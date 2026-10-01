@@ -1,6 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import deployRoutes from './routes/deployRoutes.js'
+import historyRoutes from './routes/historyRoutes.js'
+import { errorHandler } from './middleware/errorHandler.js'
 
 dotenv.config()
 
@@ -13,6 +16,10 @@ app.use(express.json())
 app.get('/health', (req, res) => {
   res.json({ status: 'LaunchFlow API running ✅' })
 })
+
+app.use('/api/deploy', deployRoutes)
+app.use('/api/history', historyRoutes)
+app.use(errorHandler)
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
