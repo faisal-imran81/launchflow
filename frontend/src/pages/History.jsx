@@ -3,9 +3,17 @@ import DeploymentCard from '../components/DeploymentCard'
 import Spinner from '../components/Spinner'
 import ErrorAlert from '../components/ErrorAlert'
 import EmptyState from '../components/EmptyState'
+import SuccessToast from '../components/SuccessToast'
+import { useState } from 'react'
 
 export default function History() {
-  const { deployments, fetchDeployments, isLoading, error } = useHistory()
+  const { deployments, fetchDeployments, removeDeployment, isLoading, error } = useHistory()
+  const [toastMessage, setToastMessage] = useState('')
+
+  const handleDelete = async (id) => {
+    await removeDeployment(id)
+    setToastMessage('🗑 Deployment deleted successfully')
+  }
 
   return (
     <div className="space-y-6">
@@ -27,9 +35,7 @@ export default function History() {
         </div>
       </div>
 
-      {error && (
-        <ErrorAlert message={error} />
-      )}
+      {error && <ErrorAlert message={error} />}
 
       {isLoading ? (
         <div className="py-20">
@@ -47,10 +53,16 @@ export default function History() {
             <DeploymentCard
               key={deployment.id}
               deployment={deployment}
+              onDelete={handleDelete}
             />
           ))}
         </div>
       )}
+
+      <SuccessToast
+        message={toastMessage}
+        onDismiss={() => setToastMessage('')}
+      />
     </div>
   )
 }
