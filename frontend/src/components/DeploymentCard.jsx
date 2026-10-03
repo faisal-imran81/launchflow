@@ -72,7 +72,7 @@ export default function DeploymentCard({ deployment, onDelete }) {
         <div className="mt-4 flex items-center justify-end gap-2">
           {confirming ? (
             <>
-              <p className="text-red-400 text-xs mr-2">Sure karo?</p>
+              <p className="text-red-400 text-xs mr-2">Are you sure?</p>
               <button
                 onClick={handleCancel}
                 className="text-xs text-gray-400 hover:text-gray-300 bg-gray-800 px-3 py-1 rounded-lg transition-colors"
@@ -83,7 +83,7 @@ export default function DeploymentCard({ deployment, onDelete }) {
                 onClick={handleDelete}
                 className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-lg transition-colors"
               >
-                Haan, Delete Karo
+                Yes, Delete
               </button>
             </>
           ) : (
