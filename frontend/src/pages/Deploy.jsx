@@ -3,21 +3,18 @@ import DeployForm from '../components/DeployForm'
 import DeploymentCard from '../components/DeploymentCard'
 import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
+import Spinner from '../components/Spinner'
+import { useHistory } from '../hooks/useHistory'
 
 export default function Deploy() {
-  const [recentDeployments, setRecentDeployments] = useState([])
+  const { deployments, fetchDeployments, isLoading } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
 
-  const handleSuccess = (result) => {
-    const newDeployment = result.data?.deployment
+  const handleSuccess = async (result) => {
     const newProject = result.data?.project
-
-    if (newDeployment && newProject) {
-      setRecentDeployments((prev) => [
-        { ...newDeployment, projects: newProject },
-        ...prev,
-      ])
+    if (newProject) {
       setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
+      await fetchDeployments()
     }
   }
 
@@ -35,13 +32,17 @@ export default function Deploy() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-white font-semibold">This Session</h2>
+            <h2 className="text-white font-semibold">Recent Deployments</h2>
             <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
-              {recentDeployments.length} deployed
+              {deployments.length} total
             </span>
           </div>
 
-          {recentDeployments.length === 0 ? (
+          {isLoading ? (
+            <div className="py-10">
+              <Spinner text="Loading deployments..." />
+            </div>
+          ) : deployments.length === 0 ? (
             <EmptyState
               icon="🚀"
               title="No deployments yet"
@@ -49,7 +50,7 @@ export default function Deploy() {
             />
           ) : (
             <div className="space-y-3">
-              {recentDeployments.map((deployment) => (
+              {deployments.slice(0, 5).map((deployment) => (
                 <DeploymentCard
                   key={deployment.id}
                   deployment={deployment}
