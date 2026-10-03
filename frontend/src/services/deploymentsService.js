@@ -36,3 +36,13 @@ export const fetchDeploymentById = async (id) => {
   if (error) throw new Error(error.message)
   return data
 }
+
+export const deleteDeployment = async (id) => {
+  const { error } = await supabase
+    .from('deployments')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw new Error(error.message)
+  return { success: true }
+}
