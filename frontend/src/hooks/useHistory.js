@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react'
-import { fetchAllDeployments, fetchDeploymentById } from '../services/deploymentsService.js'
+import {
+  fetchAllDeployments,
+  fetchDeploymentById,
+  deleteDeployment
+} from '../services/deploymentsService.js'
 
 export const useHistory = () => {
   const [deployments, setDeployments] = useState([])
@@ -32,9 +36,19 @@ export const useHistory = () => {
     }
   }
 
+  const removeDeployment = async (id) => {
+    try {
+      setError(null)
+      await deleteDeployment(id)
+      setDeployments((prev) => prev.filter((d) => d.id !== id))
+    } catch (err) {
+      setError(err.message || 'Failed to delete deployment')
+    }
+  }
+
   useEffect(() => {
     fetchDeployments()
   }, [])
 
-  return { deployments, fetchDeployments, fetchById, isLoading, error }
+  return { deployments, fetchDeployments, fetchById, removeDeployment, isLoading, error }
 }
