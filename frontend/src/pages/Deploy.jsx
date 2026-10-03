@@ -2,9 +2,11 @@ import { useState } from 'react'
 import DeployForm from '../components/DeployForm'
 import DeploymentCard from '../components/DeploymentCard'
 import EmptyState from '../components/EmptyState'
+import SuccessToast from '../components/SuccessToast'
 
 export default function Deploy() {
   const [recentDeployments, setRecentDeployments] = useState([])
+  const [toastMessage, setToastMessage] = useState('')
 
   const handleSuccess = (result) => {
     const newDeployment = result.data?.deployment
@@ -15,6 +17,7 @@ export default function Deploy() {
         { ...newDeployment, projects: newProject },
         ...prev,
       ])
+      setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
     }
   }
 
@@ -56,6 +59,11 @@ export default function Deploy() {
           )}
         </div>
       </div>
+
+      <SuccessToast
+        message={toastMessage}
+        onDismiss={() => setToastMessage('')}
+      />
     </div>
   )
 }
