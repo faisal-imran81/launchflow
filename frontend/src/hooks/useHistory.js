@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllDeployments, getDeploymentById } from '../services/historyService.js'
+import { fetchAllDeployments, fetchDeploymentById } from '../services/deploymentsService.js'
 
 export const useHistory = () => {
   const [deployments, setDeployments] = useState([])
@@ -10,8 +10,8 @@ export const useHistory = () => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await getAllDeployments()
-      setDeployments(data.data || [])
+      const data = await fetchAllDeployments()
+      setDeployments(data || [])
     } catch (err) {
       setError(err.message || 'Failed to fetch deployments')
     } finally {
@@ -19,11 +19,11 @@ export const useHistory = () => {
     }
   }
 
-  const fetchDeploymentById = async (id) => {
+  const fetchById = async (id) => {
     try {
       setIsLoading(true)
       setError(null)
-      const data = await getDeploymentById(id)
+      const data = await fetchDeploymentById(id)
       return data
     } catch (err) {
       setError(err.message || 'Failed to fetch deployment')
@@ -36,5 +36,5 @@ export const useHistory = () => {
     fetchDeployments()
   }, [])
 
-  return { deployments, fetchDeployments, fetchDeploymentById, isLoading, error }
+  return { deployments, fetchDeployments, fetchById, isLoading, error }
 }
