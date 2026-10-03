@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import StatusBadge from './StatusBadge'
 
-export default function DeploymentCard({ deployment, onClick }) {
+export default function DeploymentCard({ deployment, onDelete }) {
   const { projects, status, triggered_at, completed_at, logs } = deployment
+  const [confirming, setConfirming] = useState(false)
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—'
@@ -14,11 +16,23 @@ export default function DeploymentCard({ deployment, onClick }) {
     })
   }
 
+  const handleDelete = (e) => {
+    e.stopPropagation()
+    if (confirming) {
+      onDelete(deployment.id)
+      setConfirming(false)
+    } else {
+      setConfirming(true)
+    }
+  }
+
+  const handleCancel = (e) => {
+    e.stopPropagation()
+    setConfirming(false)
+  }
+
   return (
-    <div
-      onClick={onClick}
-      className="bg-gray-900 border border-gray-700 hover:border-gray-500 rounded-xl p-5 cursor-pointer transition-all duration-200"
-    >
+    <div className="bg-gray-900 border border-gray-700 hover:border-gray-500 rounded-xl p-5 transition-all duration-200">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-3 flex-wrap">
@@ -31,10 +45,11 @@ export default function DeploymentCard({ deployment, onClick }) {
             {projects?.repo_url || '—'}
           </p>
           <p className="text-gray-600 text-xs">
-            Environment: {' '}
+            Environment:{' '}
             <span className="text-gray-400">{projects?.environment || '—'}</span>
           </p>
         </div>
+
         <div className="text-right shrink-0 space-y-1">
           <p className="text-gray-500 text-xs">Triggered</p>
           <p className="text-gray-400 text-xs">{formatDate(triggered_at)}</p>
@@ -46,9 +61,39 @@ export default function DeploymentCard({ deployment, onClick }) {
           )}
         </div>
       </div>
+
       {logs && (
         <div className="mt-3 bg-gray-800 rounded-lg px-3 py-2">
           <p className="text-gray-400 text-xs font-mono line-clamp-2">{logs}</p>
+        </div>
+      )}
+
+      {onDelete && (
+        <div className="mt-4 flex items-center justify-end gap-2">
+          {confirming ? (
+            <>
+              <p className="text-red-400 text-xs mr-2">Sure karo?</p>
+              <button
+                onClick={handleCancel}
+                className="text-xs text-gray-400 hover:text-gray-300 bg-gray-800 px-3 py-1 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-lg transition-colors"
+              >
+                Haan, Delete Karo
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={handleDelete}
+              className="text-xs text-red-400 hover:text-red-300 bg-red-500/10 border border-red-500/20 px-3 py-1 rounded-lg transition-colors"
+            >
+              🗑 Delete
+            </button>
+          )}
         </div>
       )}
     </div>
