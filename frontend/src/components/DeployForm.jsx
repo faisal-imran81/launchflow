@@ -66,7 +66,11 @@ export default function DeployForm({ onSuccess }) {
         <ErrorAlert message={error || repoError} onDismiss={clearError} />
       )}
 
-      <RepoSearchBar onSearch={handleSearch} isLoading={repoLoading} />
+      <RepoSearchBar
+        onSearch={handleSearch}
+        onClear={() => { clearRepos(); setSelectedRepo(null); setSearched(false) }}
+        isLoading={repoLoading}
+      />
 
       <RepoList
         repos={repos}
