@@ -1,9 +1,26 @@
-export default function RepoList({ repos, onSelect, selectedRepo }) {
-  if (!repos || repos.length === 0) return null
+import EmptyState from './EmptyState'
+
+export default function RepoList({ repos, onSelect, selectedRepo, searched }) {
+  if (!searched) return null
+
+  if (repos.length === 0) {
+    return (
+      <EmptyState
+        icon="🔍"
+        title="No repositories found"
+        description="Check the username and try again"
+      />
+    )
+  }
 
   return (
     <div className="space-y-1">
-      <label className="text-gray-400 text-sm">Select Repository</label>
+      <div className="flex items-center justify-between">
+        <label className="text-gray-400 text-sm">Select Repository</label>
+        <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">
+          {repos.length} repos found
+        </span>
+      </div>
       <div className="max-h-48 overflow-y-auto rounded-lg border border-gray-700 divide-y divide-gray-800">
         {repos.map((repo) => (
           <button

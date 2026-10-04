@@ -11,6 +11,7 @@ export default function DeployForm({ onSuccess }) {
   const { repos, getRepos, clearRepos, isLoading: repoLoading, error: repoError } = useGitHub()
 
   const [selectedRepo, setSelectedRepo] = useState(null)
+  const [searched, setSearched] = useState(false)
   const [form, setForm] = useState({
     appName: '',
     environment: 'production',
@@ -19,7 +20,9 @@ export default function DeployForm({ onSuccess }) {
   const handleSearch = async (username) => {
     clearRepos()
     setSelectedRepo(null)
+    setSearched(false)
     await getRepos(username)
+    setSearched(true)
   }
 
   const handleRepoSelect = (repo) => {
@@ -65,13 +68,12 @@ export default function DeployForm({ onSuccess }) {
 
       <RepoSearchBar onSearch={handleSearch} isLoading={repoLoading} />
 
-      {repos.length > 0 && (
-        <RepoList
-          repos={repos}
-          onSelect={handleRepoSelect}
-          selectedRepo={selectedRepo}
-        />
-      )}
+      <RepoList
+        repos={repos}
+        onSelect={handleRepoSelect}
+        selectedRepo={selectedRepo}
+        searched={searched}
+      />
 
       {selectedRepo && (
         <div className="bg-blue-600/10 border border-blue-500/20 rounded-lg px-4 py-3 space-y-1">
