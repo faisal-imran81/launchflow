@@ -18,6 +18,8 @@ export const getUserRepos = async (username) => {
 
   if (!response.ok) {
     const error = await response.json()
+    if (response.status === 404) throw new Error(`GitHub user "${username}" not found`)
+    if (response.status === 403) throw new Error('GitHub API rate limit exceeded — try again later')
     throw new Error(error.message || 'Failed to fetch repositories')
   }
 
@@ -45,6 +47,8 @@ export const getRepoDetails = async (owner, repo) => {
 
   if (!response.ok) {
     const error = await response.json()
+    if (response.status === 404) throw new Error(`Repository "${owner}/${repo}" not found`)
+    if (response.status === 403) throw new Error('GitHub API rate limit exceeded — try again later')
     throw new Error(error.message || 'Failed to fetch repository details')
   }
 
@@ -60,5 +64,21 @@ export const getRepoDetails = async (owner, repo) => {
     language: data.language,
     stars: data.stargazers_count,
     defaultBranch: data.default_branch,
+  }
+}
+
+export const getRateLimit = async () => {
+  const response = await fetch(
+    `${GITHUB_API}/rate_limit`,
+    { headers: githubHeaders }
+  )
+
+  if (!response.ok) throw new Error('Failed to fetch rate limit')
+
+  const data = await response.json()
+  return {
+    limit: data.rate.limit,
+    remaining: data.rate.remaining,
+    reset: new Date(data.rate.reset * 1000).toLocaleTimeString(),
   }
 }

@@ -1,4 +1,4 @@
-import { getUserRepos, getRepoDetails } from '../services/githubService.js'
+import { getUserRepos, getRepoDetails, getRateLimit } from '../services/githubService.js'
 
 export const fetchUserRepos = async (req, res) => {
   try {
@@ -40,6 +40,19 @@ export const fetchRepoDetails = async (req, res) => {
       success: true,
       data: repoDetails,
       message: 'Repository details fetched successfully'
+    })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+export const fetchRateLimit = async (req, res) => {
+  try {
+    const data = await getRateLimit()
+    res.status(200).json({
+      success: true,
+      data,
+      message: 'Rate limit fetched successfully'
     })
   } catch (error) {
     res.status(500).json({ error: error.message })
