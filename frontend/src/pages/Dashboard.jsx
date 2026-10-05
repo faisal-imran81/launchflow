@@ -1,9 +1,8 @@
+import { usePageTitle } from '../hooks/usePageTitle'
 import { useHistory } from '../hooks/useHistory'
-import Spinner from '../components/Spinner'
+import SkeletonCard from '../components/SkeletonCard'
 import ErrorAlert from '../components/ErrorAlert'
 import StatusBadge from '../components/StatusBadge'
-
-import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Dashboard() {
   usePageTitle('Dashboard')
@@ -37,9 +36,25 @@ export default function Dashboard() {
       {error && <ErrorAlert message={error} />}
 
       {isLoading ? (
-        <div className="py-20">
-          <Spinner text="Loading dashboard..." />
-        </div>
+        <>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-gray-900 border border-gray-700 rounded-xl p-5 space-y-3 animate-pulse"
+              >
+                <div className="h-8 w-8 bg-gray-700 rounded-full" />
+                <div className="h-8 w-16 bg-gray-700 rounded-lg" />
+                <div className="h-3 w-24 bg-gray-800 rounded-full" />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <SkeletonCard key={i} rows={2} />
+            ))}
+          </div>
+        </>
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -59,7 +74,9 @@ export default function Dashboard() {
             <h2 className="text-white font-semibold">Recent Deployments</h2>
             {recentDeployments.length === 0 ? (
               <div className="bg-gray-900 border border-gray-700 rounded-xl p-8 text-center">
-                <p className="text-gray-500 text-sm">No deployments yet — go deploy something! 🚀</p>
+                <p className="text-gray-500 text-sm">
+                  No deployments yet — go deploy something! 🚀
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
