@@ -1,12 +1,11 @@
 import { useState } from 'react'
+import { usePageTitle } from '../hooks/usePageTitle'
+import { useHistory } from '../hooks/useHistory'
 import DeployForm from '../components/DeployForm'
 import DeploymentCard from '../components/DeploymentCard'
+import SkeletonCard from '../components/SkeletonCard'
 import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
-import Spinner from '../components/Spinner'
-import { useHistory } from '../hooks/useHistory'
-
-import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function Deploy() {
   usePageTitle('Deploy')
@@ -37,13 +36,15 @@ export default function Deploy() {
           <div className="flex items-center justify-between">
             <h2 className="text-white font-semibold">Recent Deployments</h2>
             <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
-              {deployments.length} total
+              {isLoading ? '...' : `${deployments.length} total`}
             </span>
           </div>
 
           {isLoading ? (
-            <div className="py-10">
-              <Spinner text="Loading deployments..." />
+            <div className="space-y-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonCard key={i} rows={2} />
+              ))}
             </div>
           ) : deployments.length === 0 ? (
             <EmptyState
