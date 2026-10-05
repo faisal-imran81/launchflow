@@ -1,12 +1,11 @@
+import { useState } from 'react'
+import { usePageTitle } from '../hooks/usePageTitle'
 import { useHistory } from '../hooks/useHistory'
 import DeploymentCard from '../components/DeploymentCard'
-import Spinner from '../components/Spinner'
+import SkeletonCard from '../components/SkeletonCard'
 import ErrorAlert from '../components/ErrorAlert'
 import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
-import { useState } from 'react'
-
-import { usePageTitle } from '../hooks/usePageTitle'
 
 export default function History() {
   usePageTitle('History')
@@ -27,11 +26,12 @@ export default function History() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
-            {deployments.length} deployments
+            {isLoading ? '...' : `${deployments.length} deployments`}
           </span>
           <button
             onClick={fetchDeployments}
-            className="text-xs text-blue-400 hover:text-blue-300 bg-gray-800 px-3 py-1 rounded-full transition-colors"
+            disabled={isLoading}
+            className="text-xs text-blue-400 hover:text-blue-300 disabled:text-blue-800 bg-gray-800 px-3 py-1 rounded-full transition-colors"
           >
             ↻ Refresh
           </button>
@@ -41,8 +41,10 @@ export default function History() {
       {error && <ErrorAlert message={error} />}
 
       {isLoading ? (
-        <div className="py-20">
-          <Spinner text="Fetching deployments..." />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <SkeletonCard key={i} rows={3} />
+          ))}
         </div>
       ) : deployments.length === 0 ? (
         <EmptyState
