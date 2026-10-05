@@ -1,4 +1,4 @@
-import { createProject, getProjectById } from '../db/projectsService.js'
+import { createProject } from '../db/projectsService.js'
 import { createDeployment, updateDeploymentStatus, getDeploymentById } from '../db/deploymentsService.js'
 
 export const triggerDeploy = async (req, res) => {

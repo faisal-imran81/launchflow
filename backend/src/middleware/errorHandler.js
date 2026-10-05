@@ -1,7 +1,14 @@
 export const errorHandler = (err, req, res, next) => {
-  console.error(err.stack)
-  res.status(err.status || 500).json({
+  const status = err.status || 500
+  const message = err.message || 'Internal Server Error'
+
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(`[${new Date().toISOString()}] ${status} — ${message}`)
+    if (err.stack) console.error(err.stack)
+  }
+
+  res.status(status).json({
     success: false,
-    error: err.message || 'Internal Server Error'
+    error: message,
   })
 }
