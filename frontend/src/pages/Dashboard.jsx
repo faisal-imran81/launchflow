@@ -3,6 +3,7 @@ import { useHistory } from '../hooks/useHistory'
 import SkeletonCard from '../components/SkeletonCard'
 import ErrorAlert from '../components/ErrorAlert'
 import StatusBadge from '../components/StatusBadge'
+import DeploymentCard from '../components/DeploymentCard'
 
 export default function Dashboard() {
   usePageTitle('Dashboard')
@@ -81,20 +82,10 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-3">
                 {recentDeployments.map((deployment) => (
-                  <div
+                  <DeploymentCard
                     key={deployment.id}
-                    className="bg-gray-900 border border-gray-700 rounded-xl px-5 py-4 flex items-center justify-between gap-4"
-                  >
-                    <div className="space-y-0.5 min-w-0">
-                      <p className="text-white font-medium truncate">
-                        {deployment.projects?.name || 'Unnamed App'}
-                      </p>
-                      <p className="text-gray-500 text-xs truncate">
-                        {deployment.projects?.repo_url || '—'}
-                      </p>
-                    </div>
-                    <StatusBadge status={deployment.status} />
-                  </div>
+                    deployment={deployment}
+                  />
                 ))}
               </div>
             )}
