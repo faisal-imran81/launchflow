@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Dashboard from './pages/Dashboard'
 import Deploy from './pages/Deploy'
 import History from './pages/History'
+import NotFound from './pages/NotFound'
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/deploy" element={<Deploy />} />
               <Route path="/history" element={<History />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
         </div>
