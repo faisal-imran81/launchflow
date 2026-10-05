@@ -3,7 +3,10 @@ import Spinner from '../components/Spinner'
 import ErrorAlert from '../components/ErrorAlert'
 import StatusBadge from '../components/StatusBadge'
 
+import { usePageTitle } from '../hooks/usePageTitle'
+
 export default function Dashboard() {
+  usePageTitle('Dashboard')
   const { deployments, isLoading, error } = useHistory()
 
   const stats = {

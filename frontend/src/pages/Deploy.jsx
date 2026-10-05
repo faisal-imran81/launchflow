@@ -6,7 +6,10 @@ import SuccessToast from '../components/SuccessToast'
 import Spinner from '../components/Spinner'
 import { useHistory } from '../hooks/useHistory'
 
+import { usePageTitle } from '../hooks/usePageTitle'
+
 export default function Deploy() {
+  usePageTitle('Deploy')
   const { deployments, fetchDeployments, isLoading } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
 

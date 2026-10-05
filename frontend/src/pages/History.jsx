@@ -6,7 +6,10 @@ import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
 import { useState } from 'react'
 
+import { usePageTitle } from '../hooks/usePageTitle'
+
 export default function History() {
+  usePageTitle('History')
   const { deployments, fetchDeployments, removeDeployment, isLoading, error } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
 
