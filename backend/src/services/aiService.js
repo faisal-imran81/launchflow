@@ -1,6 +1,6 @@
 import groq from "../config/groq.js";
 
-const AI_MODEL = "llama-3.3-70b-versatile";
+const AI_MODEL = "openai/gpt-oss-20b";
 
 export async function generateDockerfile(repoInfo) {
   const { repoName, language, framework, description } = repoInfo;
