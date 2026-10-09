@@ -29,7 +29,7 @@ Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
     model: AI_MODEL,
     messages: [{ role: "user", content: prompt }],
     temperature: 0.3,
-    max_tokens: 1024,
+    max_tokens: 4096,
   });
 
   return completion.choices[0]?.message?.content?.trim();
@@ -60,7 +60,7 @@ Return ONLY the YAML content, no explanation, no markdown code blocks.`;
     model: AI_MODEL,
     messages: [{ role: "user", content: prompt }],
     temperature: 0.3,
-    max_tokens: 1024,
+    max_tokens: 4096,
   });
 
   return completion.choices[0]?.message?.content?.trim();
