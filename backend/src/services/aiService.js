@@ -103,7 +103,11 @@ export async function generateDockerfileFromStack(analysis) {
   } else if (type === "fullstack") {
     stackRules = `- This is a Next.js app. Use a multi-stage build with node:20-alpine.
 - Build stage: "npm ci" then "npm run build".
-- Final stage: copy the built app, install production dependencies only with "npm ci --omit=dev", and start with "npm start".
+- Final stage: set NODE_ENV=production, and copy ONLY these from the build stage: package.json, node_modules, and the .next folder.
+- Do NOT copy any .env files into the image, secrets must be passed at runtime.
+- Do NOT copy next.config.js, next.config.mjs or next.config.ts by name, because the file may not exist.
+- Do NOT copy the public folder by name, because it may not exist.
+- Start with "npm start".
 - Expose port ${port}.`;
   } else {
     stackRules = `- This is a backend Node.js app. Use node:20-alpine.
