@@ -89,3 +89,46 @@ Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
   return runCompletion(prompt);
 }
+
+export async function generateDockerfileFromStack(analysis) {
+  const { repoName, description, framework, type, buildOutput, port } = analysis;
+
+  let stackRules;
+  if (type === "frontend") {
+    stackRules = `- This is a frontend app. Use a multi-stage build.
+- Build stage: node:20-alpine, install ALL dependencies with "npm ci" (never --only=production or --omit=dev here), then run "npm run build".
+- The build output folder is "${buildOutput}".
+- Final stage: nginx:stable-alpine, copy /app/${buildOutput} to /usr/share/nginx/html.
+- Expose port ${port} and run nginx with "daemon off;".`;
+  } else if (type === "fullstack") {
+    stackRules = `- This is a Next.js app. Use a multi-stage build with node:20-alpine.
+- Build stage: "npm ci" then "npm run build".
+- Final stage: copy the built app, install production dependencies only with "npm ci --omit=dev", and start with "npm start".
+- Expose port ${port}.`;
+  } else {
+    stackRules = `- This is a backend Node.js app. Use node:20-alpine.
+- Copy package*.json first, then run "npm ci --omit=dev" for production dependencies.
+- Copy the rest of the source code.
+- Expose port ${port || 3000} and start with "npm start".`;
+  }
+
+  const prompt = `You are a DevOps expert. Generate a production-ready Dockerfile for the following project:
+
+Repository: ${repoName}
+Framework: ${framework}
+Description: ${description || "No description provided"}
+
+Requirements:
+${stackRules}
+
+Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
+
+  const completion = await groq.chat.completions.create({
+    model: AI_MODEL,
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    max_tokens: 4096,
+  });
+
+  return completion.choices[0]?.message?.content?.trim();
+}
