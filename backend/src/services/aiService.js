@@ -2,6 +2,44 @@ import groq from "../config/groq.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
 
+function handleGroqError(error) {
+  if (error.status === 429) {
+    const err = new Error("AI rate limit reached. Please try again in a minute.");
+    err.status = 429;
+    throw err;
+  }
+  if (error.status === 401) {
+    const err = new Error("AI service authentication failed. Check GROQ_API_KEY.");
+    err.status = 500;
+    throw err;
+  }
+  const err = new Error("AI generation failed. Please try again.");
+  err.status = 502;
+  throw err;
+}
+
+async function runCompletion(prompt) {
+  try {
+    const completion = await groq.chat.completions.create({
+      model: AI_MODEL,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.3,
+      max_tokens: 4096,
+    });
+
+    const content = completion.choices[0]?.message?.content?.trim();
+    if (!content) {
+      const err = new Error("AI returned an empty response. Please try again.");
+      err.status = 502;
+      throw err;
+    }
+    return content;
+  } catch (error) {
+    if (error.status && error.message.startsWith("AI")) throw error;
+    handleGroqError(error);
+  }
+}
+
 export async function generateDockerfile(repoInfo) {
   const { repoName, language, framework, description } = repoInfo;
 
@@ -25,14 +63,7 @@ Requirements:
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
 
-  const completion = await groq.chat.completions.create({
-    model: AI_MODEL,
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.3,
-    max_tokens: 4096,
-  });
-
-  return completion.choices[0]?.message?.content?.trim();
+  return runCompletion(prompt);
 }
 
 export async function generateGithubActionsYAML(repoInfo) {
@@ -56,12 +87,5 @@ Requirements:
 
 Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
-  const completion = await groq.chat.completions.create({
-    model: AI_MODEL,
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.3,
-    max_tokens: 4096,
-  });
-
-  return completion.choices[0]?.message?.content?.trim();
+  return runCompletion(prompt);
 }
