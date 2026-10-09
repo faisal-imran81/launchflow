@@ -102,11 +102,9 @@ export async function generateDockerfileFromStack(analysis) {
 - Expose port ${port} and run nginx with "daemon off;".`;
   } else if (type === "fullstack") {
     stackRules = `- This is a Next.js app. Use a multi-stage build with node:20-alpine.
-- Build stage: "npm ci" then "npm run build".
-- Final stage: set NODE_ENV=production, and copy ONLY these from the build stage: package.json, node_modules, and the .next folder.
+- Build stage: run "npm ci", then "npm run build", then "mkdir -p public" (so the public folder always exists), then "npm prune --omit=dev" (so node_modules only keeps production dependencies).
+- Final stage: set NODE_ENV=production, and copy these from the build stage: "/app/package.json" together with "/app/next.config.*" in ONE single COPY instruction (the wildcard is safe because package.json always matches), plus node_modules, the .next folder, and the public folder.
 - Do NOT copy any .env files into the image, secrets must be passed at runtime.
-- Do NOT copy next.config.js, next.config.mjs or next.config.ts by name, because the file may not exist.
-- Do NOT copy the public folder by name, because it may not exist.
 - Start with "npm start".
 - Expose port ${port}.`;
   } else {
