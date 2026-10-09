@@ -46,8 +46,12 @@ Framework: ${framework || "Not specified"}
 
 Requirements:
 - Trigger on push to main branch
-- Include build and test steps
-- Add Docker build and push to Docker Hub
+- Use actions/checkout@v4 and actions/setup-node@v4
+- Use Node.js version 20 with npm cache enabled
+- Use "npm ci" to install dependencies
+- Run "npm run build" for the build step
+- Run tests with "npm test --if-present" so the workflow does not fail when no tests exist
+- Add Docker build and push to Docker Hub using docker/login-action@v3 and docker/build-push-action@v5
 - Use GitHub Secrets for credentials (DOCKER_USERNAME, DOCKER_PASSWORD)
 
 Return ONLY the YAML content, no explanation, no markdown code blocks.`;
