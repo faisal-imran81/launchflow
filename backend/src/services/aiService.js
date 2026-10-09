@@ -13,10 +13,14 @@ Framework: ${framework || "Not specified"}
 Description: ${description || "No description provided"}
 
 Requirements:
-- Use appropriate base image
-- Include all necessary build steps
-- Optimize for production (multi-stage build if needed)
-- Expose correct port
+- Use appropriate base image (node:20-alpine for Node.js projects)
+- Use multi-stage build for frontend apps
+- In the build stage, install ALL dependencies with "npm ci" (never use --only=production or --omit=dev there, because build tools like Vite need devDependencies)
+- If the framework is Vite or React with Vite, the build output folder is "dist" (not "build")
+- If the framework is Create React App, the build output folder is "build"
+- For frontend apps, serve the built files with nginx:stable-alpine
+- For backend apps, use "npm ci --omit=dev" in the final stage
+- Expose the correct port
 - Set proper CMD/ENTRYPOINT
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
