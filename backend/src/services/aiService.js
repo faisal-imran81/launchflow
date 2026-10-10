@@ -1,5 +1,6 @@
 import groq from "../config/groq.js";
 import { getWorkflowRules } from "../utils/workflowRules.js";
+import { cleanAiOutput } from "../utils/cleanAiOutput.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
 
@@ -28,7 +29,7 @@ async function runCompletion(prompt) {
       max_tokens: 4096,
     });
 
-    const content = completion.choices[0]?.message?.content?.trim();
+    const content = cleanAiOutput(completion.choices[0]?.message?.content);
     if (!content) {
       const err = new Error("AI returned an empty response. Please try again.");
       err.status = 502;
@@ -138,7 +139,7 @@ Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
     max_tokens: 4096,
   });
 
-  return completion.choices[0]?.message?.content?.trim();
+  return cleanAiOutput(completion.choices[0]?.message?.content);
 }
 
 export async function generateGithubActionsFromStack(analysis) {
@@ -162,5 +163,5 @@ Return ONLY the YAML content, no explanation, no markdown code blocks.`;
     max_tokens: 4096,
   });
 
-  return completion.choices[0]?.message?.content?.trim();
+  return cleanAiOutput(completion.choices[0]?.message?.content);
 }
