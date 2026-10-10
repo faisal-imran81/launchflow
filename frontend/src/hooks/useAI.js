@@ -1,9 +1,14 @@
 import { useState } from "react";
-import { generateDockerfile, generateGithubActions } from "../services/aiService.js";
+import {
+  generateDockerfile,
+  generateGithubActions,
+  generateAutoDockerfile,
+} from "../services/aiService.js";
 
 export function useAI() {
   const [dockerfile, setDockerfile] = useState(null);
   const [githubActionsYaml, setGithubActionsYaml] = useState(null);
+  const [autoResult, setAutoResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -35,9 +40,28 @@ export function useAI() {
     }
   }
 
+  async function handleGenerateAutoDockerfile({ owner, repo }) {
+    setLoading(true);
+    setError(null);
+    setAutoResult(null);
+    try {
+      const data = await generateAutoDockerfile({ owner, repo });
+      setAutoResult({
+        detected: data.detected,
+        dockerfile: data.dockerfile,
+        dockerignore: data.dockerignore,
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to analyze repository");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function reset() {
     setDockerfile(null);
     setGithubActionsYaml(null);
+    setAutoResult(null);
     setError(null);
     setLoading(false);
   }
@@ -45,10 +69,12 @@ export function useAI() {
   return {
     dockerfile,
     githubActionsYaml,
+    autoResult,
     loading,
     error,
     generateDockerfile: handleGenerateDockerfile,
     generateGithubActions: handleGenerateGithubActions,
+    generateAutoDockerfile: handleGenerateAutoDockerfile,
     reset,
   };
 }
