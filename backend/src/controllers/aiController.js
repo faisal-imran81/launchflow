@@ -4,6 +4,7 @@ import {
   generateDockerfileFromStack,
 } from "../services/aiService.js";
 import { analyzeRepo } from "../services/repoAnalysisService.js";
+import { generateDockerignore } from "../utils/generateDockerignore.js";
 
 export async function handleGenerateDockerfile(req, res, next) {
   try {
@@ -63,6 +64,7 @@ export async function handleAutoDockerfile(req, res, next) {
     }
 
     const dockerfile = await generateDockerfileFromStack(analysis);
+    const dockerignore = generateDockerignore(analysis.type);
 
     res.json({
       success: true,
@@ -73,6 +75,7 @@ export async function handleAutoDockerfile(req, res, next) {
         port: analysis.port,
       },
       dockerfile,
+      dockerignore,
     });
   } catch (error) {
     next(error);
