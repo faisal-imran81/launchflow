@@ -59,6 +59,19 @@ function OutputPanel({ title, text, colorClass, filename }) {
   );
 }
 
+function SetupNote() {
+  return (
+    <div className="rounded-lg bg-yellow-900/20 border border-yellow-700 px-4 py-3 text-xs text-yellow-300 space-y-1">
+      <p className="font-medium">Before using this workflow:</p>
+      <ul className="list-disc pl-4 space-y-1">
+        <li>Save the Dockerfile in your repo root (the workflow builds from it)</li>
+        <li>Save the workflow as .github/workflows/ci.yml</li>
+        <li>Add DOCKER_USERNAME and DOCKER_PASSWORD in GitHub repo Settings, Secrets and variables, Actions</li>
+      </ul>
+    </div>
+  );
+}
+
 function DetectedBadges({ detected }) {
   if (!detected) return null;
 
@@ -147,12 +160,15 @@ export default function AIOutput({
           )}
 
           {autoWorkflow && (
-            <OutputPanel
-              title="⚙️ GitHub Actions workflow (auto-detected)"
-              text={autoWorkflow.yaml}
-              colorClass="text-blue-400"
-              filename="ci.yml"
-            />
+            <>
+              <OutputPanel
+                title="⚙️ GitHub Actions workflow (auto-detected)"
+                text={autoWorkflow.yaml}
+                colorClass="text-blue-400"
+                filename="ci.yml"
+              />
+              <SetupNote />
+            </>
           )}
         </div>
       )}
