@@ -62,6 +62,39 @@ npm run dev
 - [ ] Week 3 — Docker + AWS
 - [ ] Week 4 — Polish + Launch
 
+## 🤖 AI Engine
+
+LaunchFlow uses the Groq API to generate deployment files for a repository.
+
+### What it generates
+
+- **Dockerfile**: multi-stage for frontend apps, production-only dependencies for backends
+- **.dockerignore**: fixed rules per stack, so secrets like `.env` never end up in an image
+- **GitHub Actions YAML**: CI/CD workflow with Docker Hub push
+
+### Auto-detect
+
+Enter `owner/repo` on the Deploy page. The backend reads the repo's `package.json`, detects the stack (Next.js, Vite/React, CRA, Express and other Node.js backends), and builds the prompt from the detected build output folder, port and start command.
+
+Currently only Node.js repositories with a `package.json` in the repo root are supported.
+
+### API endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ai/dockerfile` | Dockerfile from manual input |
+| POST | `/api/ai/dockerfile/auto` | Auto-detect stack from a GitHub repo, returns Dockerfile and .dockerignore |
+| POST | `/api/ai/github-actions` | GitHub Actions workflow from manual input |
+
+### Environment variables
+
+```
+GROQ_API_KEY=your_groq_api_key_here
+GITHUB_TOKEN=your_github_token_here   # optional, raises GitHub rate limit
+```
+
+Never commit real keys. Only `.env.example` is tracked in git.
+
 ## Author
 
 **Faisal Imran**
