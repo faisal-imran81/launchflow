@@ -1,5 +1,6 @@
 export function getWorkflowRules(analysis) {
   const { repoName, type, framework } = analysis;
+  const imageName = repoName.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
 
   const commonRules = [
     "- Workflow name: CI/CD",
@@ -32,7 +33,7 @@ export function getWorkflowRules(analysis) {
     "- After build and test, log in to Docker Hub with docker/login-action@v3",
     "- Then build and push the image with docker/build-push-action@v5 (context: ., push: true)",
     "- Use GitHub Secrets DOCKER_USERNAME and DOCKER_PASSWORD for credentials, never hardcode them",
-    `- Tag the image as \${{ secrets.DOCKER_USERNAME }}/${repoName}:latest and \${{ secrets.DOCKER_USERNAME }}/${repoName}:\${{ github.sha }}`,
+    `- Tag the image as \${{ secrets.DOCKER_USERNAME }}/${imageName}:latest and \${{ secrets.DOCKER_USERNAME }}/${imageName}:\${{ github.sha }}`,
   ];
 
   return [...commonRules, ...buildRules, ...dockerRules].join("\n");
