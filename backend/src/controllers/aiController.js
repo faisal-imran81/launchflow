@@ -2,6 +2,7 @@ import {
   generateDockerfile,
   generateGithubActionsYAML,
   generateDockerfileFromStack,
+  generateGithubActionsFromStack,
 } from "../services/aiService.js";
 import { analyzeRepo } from "../services/repoAnalysisService.js";
 import { generateDockerignore } from "../utils/generateDockerignore.js";
@@ -77,6 +78,40 @@ export async function handleAutoDockerfile(req, res, next) {
       },
       dockerfile,
       dockerignore,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function handleAutoGithubActions(req, res, next) {
+  try {
+    const { owner, repo } = req.body;
+
+    if (!owner || !repo) {
+      return res.status(400).json({ error: "owner and repo are required" });
+    }
+
+    const analysis = await analyzeRepo(owner, repo);
+
+    if (!analysis.hasPackageJson) {
+      return res.status(422).json({
+        error: "No package.json found in this repository. Only Node.js projects are supported for now.",
+      });
+    }
+
+    const yaml = await generateGithubActionsFromStack(analysis);
+
+    res.json({
+      success: true,
+      detected: {
+        framework: analysis.framework,
+        type: analysis.type,
+        buildOutput: analysis.buildOutput,
+        port: analysis.port,
+        startCommand: analysis.startCommand,
+      },
+      yaml,
     });
   } catch (error) {
     next(error);
