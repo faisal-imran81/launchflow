@@ -68,6 +68,7 @@ export default function AIOutput({
   dockerfile,
   githubActionsYaml,
   autoResult,
+  autoWorkflow,
   loading,
   error,
 }) {
@@ -90,23 +91,40 @@ export default function AIOutput({
     );
   }
 
-  if (!dockerfile && !githubActionsYaml && !autoResult) return null;
+  if (!dockerfile && !githubActionsYaml && !autoResult && !autoWorkflow) {
+    return null;
+  }
+
+  const detected = autoResult?.detected || autoWorkflow?.detected;
 
   return (
     <div className="mt-6 space-y-6">
-      {autoResult && (
+      {(autoResult || autoWorkflow) && (
         <div className="space-y-4">
-          <DetectedBadges detected={autoResult.detected} />
-          <OutputPanel
-            title="🐳 Dockerfile (auto-detected)"
-            text={autoResult.dockerfile}
-            colorClass="text-green-400"
-          />
-          <OutputPanel
-            title="🚫 .dockerignore"
-            text={autoResult.dockerignore}
-            colorClass="text-yellow-400"
-          />
+          <DetectedBadges detected={detected} />
+
+          {autoResult && (
+            <>
+              <OutputPanel
+                title="🐳 Dockerfile (auto-detected)"
+                text={autoResult.dockerfile}
+                colorClass="text-green-400"
+              />
+              <OutputPanel
+                title="🚫 .dockerignore"
+                text={autoResult.dockerignore}
+                colorClass="text-yellow-400"
+              />
+            </>
+          )}
+
+          {autoWorkflow && (
+            <OutputPanel
+              title="⚙️ GitHub Actions workflow (auto-detected)"
+              text={autoWorkflow.yaml}
+              colorClass="text-blue-400"
+            />
+          )}
         </div>
       )}
 
