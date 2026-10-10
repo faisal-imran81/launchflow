@@ -1,4 +1,5 @@
 import groq from "../config/groq.js";
+import { getWorkflowRules } from "../utils/workflowRules.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
 
@@ -129,6 +130,30 @@ Requirements:
 ${stackRules}
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
+
+  const completion = await groq.chat.completions.create({
+    model: AI_MODEL,
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    max_tokens: 4096,
+  });
+
+  return completion.choices[0]?.message?.content?.trim();
+}
+
+export async function generateGithubActionsFromStack(analysis) {
+  const { repoName, framework } = analysis;
+  const rules = getWorkflowRules(analysis);
+
+  const prompt = `You are a DevOps expert. Generate a GitHub Actions CI/CD workflow YAML for the following project:
+
+Repository: ${repoName}
+Framework: ${framework}
+
+Requirements:
+${rules}
+
+Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
   const completion = await groq.chat.completions.create({
     model: AI_MODEL,
