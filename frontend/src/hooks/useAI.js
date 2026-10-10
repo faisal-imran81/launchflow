@@ -3,12 +3,14 @@ import {
   generateDockerfile,
   generateGithubActions,
   generateAutoDockerfile,
+  generateAutoGithubActions,
 } from "../services/aiService.js";
 
 export function useAI() {
   const [dockerfile, setDockerfile] = useState(null);
   const [githubActionsYaml, setGithubActionsYaml] = useState(null);
   const [autoResult, setAutoResult] = useState(null);
+  const [autoWorkflow, setAutoWorkflow] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -58,10 +60,28 @@ export function useAI() {
     }
   }
 
+  async function handleGenerateAutoGithubActions({ owner, repo }) {
+    setLoading(true);
+    setError(null);
+    setAutoWorkflow(null);
+    try {
+      const data = await generateAutoGithubActions({ owner, repo });
+      setAutoWorkflow({
+        detected: data.detected,
+        yaml: data.yaml,
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to generate workflow for repository");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function reset() {
     setDockerfile(null);
     setGithubActionsYaml(null);
     setAutoResult(null);
+    setAutoWorkflow(null);
     setError(null);
     setLoading(false);
   }
@@ -70,11 +90,13 @@ export function useAI() {
     dockerfile,
     githubActionsYaml,
     autoResult,
+    autoWorkflow,
     loading,
     error,
     generateDockerfile: handleGenerateDockerfile,
     generateGithubActions: handleGenerateGithubActions,
     generateAutoDockerfile: handleGenerateAutoDockerfile,
+    generateAutoGithubActions: handleGenerateAutoGithubActions,
     reset,
   };
 }
