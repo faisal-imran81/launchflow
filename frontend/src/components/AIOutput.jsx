@@ -19,7 +19,53 @@ function CopyButton({ text }) {
   );
 }
 
-export default function AIOutput({ dockerfile, githubActionsYaml, loading, error }) {
+function OutputPanel({ title, text, colorClass }) {
+  return (
+    <div className="rounded-lg bg-gray-800 border border-gray-700 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
+        <span className="text-sm font-medium text-gray-300">{title}</span>
+        <CopyButton text={text} />
+      </div>
+      <pre className={`p-4 text-sm ${colorClass} overflow-x-auto whitespace-pre-wrap`}>
+        {text}
+      </pre>
+    </div>
+  );
+}
+
+function DetectedBadges({ detected }) {
+  if (!detected) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs text-gray-500">Detected:</span>
+      <span className="text-xs px-3 py-1 rounded-full bg-blue-900/40 border border-blue-700 text-blue-300">
+        {detected.framework}
+      </span>
+      <span className="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">
+        {detected.type}
+      </span>
+      {detected.buildOutput && (
+        <span className="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">
+          build: {detected.buildOutput}
+        </span>
+      )}
+      {detected.port && (
+        <span className="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">
+          port: {detected.port}
+        </span>
+      )}
+    </div>
+  );
+}
+
+export default function AIOutput({
+  dockerfile,
+  githubActionsYaml,
+  autoResult,
+  loading,
+  error,
+}) {
   if (loading) {
     return (
       <div className="mt-6 p-4 rounded-lg bg-gray-800 border border-gray-700">
@@ -39,32 +85,40 @@ export default function AIOutput({ dockerfile, githubActionsYaml, loading, error
     );
   }
 
-  if (!dockerfile && !githubActionsYaml) return null;
+  if (!dockerfile && !githubActionsYaml && !autoResult) return null;
 
   return (
     <div className="mt-6 space-y-6">
-      {dockerfile && (
-        <div className="rounded-lg bg-gray-800 border border-gray-700 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
-            <span className="text-sm font-medium text-gray-300">🐳 Dockerfile</span>
-            <CopyButton text={dockerfile} />
-          </div>
-          <pre className="p-4 text-sm text-green-400 overflow-x-auto whitespace-pre-wrap">
-            {dockerfile}
-          </pre>
+      {autoResult && (
+        <div className="space-y-4">
+          <DetectedBadges detected={autoResult.detected} />
+          <OutputPanel
+            title="🐳 Dockerfile (auto-detected)"
+            text={autoResult.dockerfile}
+            colorClass="text-green-400"
+          />
+          <OutputPanel
+            title="🚫 .dockerignore"
+            text={autoResult.dockerignore}
+            colorClass="text-yellow-400"
+          />
         </div>
       )}
 
+      {dockerfile && (
+        <OutputPanel
+          title="🐳 Dockerfile"
+          text={dockerfile}
+          colorClass="text-green-400"
+        />
+      )}
+
       {githubActionsYaml && (
-        <div className="rounded-lg bg-gray-800 border border-gray-700 overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
-            <span className="text-sm font-medium text-gray-300">⚙️ GitHub Actions YAML</span>
-            <CopyButton text={githubActionsYaml} />
-          </div>
-          <pre className="p-4 text-sm text-blue-400 overflow-x-auto whitespace-pre-wrap">
-            {githubActionsYaml}
-          </pre>
-        </div>
+        <OutputPanel
+          title="⚙️ GitHub Actions YAML"
+          text={githubActionsYaml}
+          colorClass="text-blue-400"
+        />
       )}
     </div>
   );
