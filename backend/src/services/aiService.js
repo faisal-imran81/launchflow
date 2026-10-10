@@ -91,7 +91,7 @@ Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 }
 
 export async function generateDockerfileFromStack(analysis) {
-  const { repoName, description, framework, type, buildOutput, port } = analysis;
+  const { repoName, description, framework, type, buildOutput, port, startCommand } = analysis;
 
   let stackRules;
   if (type === "frontend") {
@@ -108,10 +108,15 @@ export async function generateDockerfileFromStack(analysis) {
 - Start with "npm start".
 - Expose port ${port}.`;
   } else {
+    const startRule = startCommand
+      ? `- Start the app with the exact command "${startCommand}", written in exec form as the CMD (for example CMD ["npm", "start"] or CMD ["node", "src/index.js"]).`
+      : `- No start command could be detected from package.json. Use CMD ["npm", "start"] and add this comment line right above it: "# TODO: no start script found in package.json, set the correct start command".`;
+
     stackRules = `- This is a backend Node.js app. Use node:20-alpine.
 - Copy package*.json first, then run "npm ci --omit=dev" for production dependencies.
 - Copy the rest of the source code.
-- Expose port ${port || 3000} and start with "npm start".`;
+- Expose port ${port || 3000}.
+${startRule}`;
   }
 
   const prompt = `You are a DevOps expert. Generate a production-ready Dockerfile for the following project:
