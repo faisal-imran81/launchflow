@@ -30,11 +30,12 @@ export default function Deploy() {
     dockerfile,
     githubActionsYaml,
     autoResult,
+    autoWorkflow,
     loading: aiLoading,
     error: aiError,
     generateDockerfile,
     generateGithubActions,
-    generateAutoDockerfile,
+    generateAutoAll,
     reset,
   } = useAI()
 
@@ -50,7 +51,7 @@ export default function Deploy() {
 
   const handleAutoDetect = () => {
     if (!parsedAutoRepo) return
-    generateAutoDockerfile(parsedAutoRepo)
+    generateAutoAll(parsedAutoRepo)
   }
 
   return (
@@ -103,7 +104,7 @@ export default function Deploy() {
         <div>
           <h2 className="text-white font-semibold text-lg">🤖 AI Engine</h2>
           <p className="text-gray-400 text-sm mt-1">
-            Generate Dockerfile + GitHub Actions YAML for your repo
+            Generate Dockerfile, .dockerignore and GitHub Actions workflow for your repo
           </p>
         </div>
 
@@ -123,7 +124,7 @@ export default function Deploy() {
               disabled={aiLoading || !parsedAutoRepo}
               className="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
             >
-              🔍 Auto-detect & Generate
+              🔍 Auto-detect & Generate All
             </button>
           </div>
           {autoRepoInput && !parsedAutoRepo && (
@@ -177,7 +178,7 @@ export default function Deploy() {
             >
               ⚙️ Generate GitHub Actions
             </button>
-            {(dockerfile || githubActionsYaml || autoResult || aiError) && (
+            {(dockerfile || githubActionsYaml || autoResult || autoWorkflow || aiError) && (
               <button
                 onClick={reset}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm rounded-lg transition-colors"
@@ -192,6 +193,7 @@ export default function Deploy() {
           dockerfile={dockerfile}
           githubActionsYaml={githubActionsYaml}
           autoResult={autoResult}
+          autoWorkflow={autoWorkflow}
           loading={aiLoading}
           error={aiError}
         />
