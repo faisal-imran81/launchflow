@@ -73,6 +73,7 @@ export async function handleAutoDockerfile(req, res, next) {
         type: analysis.type,
         buildOutput: analysis.buildOutput,
         port: analysis.port,
+        startCommand: analysis.startCommand,
       },
       dockerfile,
       dockerignore,

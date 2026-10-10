@@ -55,6 +55,11 @@ function DetectedBadges({ detected }) {
           port: {detected.port}
         </span>
       )}
+      {detected.startCommand && (
+        <span className="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-300">
+          start: {detected.startCommand}
+        </span>
+      )}
     </div>
   );
 }
