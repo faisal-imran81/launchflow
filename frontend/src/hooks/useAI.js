@@ -77,6 +77,32 @@ export function useAI() {
     }
   }
 
+  async function handleGenerateAutoAll({ owner, repo }) {
+    setLoading(true);
+    setError(null);
+    setAutoResult(null);
+    setAutoWorkflow(null);
+    try {
+      const [dockerData, workflowData] = await Promise.all([
+        generateAutoDockerfile({ owner, repo }),
+        generateAutoGithubActions({ owner, repo }),
+      ]);
+      setAutoResult({
+        detected: dockerData.detected,
+        dockerfile: dockerData.dockerfile,
+        dockerignore: dockerData.dockerignore,
+      });
+      setAutoWorkflow({
+        detected: workflowData.detected,
+        yaml: workflowData.yaml,
+      });
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to analyze repository");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function reset() {
     setDockerfile(null);
     setGithubActionsYaml(null);
@@ -97,6 +123,7 @@ export function useAI() {
     generateGithubActions: handleGenerateGithubActions,
     generateAutoDockerfile: handleGenerateAutoDockerfile,
     generateAutoGithubActions: handleGenerateAutoGithubActions,
+    generateAutoAll: handleGenerateAutoAll,
     reset,
   };
 }
