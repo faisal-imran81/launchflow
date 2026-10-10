@@ -19,12 +19,38 @@ function CopyButton({ text }) {
   );
 }
 
-function OutputPanel({ title, text, colorClass }) {
+function DownloadButton({ text, filename }) {
+  function handleDownload() {
+    const blob = new Blob([text], { type: "application/octet-stream" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      className="text-xs px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
+    >
+      Download
+    </button>
+  );
+}
+
+function OutputPanel({ title, text, colorClass, filename }) {
   return (
     <div className="rounded-lg bg-gray-800 border border-gray-700 overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
         <span className="text-sm font-medium text-gray-300">{title}</span>
-        <CopyButton text={text} />
+        <div className="flex items-center gap-2">
+          <DownloadButton text={text} filename={filename} />
+          <CopyButton text={text} />
+        </div>
       </div>
       <pre className={`p-4 text-sm ${colorClass} overflow-x-auto whitespace-pre-wrap`}>
         {text}
@@ -109,11 +135,13 @@ export default function AIOutput({
                 title="🐳 Dockerfile (auto-detected)"
                 text={autoResult.dockerfile}
                 colorClass="text-green-400"
+                filename="Dockerfile"
               />
               <OutputPanel
                 title="🚫 .dockerignore"
                 text={autoResult.dockerignore}
                 colorClass="text-yellow-400"
+                filename=".dockerignore"
               />
             </>
           )}
@@ -123,6 +151,7 @@ export default function AIOutput({
               title="⚙️ GitHub Actions workflow (auto-detected)"
               text={autoWorkflow.yaml}
               colorClass="text-blue-400"
+              filename="ci.yml"
             />
           )}
         </div>
@@ -133,6 +162,7 @@ export default function AIOutput({
           title="🐳 Dockerfile"
           text={dockerfile}
           colorClass="text-green-400"
+          filename="Dockerfile"
         />
       )}
 
@@ -141,6 +171,7 @@ export default function AIOutput({
           title="⚙️ GitHub Actions YAML"
           text={githubActionsYaml}
           colorClass="text-blue-400"
+          filename="ci.yml"
         />
       )}
     </div>
