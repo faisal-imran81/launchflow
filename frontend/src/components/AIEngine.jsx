@@ -39,7 +39,7 @@ export default function AIEngine() {
   }
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
+    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 space-y-6">
       <div>
         <h2 className="text-white font-semibold text-lg">🤖 AI Engine</h2>
         <p className="text-gray-400 text-sm mt-1">

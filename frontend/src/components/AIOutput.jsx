@@ -48,7 +48,7 @@ function OutputPanel({ title, text, colorClass, filename }) {
 
   return (
     <div className="rounded-lg bg-gray-800 border border-gray-700 overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-2 bg-gray-900 border-b border-gray-700">
         <div className="flex items-center gap-2 min-w-0">
           <span className="text-sm font-medium text-gray-300 truncate">{title}</span>
           <span className="text-xs px-2 py-0.5 rounded-full bg-gray-700 text-gray-400 whitespace-nowrap">
@@ -60,7 +60,7 @@ function OutputPanel({ title, text, colorClass, filename }) {
           <CopyButton text={text} />
         </div>
       </div>
-      <pre className={`p-4 text-sm ${colorClass} overflow-x-auto whitespace-pre-wrap`}>
+      <pre className={`p-4 text-xs sm:text-sm ${colorClass} overflow-x-auto whitespace-pre-wrap`}>
         {text}
       </pre>
     </div>
