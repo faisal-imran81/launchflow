@@ -1,12 +1,31 @@
 import { useState } from 'react'
 import { parseRepoInput } from '../utils/parseRepoInput'
 
+const STORAGE_KEY = 'launchflow:lastRepoInput'
+
+function readSavedInput() {
+  try {
+    return localStorage.getItem(STORAGE_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+function saveInput(value) {
+  try {
+    localStorage.setItem(STORAGE_KEY, value)
+  } catch {
+    // storage can be blocked (private mode), the form still works without it
+  }
+}
+
 export default function AutoDetectForm({ onSubmit, loading }) {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(readSavedInput)
   const parsed = parseRepoInput(input)
 
   const handleSubmit = () => {
     if (!parsed) return
+    saveInput(input.trim())
     onSubmit(parsed)
   }
 
