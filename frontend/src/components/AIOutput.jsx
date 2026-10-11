@@ -1,4 +1,5 @@
 import { useState } from "react";
+import OutputTabs from "./OutputTabs";
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -103,6 +104,42 @@ function DetectedBadges({ detected }) {
   );
 }
 
+function buildAutoTabs(autoResult, autoWorkflow) {
+  const tabs = [];
+
+  if (autoResult) {
+    tabs.push({
+      id: "dockerfile",
+      label: "🐳 Dockerfile",
+      title: "🐳 Dockerfile (auto-detected)",
+      text: autoResult.dockerfile,
+      colorClass: "text-green-400",
+      filename: "Dockerfile",
+    });
+    tabs.push({
+      id: "dockerignore",
+      label: "🚫 .dockerignore",
+      title: "🚫 .dockerignore",
+      text: autoResult.dockerignore,
+      colorClass: "text-yellow-400",
+      filename: ".dockerignore",
+    });
+  }
+
+  if (autoWorkflow) {
+    tabs.push({
+      id: "workflow",
+      label: "⚙️ Workflow",
+      title: "⚙️ GitHub Actions workflow (auto-detected)",
+      text: autoWorkflow.yaml,
+      colorClass: "text-blue-400",
+      filename: "ci.yml",
+    });
+  }
+
+  return tabs;
+}
+
 export default function AIOutput({
   dockerfile,
   githubActionsYaml,
@@ -111,6 +148,8 @@ export default function AIOutput({
   loading,
   error,
 }) {
+  const [activeTab, setActiveTab] = useState("dockerfile");
+
   if (loading) {
     return (
       <div className="mt-6 p-4 rounded-lg bg-gray-800 border border-gray-700">
@@ -135,41 +174,30 @@ export default function AIOutput({
   }
 
   const detected = autoResult?.detected || autoWorkflow?.detected;
+  const tabs = buildAutoTabs(autoResult, autoWorkflow);
+  const currentTab = tabs.find((tab) => tab.id === activeTab) || tabs[0];
 
   return (
     <div className="mt-6 space-y-6">
-      {(autoResult || autoWorkflow) && (
+      {tabs.length > 0 && (
         <div className="space-y-4">
           <DetectedBadges detected={detected} />
 
-          {autoResult && (
-            <>
-              <OutputPanel
-                title="🐳 Dockerfile (auto-detected)"
-                text={autoResult.dockerfile}
-                colorClass="text-green-400"
-                filename="Dockerfile"
-              />
-              <OutputPanel
-                title="🚫 .dockerignore"
-                text={autoResult.dockerignore}
-                colorClass="text-yellow-400"
-                filename=".dockerignore"
-              />
-            </>
-          )}
+          <OutputTabs
+            tabs={tabs}
+            activeId={currentTab.id}
+            onChange={setActiveTab}
+          />
 
-          {autoWorkflow && (
-            <>
-              <OutputPanel
-                title="⚙️ GitHub Actions workflow (auto-detected)"
-                text={autoWorkflow.yaml}
-                colorClass="text-blue-400"
-                filename="ci.yml"
-              />
-              <SetupNote />
-            </>
-          )}
+          <OutputPanel
+            key={currentTab.id}
+            title={currentTab.title}
+            text={currentTab.text}
+            colorClass={currentTab.colorClass}
+            filename={currentTab.filename}
+          />
+
+          {currentTab.id === "workflow" && <SetupNote />}
         </div>
       )}
 
