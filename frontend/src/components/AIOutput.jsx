@@ -147,6 +147,21 @@ function buildAutoTabs(autoResult, autoWorkflow) {
   return tabs;
 }
 
+function LoadingBanner({ hasPrevious }) {
+  return (
+    <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
+      <div className="flex items-center gap-3 text-gray-400">
+        <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm">
+          {hasPrevious
+            ? "AI is generating... previous results shown below"
+            : "AI is generating..."}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function AIOutput({
   dockerfile,
   githubActionsYaml,
@@ -157,16 +172,9 @@ export default function AIOutput({
 }) {
   const [activeTab, setActiveTab] = useState("dockerfile");
 
-  if (loading) {
-    return (
-      <div className="mt-6 p-4 rounded-lg bg-gray-800 border border-gray-700">
-        <div className="flex items-center gap-3 text-gray-400">
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm">AI is generating...</span>
-        </div>
-      </div>
-    );
-  }
+  const hasResults = Boolean(
+    dockerfile || githubActionsYaml || autoResult || autoWorkflow
+  );
 
   if (error) {
     return (
@@ -176,8 +184,12 @@ export default function AIOutput({
     );
   }
 
-  if (!dockerfile && !githubActionsYaml && !autoResult && !autoWorkflow) {
-    return null;
+  if (!hasResults) {
+    return loading ? (
+      <div className="mt-6">
+        <LoadingBanner hasPrevious={false} />
+      </div>
+    ) : null;
   }
 
   const detected = autoResult?.detected || autoWorkflow?.detected;
@@ -186,45 +198,53 @@ export default function AIOutput({
 
   return (
     <div className="mt-6 space-y-6">
-      {tabs.length > 0 && (
-        <div className="space-y-4">
-          <DetectedBadges detected={detected} />
+      {loading && <LoadingBanner hasPrevious />}
 
-          <OutputTabs
-            tabs={tabs}
-            activeId={currentTab.id}
-            onChange={setActiveTab}
-          />
+      <div
+        className={`space-y-6 transition-opacity ${
+          loading ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
+        {tabs.length > 0 && (
+          <div className="space-y-4">
+            <DetectedBadges detected={detected} />
 
+            <OutputTabs
+              tabs={tabs}
+              activeId={currentTab.id}
+              onChange={setActiveTab}
+            />
+
+            <OutputPanel
+              key={currentTab.id}
+              title={currentTab.title}
+              text={currentTab.text}
+              colorClass={currentTab.colorClass}
+              filename={currentTab.filename}
+            />
+
+            {currentTab.id === "workflow" && <SetupNote />}
+          </div>
+        )}
+
+        {dockerfile && (
           <OutputPanel
-            key={currentTab.id}
-            title={currentTab.title}
-            text={currentTab.text}
-            colorClass={currentTab.colorClass}
-            filename={currentTab.filename}
+            title="🐳 Dockerfile"
+            text={dockerfile}
+            colorClass="text-green-400"
+            filename="Dockerfile"
           />
+        )}
 
-          {currentTab.id === "workflow" && <SetupNote />}
-        </div>
-      )}
-
-      {dockerfile && (
-        <OutputPanel
-          title="🐳 Dockerfile"
-          text={dockerfile}
-          colorClass="text-green-400"
-          filename="Dockerfile"
-        />
-      )}
-
-      {githubActionsYaml && (
-        <OutputPanel
-          title="⚙️ GitHub Actions YAML"
-          text={githubActionsYaml}
-          colorClass="text-blue-400"
-          filename="ci.yml"
-        />
-      )}
+        {githubActionsYaml && (
+          <OutputPanel
+            title="⚙️ GitHub Actions YAML"
+            text={githubActionsYaml}
+            colorClass="text-blue-400"
+            filename="ci.yml"
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -17,11 +17,11 @@ export function useAI() {
   async function handleGenerateDockerfile(repoInfo) {
     setLoading(true);
     setError(null);
-    setDockerfile(null);
     try {
       const data = await generateDockerfile(repoInfo);
       setDockerfile(data.dockerfile);
     } catch (err) {
+      setDockerfile(null);
       setError(err.response?.data?.error || "Failed to generate Dockerfile");
     } finally {
       setLoading(false);
@@ -31,11 +31,11 @@ export function useAI() {
   async function handleGenerateGithubActions(repoInfo) {
     setLoading(true);
     setError(null);
-    setGithubActionsYaml(null);
     try {
       const data = await generateGithubActions(repoInfo);
       setGithubActionsYaml(data.yaml);
     } catch (err) {
+      setGithubActionsYaml(null);
       setError(err.response?.data?.error || "Failed to generate GitHub Actions YAML");
     } finally {
       setLoading(false);
@@ -45,7 +45,6 @@ export function useAI() {
   async function handleGenerateAutoDockerfile({ owner, repo }) {
     setLoading(true);
     setError(null);
-    setAutoResult(null);
     try {
       const data = await generateAutoDockerfile({ owner, repo });
       setAutoResult({
@@ -54,6 +53,7 @@ export function useAI() {
         dockerignore: data.dockerignore,
       });
     } catch (err) {
+      setAutoResult(null);
       setError(err.response?.data?.error || "Failed to analyze repository");
     } finally {
       setLoading(false);
@@ -63,7 +63,6 @@ export function useAI() {
   async function handleGenerateAutoGithubActions({ owner, repo }) {
     setLoading(true);
     setError(null);
-    setAutoWorkflow(null);
     try {
       const data = await generateAutoGithubActions({ owner, repo });
       setAutoWorkflow({
@@ -71,6 +70,7 @@ export function useAI() {
         yaml: data.yaml,
       });
     } catch (err) {
+      setAutoWorkflow(null);
       setError(err.response?.data?.error || "Failed to generate workflow for repository");
     } finally {
       setLoading(false);
@@ -80,8 +80,6 @@ export function useAI() {
   async function handleGenerateAutoAll({ owner, repo }) {
     setLoading(true);
     setError(null);
-    setAutoResult(null);
-    setAutoWorkflow(null);
     try {
       const [dockerData, workflowData] = await Promise.all([
         generateAutoDockerfile({ owner, repo }),
@@ -97,6 +95,8 @@ export function useAI() {
         yaml: workflowData.yaml,
       });
     } catch (err) {
+      setAutoResult(null);
+      setAutoWorkflow(null);
       setError(err.response?.data?.error || "Failed to analyze repository");
     } finally {
       setLoading(false);
