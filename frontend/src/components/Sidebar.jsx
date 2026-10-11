@@ -10,7 +10,7 @@ export default function Sidebar() {
   const location = useLocation()
 
   return (
-    <aside className="h-screen w-56 bg-gray-900 border-r border-gray-700 flex flex-col py-6 px-3">
+    <aside className="hidden md:flex h-screen w-56 shrink-0 bg-gray-900 border-r border-gray-700 flex-col py-6 px-3">
       {links.map((link) => (
         <Link
           key={link.path}
