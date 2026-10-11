@@ -80,6 +80,18 @@ One click on **Auto-detect & Generate All** returns the Dockerfile, `.dockerigno
 
 Currently only Node.js repositories with a `package.json` in the repo root are supported.
 
+### Output panel
+
+- Auto-detected results open in tabs (Dockerfile, .dockerignore, Workflow) with a line count badge on each panel
+- Copy and Download buttons on every panel; files download as `Dockerfile`, `.dockerignore` and `ci.yml`
+- Regenerate button re-runs the last auto-detect, and the previous results stay visible (dimmed) while the new ones load
+- The last entered `owner/repo` is remembered in the browser (localStorage), so a page refresh does not clear the input
+- An empty state hint shows before anything has been generated
+
+### Mobile
+
+The sidebar is hidden below 768px because the navbar carries the same links. The navbar, History header and AI Engine panels wrap on small screens.
+
 ### API endpoints
 
 | Method | Endpoint | Description |
