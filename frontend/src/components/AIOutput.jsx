@@ -147,6 +147,19 @@ function buildAutoTabs(autoResult, autoWorkflow) {
   return tabs;
 }
 
+function EmptyHint() {
+  return (
+    <div className="mt-6 rounded-lg border border-dashed border-gray-600 px-4 py-6 text-center space-y-1">
+      <p className="text-sm text-gray-300">Nothing generated yet</p>
+      <p className="text-xs text-gray-500">
+        Enter an owner/repo above to get a Dockerfile, .dockerignore and GitHub Actions
+        workflow in one click, or fill in the details manually.
+      </p>
+      <p className="text-xs text-gray-600">Node.js repos with a package.json in the root only, for now.</p>
+    </div>
+  );
+}
+
 function LoadingBanner({ hasPrevious }) {
   return (
     <div className="p-4 rounded-lg bg-gray-800 border border-gray-700">
@@ -190,7 +203,9 @@ export default function AIOutput({
       <div className="mt-6">
         <LoadingBanner hasPrevious={false} />
       </div>
-    ) : null;
+    ) : (
+      <EmptyHint />
+    );
   }
 
   const detected = autoResult?.detected || autoWorkflow?.detected;
