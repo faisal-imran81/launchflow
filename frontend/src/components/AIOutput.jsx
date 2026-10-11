@@ -169,6 +169,7 @@ export default function AIOutput({
   autoWorkflow,
   loading,
   error,
+  onRegenerate,
 }) {
   const [activeTab, setActiveTab] = useState("dockerfile");
 
@@ -207,7 +208,18 @@ export default function AIOutput({
       >
         {tabs.length > 0 && (
           <div className="space-y-4">
-            <DetectedBadges detected={detected} />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <DetectedBadges detected={detected} />
+              {onRegenerate && (
+                <button
+                  onClick={onRegenerate}
+                  disabled={loading}
+                  className="text-xs px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-gray-300 transition-colors"
+                >
+                  🔄 Regenerate
+                </button>
+              )}
+            </div>
 
             <OutputTabs
               tabs={tabs}

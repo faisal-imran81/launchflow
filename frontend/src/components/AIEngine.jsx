@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { useAI } from '../hooks/useAI'
 import AutoDetectForm from './AutoDetectForm'
 import ManualGenerateForm from './ManualGenerateForm'
 import AIOutput from './AIOutput'
 
 export default function AIEngine() {
+  const [lastAutoRepo, setLastAutoRepo] = useState(null)
+
   const {
     dockerfile,
     githubActionsYaml,
@@ -21,6 +24,20 @@ export default function AIEngine() {
     dockerfile || githubActionsYaml || autoResult || autoWorkflow || error
   )
 
+  const handleAutoSubmit = (repo) => {
+    setLastAutoRepo(repo)
+    generateAutoAll(repo)
+  }
+
+  const handleRegenerate = () => {
+    if (lastAutoRepo) generateAutoAll(lastAutoRepo)
+  }
+
+  const handleReset = () => {
+    reset()
+    setLastAutoRepo(null)
+  }
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-6">
       <div>
@@ -30,14 +47,14 @@ export default function AIEngine() {
         </p>
       </div>
 
-      <AutoDetectForm onSubmit={generateAutoAll} loading={loading} />
+      <AutoDetectForm onSubmit={handleAutoSubmit} loading={loading} />
 
       <div className="border-t border-gray-700" />
 
       <ManualGenerateForm
         onGenerateDockerfile={generateDockerfile}
         onGenerateActions={generateGithubActions}
-        onReset={reset}
+        onReset={handleReset}
         showReset={hasOutput}
         loading={loading}
       />
@@ -49,6 +66,7 @@ export default function AIEngine() {
         autoWorkflow={autoWorkflow}
         loading={loading}
         error={error}
+        onRegenerate={lastAutoRepo ? handleRegenerate : null}
       />
     </div>
   )
