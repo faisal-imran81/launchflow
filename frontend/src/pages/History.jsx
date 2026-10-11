@@ -19,19 +19,21 @@ export default function History() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Deployment History</h1>
           <p className="text-gray-400 text-sm mt-1">All your past and current deployments</p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
-            {isLoading ? '...' : `${deployments.length} deployments`}
+          <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full whitespace-nowrap">
+            {isLoading
+              ? '...'
+              : `${deployments.length} ${deployments.length === 1 ? 'deployment' : 'deployments'}`}
           </span>
           <button
             onClick={fetchDeployments}
             disabled={isLoading}
-            className="text-xs text-blue-400 hover:text-blue-300 disabled:text-blue-800 bg-gray-800 px-3 py-1 rounded-full transition-colors"
+            className="text-xs text-blue-400 hover:text-blue-300 disabled:text-blue-800 bg-gray-800 px-3 py-1 rounded-full transition-colors whitespace-nowrap"
           >
             ↻ Refresh
           </button>
