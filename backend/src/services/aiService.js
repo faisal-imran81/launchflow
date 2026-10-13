@@ -1,6 +1,7 @@
 import groq from "../config/groq.js";
 import { getWorkflowRules } from "../utils/workflowRules.js";
 import { cleanAiOutput } from "../utils/cleanAiOutput.js";
+import { toAiError } from "../utils/aiErrors.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
 
@@ -21,25 +22,38 @@ function handleGroqError(error) {
 }
 
 async function runCompletion(prompt) {
+  let completion;
+
   try {
-    const completion = await groq.chat.completions.create({
+    completion = await groq.chat.completions.create({
       model: AI_MODEL,
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
       max_tokens: 4096,
     });
-
-    const content = cleanAiOutput(completion.choices[0]?.message?.content);
-    if (!content) {
-      const err = new Error("AI returned an empty response. Please try again.");
-      err.status = 502;
-      throw err;
-    }
-    return content;
   } catch (error) {
-    if (error.status && error.message.startsWith("AI")) throw error;
-    handleGroqError(error);
+    throw toAiError(error);
   }
+
+  const choice = completion.choices?.[0];
+
+  if (choice?.finish_reason === "length") {
+    const err = new Error("AI output was cut off because it was too long. Please try again.");
+    err.status = 502;
+    err.isAiError = true;
+    throw err;
+  }
+
+  const content = cleanAiOutput(choice?.message?.content);
+
+  if (!content) {
+    const err = new Error("AI returned an empty response. Please try again.");
+    err.status = 502;
+    err.isAiError = true;
+    throw err;
+  }
+
+  return content;
 }
 
 export async function generateDockerfile(repoInfo) {
