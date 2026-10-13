@@ -5,22 +5,6 @@ import { toAiError } from "../utils/aiErrors.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
 
-function handleGroqError(error) {
-  if (error.status === 429) {
-    const err = new Error("AI rate limit reached. Please try again in a minute.");
-    err.status = 429;
-    throw err;
-  }
-  if (error.status === 401) {
-    const err = new Error("AI service authentication failed. Check GROQ_API_KEY.");
-    err.status = 500;
-    throw err;
-  }
-  const err = new Error("AI generation failed. Please try again.");
-  err.status = 502;
-  throw err;
-}
-
 async function runCompletion(prompt) {
   let completion;
 
