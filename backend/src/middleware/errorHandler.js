@@ -7,8 +7,8 @@ export const errorHandler = (err, req, res, next) => {
     if (err.stack) console.error(err.stack)
   }
 
-  res.status(status).json({
-    success: false,
-    error: message,
-  })
+  const body = { success: false, error: message }
+  if (err.code) body.code = err.code
+
+  res.status(status).json(body)
 }
