@@ -17,11 +17,13 @@ export function toAiError(error) {
   }
 
   if (status === 401 || status === 403) {
-    return buildError("AI service authentication failed. Check GROQ_API_KEY on the server.", 500, "ai/auth-failed");
+    console.error("[ai] Authentication failed. Check GROQ_API_KEY on the server.");
+    return buildError("The AI service is not available right now. Please try again later.", 500, "ai/auth-failed");
   }
 
   if (code === "model_not_found" || code === "model_decommissioned") {
-    return buildError("The configured AI model is unavailable. Update AI_MODEL on the server.", 500, "ai/model-unavailable");
+    console.error("[ai] Configured model is unavailable. Update AI_MODEL on the server.");
+    return buildError("The AI model is currently unavailable. Please try again later.", 500, "ai/model-unavailable");
   }
 
   if (!status) {

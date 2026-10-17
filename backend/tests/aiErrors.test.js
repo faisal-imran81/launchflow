@@ -11,11 +11,11 @@ test("toAiError maps 429 to a rate limit message", () => {
   assert.equal(err.isAiError, true);
 });
 
-test("toAiError maps 401 to a server-side auth failure", () => {
+test("toAiError maps 401 to a server-side auth failure without leaking config", () => {
   const err = toAiError({ status: 401 });
   assert.equal(err.status, 500);
   assert.equal(err.code, "ai/auth-failed");
-  assert.ok(err.message.includes("GROQ_API_KEY"));
+  assert.ok(!err.message.includes("GROQ_API_KEY"));
 });
 
 test("toAiError maps 403 to a server-side auth failure", () => {
@@ -24,11 +24,12 @@ test("toAiError maps 403 to a server-side auth failure", () => {
   assert.equal(err.code, "ai/auth-failed");
 });
 
-test("toAiError detects model_not_found", () => {
+test("toAiError detects model_not_found without leaking config", () => {
   const err = toAiError({ status: 404, code: "model_not_found" });
   assert.equal(err.status, 500);
   assert.equal(err.code, "ai/model-unavailable");
   assert.ok(err.message.includes("model"));
+  assert.ok(!err.message.includes("AI_MODEL"));
 });
 
 test("toAiError detects model_decommissioned", () => {
