@@ -8,6 +8,7 @@ import githubRoutes from './routes/githubRoutes.js'
 import aiRoutes from './routes/aiRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
+import { requestLogger } from './middleware/requestLogger.js'
 
 dotenv.config()
 
@@ -15,6 +16,7 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 app.use(cors())
+app.use(requestLogger)
 app.use(express.json())
 
 app.get('/health', (req, res) => {
