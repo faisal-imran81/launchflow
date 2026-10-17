@@ -3,12 +3,16 @@ import OutputTabs from "./OutputTabs";
 import ErrorAlert from "./ErrorAlert";
 
 function CopyButton({ text }) {
-  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState("idle");
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setStatus("copied");
+    } catch {
+      setStatus("failed");
+    }
+    setTimeout(() => setStatus("idle"), 2000);
   }
 
   return (
@@ -16,7 +20,7 @@ function CopyButton({ text }) {
       onClick={handleCopy}
       className="text-xs px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
     >
-      {copied ? "✅ Copied!" : "Copy"}
+      {status === "copied" ? "✅ Copied!" : status === "failed" ? "❌ Copy failed" : "Copy"}
     </button>
   );
 }
