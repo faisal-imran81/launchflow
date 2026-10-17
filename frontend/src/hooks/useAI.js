@@ -108,6 +108,10 @@ export function useAI() {
     }
   }
 
+  function clearError() {
+    setError(null);
+  }
+
   function reset() {
     setDockerfile(null);
     setGithubActionsYaml(null);
@@ -129,6 +133,7 @@ export function useAI() {
     generateAutoDockerfile: handleGenerateAutoDockerfile,
     generateAutoGithubActions: handleGenerateAutoGithubActions,
     generateAutoAll: handleGenerateAutoAll,
+    clearError,
     reset,
   };
 }
