@@ -21,9 +21,11 @@ export function useAI() {
     try {
       const data = await generateDockerfile(repoInfo);
       setDockerfile(data.dockerfile);
+      return true;
     } catch (err) {
       setDockerfile(null);
       setError(resolveAiError(err, "Failed to generate Dockerfile"));
+      return false;
     } finally {
       setLoading(false);
     }
@@ -35,9 +37,11 @@ export function useAI() {
     try {
       const data = await generateGithubActions(repoInfo);
       setGithubActionsYaml(data.yaml);
+      return true;
     } catch (err) {
       setGithubActionsYaml(null);
       setError(resolveAiError(err, "Failed to generate GitHub Actions YAML"));
+      return false;
     } finally {
       setLoading(false);
     }
@@ -53,9 +57,11 @@ export function useAI() {
         dockerfile: data.dockerfile,
         dockerignore: data.dockerignore,
       });
+      return true;
     } catch (err) {
       setAutoResult(null);
       setError(resolveAiError(err, "Failed to analyze repository"));
+      return false;
     } finally {
       setLoading(false);
     }
@@ -70,9 +76,11 @@ export function useAI() {
         detected: data.detected,
         yaml: data.yaml,
       });
+      return true;
     } catch (err) {
       setAutoWorkflow(null);
       setError(resolveAiError(err, "Failed to generate workflow for repository"));
+      return false;
     } finally {
       setLoading(false);
     }
@@ -95,10 +103,12 @@ export function useAI() {
         detected: workflowData.detected,
         yaml: workflowData.yaml,
       });
+      return true;
     } catch (err) {
       setAutoResult(null);
       setAutoWorkflow(null);
       setError(resolveAiError(err, "Failed to analyze repository"));
+      return false;
     } finally {
       setLoading(false);
     }
