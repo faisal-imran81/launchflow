@@ -5,11 +5,7 @@ import {
   generateAutoDockerfile,
   generateAutoGithubActions,
 } from "../services/aiService.js";
-import { getAiErrorMessage } from "../utils/aiErrorMessages.js";
-
-function resolveError(err, fallback) {
-  return getAiErrorMessage(err, err.response?.data?.error || fallback);
-}
+import { resolveAiError } from "../utils/aiErrorMessages.js";
 
 export function useAI() {
   const [dockerfile, setDockerfile] = useState(null);
@@ -27,7 +23,7 @@ export function useAI() {
       setDockerfile(data.dockerfile);
     } catch (err) {
       setDockerfile(null);
-      setError(resolveError(err, "Failed to generate Dockerfile"));
+      setError(resolveAiError(err, "Failed to generate Dockerfile"));
     } finally {
       setLoading(false);
     }
@@ -41,7 +37,7 @@ export function useAI() {
       setGithubActionsYaml(data.yaml);
     } catch (err) {
       setGithubActionsYaml(null);
-      setError(resolveError(err, "Failed to generate GitHub Actions YAML"));
+      setError(resolveAiError(err, "Failed to generate GitHub Actions YAML"));
     } finally {
       setLoading(false);
     }
@@ -59,7 +55,7 @@ export function useAI() {
       });
     } catch (err) {
       setAutoResult(null);
-      setError(resolveError(err, "Failed to analyze repository"));
+      setError(resolveAiError(err, "Failed to analyze repository"));
     } finally {
       setLoading(false);
     }
@@ -76,7 +72,7 @@ export function useAI() {
       });
     } catch (err) {
       setAutoWorkflow(null);
-      setError(resolveError(err, "Failed to generate workflow for repository"));
+      setError(resolveAiError(err, "Failed to generate workflow for repository"));
     } finally {
       setLoading(false);
     }
@@ -102,7 +98,7 @@ export function useAI() {
     } catch (err) {
       setAutoResult(null);
       setAutoWorkflow(null);
-      setError(resolveError(err, "Failed to analyze repository"));
+      setError(resolveAiError(err, "Failed to analyze repository"));
     } finally {
       setLoading(false);
     }

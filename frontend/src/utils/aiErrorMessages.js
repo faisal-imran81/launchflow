@@ -25,3 +25,7 @@ export function getAiErrorMessage(err, fallback) {
 
   return fallback;
 }
+
+export function resolveAiError(err, fallback) {
+  return getAiErrorMessage(err, err?.response?.data?.error || fallback);
+}

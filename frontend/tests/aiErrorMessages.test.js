@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { getAiErrorMessage } from "../src/utils/aiErrorMessages.js";
+import { getAiErrorMessage, resolveAiError } from "../src/utils/aiErrorMessages.js";
 
 const FALLBACK = "fallback message";
 
@@ -67,4 +67,30 @@ test("returns the fallback for unknown code and unknown status", () => {
 test("code takes priority over status", () => {
   const msg = getAiErrorMessage(makeErr(503, "ai/rate-limited"), FALLBACK);
   assert.ok(msg.includes("Too many requests"));
+});
+
+test("resolveAiError prefers a mapped code over the raw server message", () => {
+  const err = { response: { status: 429, data: { code: "ai/rate-limited", error: "raw server text" } } };
+  const msg = resolveAiError(err, FALLBACK);
+  assert.ok(msg.includes("Too many requests"));
+});
+
+test("resolveAiError keeps the specific server message for unmapped errors", () => {
+  const err = { response: { status: 422, data: { error: "No package.json found in this repository." } } };
+  assert.equal(resolveAiError(err, FALLBACK), "No package.json found in this repository.");
+});
+
+test("resolveAiError uses the fallback when the server sent no message", () => {
+  const err = { response: { status: 422, data: {} } };
+  assert.equal(resolveAiError(err, FALLBACK), FALLBACK);
+});
+
+test("resolveAiError returns the network message when there is no response", () => {
+  const msg = resolveAiError(new Error("Network Error"), FALLBACK);
+  assert.ok(msg.includes("Cannot reach the server"));
+});
+
+test("resolveAiError does not throw when err is undefined", () => {
+  const msg = resolveAiError(undefined, FALLBACK);
+  assert.ok(msg.includes("Cannot reach the server"));
 });
