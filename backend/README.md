@@ -70,6 +70,35 @@ npm run dev
 |--------|----------|-------------|
 | GET | `/health` | API health check |
 
+## 🧪 Testing
+
+All backend utilities and middleware are covered with unit tests using Node.js built-in `node:test` framework.
+
+### Run all tests
+
+```bash
+node --test backend/tests/*.test.js
+```
+
+### Test files
+
+| File | What it covers |
+|---|---|
+| `aiErrors.test.js` | Groq error mapping → status codes + codes |
+| `errorHandler.test.js` | Global error middleware response shape |
+| `aiController.test.js` | Input validation guards (400 responses) |
+| `cleanAiOutput.test.js` | Fenced code block extraction |
+| `detectStack.test.js` | Framework + type detection from package.json |
+| `workflowRules.test.js` | GitHub Actions YAML rule generation |
+| `notFound.test.js` | 404 middleware response shape |
+| `generateDockerignore.test.js` | Dockerignore content by stack type |
+| `sanitizeInput.test.js` | Input trimming + length limiting |
+| `asyncHandler.test.js` | Async error forwarding to next() |
+| `healthRoute.test.js` | /api/health response shape |
+| `parseOwnerRepo.test.js` | GitHub URL + owner/repo parsing |
+| `rateLimit.test.js` | In-memory rate limiting per key |
+| `aiService.integration.test.js` | aiService export shape smoke tests |
+
 ## Environment Variables
 
 See `.env.example` for all required variables.
