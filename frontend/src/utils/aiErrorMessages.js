@@ -2,6 +2,8 @@ const CODE_MESSAGES = {
   "ai/rate-limited": "Too many requests. Please wait a moment and try again.",
   "ai/service-unavailable": "The AI service is temporarily unavailable. Please try again later.",
   "ai/bad-gateway": "The AI provider returned an error. Please try again.",
+  "ai/auth-failed": "The AI service is not available right now. Please try again later.",
+  "ai/model-unavailable": "The AI model is currently unavailable. Please try again later.",
   "bad-request/invalid-json": "Invalid request data. Please check your input.",
 };
 
