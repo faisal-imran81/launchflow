@@ -1,5 +1,6 @@
 import { useState } from "react";
 import OutputTabs from "./OutputTabs";
+import ErrorAlert from "./ErrorAlert";
 
 function CopyButton({ text }) {
   const [copied, setCopied] = useState(false);
@@ -183,6 +184,8 @@ export default function AIOutput({
   loading,
   error,
   onRegenerate,
+  onRetry,
+  onDismissError,
 }) {
   const [activeTab, setActiveTab] = useState("dockerfile");
 
@@ -190,22 +193,22 @@ export default function AIOutput({
     dockerfile || githubActionsYaml || autoResult || autoWorkflow
   );
 
-  if (error) {
-    return (
-      <div className="mt-6 p-4 rounded-lg bg-red-900/30 border border-red-700">
-        <p className="text-red-400 text-sm">❌ {error}</p>
-      </div>
-    );
-  }
+  const errorAlert = error ? (
+    <ErrorAlert message={error} onDismiss={onDismissError} onRetry={onRetry} />
+  ) : null;
 
   if (!hasResults) {
-    return loading ? (
-      <div className="mt-6">
-        <LoadingBanner hasPrevious={false} />
-      </div>
-    ) : (
-      <EmptyHint />
-    );
+    if (loading) {
+      return (
+        <div className="mt-6">
+          <LoadingBanner hasPrevious={false} />
+        </div>
+      );
+    }
+    if (error) {
+      return <div className="mt-6">{errorAlert}</div>;
+    }
+    return <EmptyHint />;
   }
 
   const detected = autoResult?.detected || autoWorkflow?.detected;
@@ -214,6 +217,8 @@ export default function AIOutput({
 
   return (
     <div className="mt-6 space-y-6">
+      {errorAlert}
+
       {loading && <LoadingBanner hasPrevious />}
 
       <div

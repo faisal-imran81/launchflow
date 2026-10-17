@@ -6,6 +6,7 @@ import AIOutput from './AIOutput'
 
 export default function AIEngine() {
   const [lastAutoRepo, setLastAutoRepo] = useState(null)
+  const [lastAttempt, setLastAttempt] = useState(null)
 
   const {
     dockerfile,
@@ -17,6 +18,7 @@ export default function AIEngine() {
     generateDockerfile,
     generateGithubActions,
     generateAutoAll,
+    clearError,
     reset,
   } = useAI()
 
@@ -26,16 +28,35 @@ export default function AIEngine() {
 
   const handleAutoSubmit = (repo) => {
     setLastAutoRepo(repo)
+    setLastAttempt({ kind: 'auto', payload: repo })
     generateAutoAll(repo)
+  }
+
+  const handleManualDockerfile = (info) => {
+    setLastAttempt({ kind: 'dockerfile', payload: info })
+    generateDockerfile(info)
+  }
+
+  const handleManualActions = (info) => {
+    setLastAttempt({ kind: 'actions', payload: info })
+    generateGithubActions(info)
   }
 
   const handleRegenerate = () => {
     if (lastAutoRepo) generateAutoAll(lastAutoRepo)
   }
 
+  const handleRetry = () => {
+    if (!lastAttempt) return
+    if (lastAttempt.kind === 'auto') generateAutoAll(lastAttempt.payload)
+    if (lastAttempt.kind === 'dockerfile') generateDockerfile(lastAttempt.payload)
+    if (lastAttempt.kind === 'actions') generateGithubActions(lastAttempt.payload)
+  }
+
   const handleReset = () => {
     reset()
     setLastAutoRepo(null)
+    setLastAttempt(null)
   }
 
   return (
@@ -52,8 +73,8 @@ export default function AIEngine() {
       <div className="border-t border-gray-700" />
 
       <ManualGenerateForm
-        onGenerateDockerfile={generateDockerfile}
-        onGenerateActions={generateGithubActions}
+        onGenerateDockerfile={handleManualDockerfile}
+        onGenerateActions={handleManualActions}
         onReset={handleReset}
         showReset={hasOutput}
         loading={loading}
@@ -67,6 +88,8 @@ export default function AIEngine() {
         loading={loading}
         error={error}
         onRegenerate={lastAutoRepo ? handleRegenerate : null}
+        onRetry={lastAttempt ? handleRetry : null}
+        onDismissError={clearError}
       />
     </div>
   )
