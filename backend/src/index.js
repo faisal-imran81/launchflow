@@ -8,6 +8,7 @@ import githubRoutes from './routes/githubRoutes.js'
 import aiRoutes from './routes/aiRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
+import healthRoutes from './routes/healthRoutes.js'
 import { validateJson } from './middleware/validateJson.js'
 import { requestLogger } from './middleware/requestLogger.js'
 
@@ -29,6 +30,7 @@ app.use('/api/history', historyRoutes)
 app.use('/api/projects', projectsRoutes)
 app.use('/api/github', githubRoutes)
 app.use('/api/ai', aiRoutes)
+app.use('/api/health', healthRoutes)
 app.use(notFound)
 app.use(validateJson)
 app.use(errorHandler)
