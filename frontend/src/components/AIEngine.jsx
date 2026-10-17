@@ -26,6 +26,8 @@ export default function AIEngine() {
     dockerfile || githubActionsYaml || autoResult || autoWorkflow || error
   )
 
+  const activeKind = loading ? lastAttempt?.kind : null
+
   const handleAutoSubmit = (repo) => {
     setLastAutoRepo(repo)
     setLastAttempt({ kind: 'auto', payload: repo })
@@ -43,7 +45,9 @@ export default function AIEngine() {
   }
 
   const handleRegenerate = () => {
-    if (lastAutoRepo) generateAutoAll(lastAutoRepo)
+    if (!lastAutoRepo) return
+    setLastAttempt({ kind: 'auto', payload: lastAutoRepo })
+    generateAutoAll(lastAutoRepo)
   }
 
   const handleRetry = () => {
@@ -68,7 +72,11 @@ export default function AIEngine() {
         </p>
       </div>
 
-      <AutoDetectForm onSubmit={handleAutoSubmit} loading={loading} />
+      <AutoDetectForm
+        onSubmit={handleAutoSubmit}
+        loading={loading}
+        busy={activeKind === 'auto'}
+      />
 
       <div className="border-t border-gray-700" />
 
@@ -78,6 +86,7 @@ export default function AIEngine() {
         onReset={handleReset}
         showReset={hasOutput}
         loading={loading}
+        busyKind={activeKind}
       />
 
       <AIOutput

@@ -19,7 +19,7 @@ function saveInput(value) {
   }
 }
 
-export default function AutoDetectForm({ onSubmit, loading }) {
+export default function AutoDetectForm({ onSubmit, loading, busy }) {
   const [input, setInput] = useState(readSavedInput)
   const parsed = parseRepoInput(input)
 
@@ -46,7 +46,14 @@ export default function AutoDetectForm({ onSubmit, loading }) {
           disabled={loading || !parsed}
           className="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
         >
-          🔍 Auto-detect & Generate All
+          {busy ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Analyzing...
+            </span>
+          ) : (
+            '🔍 Auto-detect & Generate All'
+          )}
         </button>
       </div>
       {input && !parsed && (

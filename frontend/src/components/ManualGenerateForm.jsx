@@ -9,6 +9,7 @@ export default function ManualGenerateForm({
   onReset,
   showReset,
   loading,
+  busyKind,
 }) {
   const [repoInfo, setRepoInfo] = useState({
     repoName: '',
@@ -55,14 +56,28 @@ export default function ManualGenerateForm({
           disabled={!canGenerate}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
         >
-          🐳 Generate Dockerfile
+          {busyKind === 'dockerfile' ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Generating...
+            </span>
+          ) : (
+            '🐳 Generate Dockerfile'
+          )}
         </button>
         <button
           onClick={() => onGenerateActions(repoInfo)}
           disabled={!canGenerate}
           className="px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
         >
-          ⚙️ Generate GitHub Actions
+          {busyKind === 'actions' ? (
+            <span className="inline-flex items-center gap-2">
+              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Generating...
+            </span>
+          ) : (
+            '⚙️ Generate GitHub Actions'
+          )}
         </button>
         {showReset && (
           <button
