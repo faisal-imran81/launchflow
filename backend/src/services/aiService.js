@@ -130,14 +130,7 @@ ${stackRules}
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
 
-  const completion = await groq.chat.completions.create({
-    model: AI_MODEL,
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.3,
-    max_tokens: 4096,
-  });
-
-  return cleanAiOutput(completion.choices[0]?.message?.content);
+  return runCompletion(prompt);
 }
 
 export async function generateGithubActionsFromStack(analysis) {
@@ -154,12 +147,5 @@ ${rules}
 
 Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
-  const completion = await groq.chat.completions.create({
-    model: AI_MODEL,
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.3,
-    max_tokens: 4096,
-  });
-
-  return cleanAiOutput(completion.choices[0]?.message?.content);
+  return runCompletion(prompt);
 }
