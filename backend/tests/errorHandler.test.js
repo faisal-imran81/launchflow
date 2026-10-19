@@ -13,27 +13,58 @@ function mockRes() {
 }
 
 describe('errorHandler middleware', () => {
-  it('returns 500 with message when no status on err', () => {
+  it('hides the message of unexpected 500 errors', () => {
     const res = mockRes()
     errorHandler(new Error('boom'), mockReq, res, mockNext)
     assert.equal(res._status, 500)
     assert.equal(res._body.success, false)
-    assert.equal(res._body.error, 'boom')
+    assert.equal(res._body.error, 'Internal Server Error')
   })
 
-  it('uses err.status when provided', () => {
+  it('keeps the message of client errors (4xx)', () => {
     const res = mockRes()
     const err = Object.assign(new Error('Not Found'), { status: 404 })
     errorHandler(err, mockReq, res, mockNext)
     assert.equal(res._status, 404)
+    assert.equal(res._body.error, 'Not Found')
   })
 
-  it('includes err.code in response when present', () => {
+  it('keeps the message of AI errors even when the status is 500', () => {
+    const res = mockRes()
+    const err = Object.assign(new Error('The AI model is currently unavailable.'), {
+      status: 500,
+      isAiError: true,
+    })
+    errorHandler(err, mockReq, res, mockNext)
+    assert.equal(res._status, 500)
+    assert.equal(res._body.error, 'The AI model is currently unavailable.')
+  })
+
+  it('includes err.code for client errors', () => {
     const res = mockRes()
     const err = Object.assign(new Error('Rate limited'), { status: 429, code: 'ai/rate-limited' })
     errorHandler(err, mockReq, res, mockNext)
     assert.equal(res._status, 429)
     assert.equal(res._body.code, 'ai/rate-limited')
+  })
+
+  it('forwards err.code for AI errors with status 500', () => {
+    const res = mockRes()
+    const err = Object.assign(new Error('Unavailable'), {
+      status: 500,
+      isAiError: true,
+      code: 'ai/auth-failed',
+    })
+    errorHandler(err, mockReq, res, mockNext)
+    assert.equal(res._body.code, 'ai/auth-failed')
+  })
+
+  it('does not forward err.code for unexpected 500 errors', () => {
+    const res = mockRes()
+    const err = Object.assign(new Error('db down'), { code: 'ECONNREFUSED' })
+    errorHandler(err, mockReq, res, mockNext)
+    assert.equal(res._status, 500)
+    assert.ok(!('code' in res._body))
   })
 
   it('omits code field when err.code is absent', () => {
@@ -46,5 +77,13 @@ describe('errorHandler middleware', () => {
     const res = mockRes()
     errorHandler({}, mockReq, res, mockNext)
     assert.equal(res._body.error, 'Internal Server Error')
+  })
+
+  it('keeps a 4xx message and never touches the status code', () => {
+    const res = mockRes()
+    const err = Object.assign(new Error('Bad input'), { status: 400 })
+    errorHandler(err, mockReq, res, mockNext)
+    assert.equal(res._status, 400)
+    assert.equal(res._body.error, 'Bad input')
   })
 })
