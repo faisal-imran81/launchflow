@@ -1,0 +1,6 @@
+{
+  "name": "vite-vanilla-app",
+  "version": "1.0.0",
+  "scripts": { "dev": "vite", "build": "vite build" },
+  "devDependencies": { "vite": "^5.4.0" }
+}
