@@ -2,8 +2,21 @@ import groq from "../config/groq.js";
 import { getWorkflowRules } from "../utils/workflowRules.js";
 import { cleanAiOutput } from "../utils/cleanAiOutput.js";
 import { toAiError } from "../utils/aiErrors.js";
+import { validateDockerfile } from "../utils/validateDockerfile.js";
+import { validateWorkflow } from "../utils/validateWorkflow.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
+
+function logValidationResult(validator, label, { errors, warnings }) {
+  const tag = `[${validator}] ${label}`;
+  if (errors.length === 0 && warnings.length === 0) {
+    console.log(`${tag} — validation passed`);
+    return;
+  }
+  console.warn(`${tag} — ${errors.length} error(s), ${warnings.length} warning(s)`);
+  for (const msg of errors) console.error(`  ERROR: ${msg}`);
+  for (const msg of warnings) console.warn(`  WARN: ${msg}`);
+}
 
 async function runCompletion(prompt) {
   let completion;
@@ -63,7 +76,9 @@ Requirements:
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
 
-  return runCompletion(prompt);
+  const content = await runCompletion(prompt);
+  logValidationResult("validateDockerfile", repoName, validateDockerfile(content));
+  return content;
 }
 
 export async function generateGithubActionsYAML(repoInfo) {
@@ -87,7 +102,9 @@ Requirements:
 
 Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
-  return runCompletion(prompt);
+  const content = await runCompletion(prompt);
+  logValidationResult("validateWorkflow", repoName, validateWorkflow(content));
+  return content;
 }
 
 export async function generateDockerfileFromStack(analysis) {
@@ -130,7 +147,9 @@ ${stackRules}
 
 Return ONLY the Dockerfile content, no explanation, no markdown code blocks.`;
 
-  return runCompletion(prompt);
+  const content = await runCompletion(prompt);
+  logValidationResult("validateDockerfile", repoName, validateDockerfile(content));
+  return content;
 }
 
 export async function generateGithubActionsFromStack(analysis) {
@@ -147,5 +166,7 @@ ${rules}
 
 Return ONLY the YAML content, no explanation, no markdown code blocks.`;
 
-  return runCompletion(prompt);
+  const content = await runCompletion(prompt);
+  logValidationResult("validateWorkflow", repoName, validateWorkflow(content));
+  return content;
 }
