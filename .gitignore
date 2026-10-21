@@ -27,3 +27,6 @@ Thumbs.db
 
 # Coverage
 coverage/
+
+# eval outputs — AI-generated files, not committed
+backend/eval-outputs/
