@@ -77,3 +77,22 @@ test("toAiError returns an existing AI error unchanged", () => {
   original.isAiError = true;
   assert.equal(toAiError(original), original);
 });
+
+test("toAiError maps AbortError to ai/timeout", () => {
+  const abort = new Error("The operation was aborted");
+  abort.name = "AbortError";
+  const err = toAiError(abort);
+  assert.equal(err.status, 504);
+  assert.equal(err.code, "ai/timeout");
+  assert.ok(err.message.toLowerCase().includes("timed out"));
+  assert.equal(err.isAiError, true);
+});
+
+test("toAiError maps ERR_CANCELED to ai/timeout", () => {
+  const canceled = new Error("Request canceled");
+  canceled.code = "ERR_CANCELED";
+  const err = toAiError(canceled);
+  assert.equal(err.status, 504);
+  assert.equal(err.code, "ai/timeout");
+  assert.equal(err.isAiError, true);
+});
