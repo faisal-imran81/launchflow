@@ -1,3 +1,14 @@
+/**
+ * Parses a GitHub owner/repo string or full GitHub URL into its parts.
+ *
+ * Accepts:
+ *  - "owner/repo"
+ *  - "https://github.com/owner/repo"
+ *  - "https://github.com/owner/repo.git"
+ *
+ * @param {string} input - Raw user input
+ * @returns {{ owner: string, repo: string } | null} Parsed parts, or null if invalid
+ */
 export function parseOwnerRepo(input) {
   if (!input || typeof input !== 'string') return null
 
