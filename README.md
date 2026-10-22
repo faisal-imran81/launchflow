@@ -58,7 +58,7 @@ npm run dev
 ## Roadmap
 
 - [x] Week 1 — Frontend + Backend Foundation
-- [ ] Week 2 — AI Engine (Groq API)
+- [x] Week 2 — AI Engine (Groq API)
 - [ ] Week 3 — Docker + AWS
 - [ ] Week 4 — Polish + Launch
 
@@ -127,7 +127,22 @@ cd backend
 npm test
 ```
 
-The tests cover stack detection (`detectStack`), the workflow rules builder (`getWorkflowRules`, including the lowercase Docker image name) and the AI output cleaner (`cleanAiOutput`). They do not call the Groq API.
+**276 tests, 0 failures** — no extra dependencies, no network calls.
+
+| Test file | What it covers |
+|---|---|
+| `detectStack.test.js` | null input, all framework detections, startCommand logic |
+| `detectStack.stacks.test.js` | full shape for all 12 fixture `package.json` files |
+| `cleanAiOutput.test.js` | fenced block extraction, trimming, edge inputs |
+| `cleanAiOutput.edge.test.js` | preamble/epilogue stripping, malformed fences, content preservation |
+| `validateDockerfile.test.js` | 39 cases — valid files, FROM rules, unknown instructions, base image tags, CMD/EXPOSE warnings, hardcoded secrets |
+| `validateWorkflow.test.js` | structure rules, action pinning, Docker login, hardcoded secrets |
+| `promptRules.test.js` | per-stack CI rules, build step, image tag slug, credential safety |
+| `workflowRules.test.js` | image name slugification, Docker Hub login and build-push steps, secret safety |
+| `errorHandler.test.js` | 500 masking, AI error passthrough, err.code forwarding |
+| other utils | `asyncHandler`, `parseOwnerRepo`, `rateLimit`, `sanitizeInput`, `validateJson`, `generateDockerignore`, `notFound`, `requestLogger`, `healthRoute` |
+
+None of these call the Groq API. For AI output evaluation see `backend/scripts/evalAi.js`.
 
 ## Testing AI Outputs
 
