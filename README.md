@@ -128,3 +128,66 @@ npm test
 ```
 
 The tests cover stack detection (`detectStack`), the workflow rules builder (`getWorkflowRules`, including the lowercase Docker image name) and the AI output cleaner (`cleanAiOutput`). They do not call the Groq API.
+
+## Testing AI Outputs
+
+Day 13 of the roadmap focused on validating every AI-generated file before it reaches the client.
+
+### What is tested
+
+| Layer | File | What it checks |
+|---|---|---|
+| Unit | `backend/tests/validateDockerfile.test.js` | 39 cases — valid Dockerfiles, FROM rules, unknown instructions, base image tags, CMD/EXPOSE warnings, hardcoded secrets |
+| Unit | `backend/tests/validateWorkflow.test.js` | structure rules, action pinning, docker login, hardcoded secrets |
+| Unit | `backend/tests/cleanAiOutput.edge.test.js` | preamble/epilogue stripping, malformed fences, content preservation |
+| Unit | `backend/tests/promptRules.test.js` | per-stack CI rules, build step, image tag, credential safety |
+| Fixtures | `backend/tests/fixtures/stacks/` | 12 sample `package.json` files (Vite, Vue, CRA, Next.js, Express, Fastify, Koa, NestJS, plain Node) |
+| Integration | `backend/tests/detectStack.stacks.test.js` | full `detectStack` shape for every fixture |
+| Manual eval | `backend/scripts/evalAi.js` | calls real Groq API, validates output, saves to `backend/eval-outputs/` |
+| Real repos | `backend/scripts/evalRealRepos.js` | fetches your public GitHub repos, runs `detectStack`, optionally generates + validates |
+
+### Run the unit tests
+
+```bash
+cd backend
+node --test tests/
+```
+
+276 tests, 0 failures.
+
+### Run the manual AI eval (requires GROQ_API_KEY)
+
+```bash
+node --env-file=backend/.env backend/scripts/evalAi.js
+```
+
+Generates a Dockerfile and GitHub Actions workflow for all 10 stack fixtures, validates each one, and prints a summary. Raw outputs are saved to `backend/eval-outputs/` (gitignored).
+
+### Run against your real repos
+
+```bash
+# detect stacks only (no API calls)
+node --env-file=backend/.env backend/scripts/evalRealRepos.js
+
+# detect + generate + validate (uses Groq API)
+node --env-file=backend/.env backend/scripts/evalRealRepos.js --generate
+```
+
+### Day 13 eval result
+
+Run on 2026-10-22 against all 10 fixtures using model `openai/gpt-oss-20b`:
+
+| Fixture | Framework | Dockerfile | Workflow |
+|---|---|---|---|
+| vite-react | React (Vite) | ✅ | ✅ |
+| vite-vue | Vue (Vite) | ✅ | ✅ |
+| vite-vanilla | Vite | ✅ | ✅ |
+| cra-app | React (CRA) | ✅ | ✅ |
+| next-app | Next.js | ✅ | ✅ |
+| express-api | Express | ✅ | ✅ |
+| fastify-api | Fastify | ✅ | ✅ |
+| koa-api | Koa | ✅ | ✅ |
+| nestjs-api | NestJS | ✅ | ✅ |
+| plain-node | Node.js | ✅ | ✅ |
+
+**10/10 Dockerfiles passed — 10/10 Workflows passed — 0 prompt fixes needed.**
