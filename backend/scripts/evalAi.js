@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { detectStack } from '../src/utils/detectStack.js'
 import { validateDockerfile } from '../src/utils/validateDockerfile.js'
 import { validateWorkflow } from '../src/utils/validateWorkflow.js'
+import { generateDockerignore } from '../src/utils/generateDockerignore.js'
 import { generateDockerfileFromStack, generateGithubActionsFromStack } from '../src/services/aiService.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -46,6 +47,10 @@ for (const name of FIXTURES) {
     console.log(`  Dockerfile: ${valid ? '✅ valid' : '❌ invalid'} — ${errors.length} error(s), ${warnings.length} warning(s)`)
     for (const e of errors)   console.error(`    ERROR: ${e}`)
     for (const w of warnings) console.warn(`    WARN:  ${w}`)
+
+    const dockerignore = generateDockerignore(analysis.type)
+    writeFileSync(join(OUT_DIR, `${name}.dockerignore`), dockerignore, 'utf8')
+    console.log(`  .dockerignore: ✅ generated (${dockerignore.split('\n').filter(Boolean).length} rules)`)
   } catch (err) {
     row.dockerfileValid = false
     row.dockerfileErrors = [err.message]
@@ -92,4 +97,5 @@ for (const r of results) {
 console.log('─'.repeat(60))
 console.log(`  Dockerfile : ${dfPass}/${results.length} passed`)
 console.log(`  Workflow   : ${wfPass}/${results.length} passed`)
+console.log(`  .dockerignore: ${results.length}/${results.length} generated`)
 console.log(`\n  Raw outputs saved to: backend/eval-outputs/`)
