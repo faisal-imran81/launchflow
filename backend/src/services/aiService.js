@@ -6,6 +6,7 @@ import { validateDockerfile } from "../utils/validateDockerfile.js";
 import { validateWorkflow } from "../utils/validateWorkflow.js";
 
 const AI_MODEL = "openai/gpt-oss-20b";
+const AI_TIMEOUT_MS = 30_000;
 
 function logValidationResult(validator, label, { errors, warnings }) {
   const tag = `[${validator}] ${label}`;
@@ -19,17 +20,24 @@ function logValidationResult(validator, label, { errors, warnings }) {
 }
 
 async function runCompletion(prompt) {
-  let completion;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
+  let completion;
   try {
-    completion = await groq.chat.completions.create({
-      model: AI_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 4096,
-    });
+    completion = await groq.chat.completions.create(
+      {
+        model: AI_MODEL,
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 4096,
+      },
+      { signal: controller.signal }
+    );
   } catch (error) {
     throw toAiError(error);
+  } finally {
+    clearTimeout(timer);
   }
 
   const choice = completion.choices?.[0];
@@ -38,6 +46,7 @@ async function runCompletion(prompt) {
     const err = new Error("AI output was cut off because it was too long. Please try again.");
     err.status = 502;
     err.isAiError = true;
+    err.code = "ai/too-long";
     throw err;
   }
 
@@ -47,6 +56,7 @@ async function runCompletion(prompt) {
     const err = new Error("AI returned an empty response. Please try again.");
     err.status = 502;
     err.isAiError = true;
+    err.code = "ai/empty-response";
     throw err;
   }
 

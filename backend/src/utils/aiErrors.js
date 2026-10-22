@@ -12,6 +12,14 @@ export function toAiError(error) {
   const status = error?.status;
   const code = error?.code ?? error?.error?.code;
 
+  if (error?.name === 'AbortError' || error?.code === 'ERR_CANCELED') {
+    return buildError(
+      'AI generation timed out. Please try again.',
+      504,
+      'ai/timeout'
+    );
+  }
+
   if (status === 429) {
     return buildError("AI rate limit reached. Please try again in a minute.", 429, "ai/rate-limited");
   }
