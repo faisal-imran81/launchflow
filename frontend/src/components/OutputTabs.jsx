@@ -4,6 +4,7 @@ export default function OutputTabs({ tabs, activeId, onChange }) {
   return (
     <div
       role="tablist"
+      aria-label="Output tabs"
       className="flex flex-wrap gap-2 border-b border-gray-700 pb-2"
     >
       {tabs.map((tab) => {
@@ -13,6 +14,7 @@ export default function OutputTabs({ tabs, activeId, onChange }) {
             key={tab.id}
             role="tab"
             aria-selected={isActive}
+            aria-controls={`panel-${tab.id}`}
             onClick={() => onChange(tab.id)}
             className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
               isActive

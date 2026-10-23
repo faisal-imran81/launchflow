@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import OutputTabs from "./OutputTabs";
 import ErrorAlert from "./ErrorAlert";
 
@@ -191,7 +191,12 @@ export default function AIOutput({
   onRetry,
   onDismissError,
 }) {
-  const [activeTab, setActiveTab] = useState("dockerfile");
+  const tabs = buildAutoTabs(autoResult, autoWorkflow);
+  const [activeTab, setActiveTab] = useState(() => tabs[0]?.id ?? "dockerfile");
+
+  useEffect(() => {
+    if (tabs.length > 0) setActiveTab(tabs[0].id);
+  }, [autoResult, autoWorkflow]);
 
   const hasResults = Boolean(
     dockerfile || githubActionsYaml || autoResult || autoWorkflow
@@ -216,8 +221,7 @@ export default function AIOutput({
   }
 
   const detected = autoResult?.detected || autoWorkflow?.detected;
-  const tabs = buildAutoTabs(autoResult, autoWorkflow);
-  const currentTab = tabs.find((tab) => tab.id === activeTab) || tabs[0];
+  const currentTab = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
 
   return (
     <div className="mt-6 space-y-6">
@@ -247,19 +251,21 @@ export default function AIOutput({
 
             <OutputTabs
               tabs={tabs}
-              activeId={currentTab.id}
+              activeId={currentTab?.id}
               onChange={setActiveTab}
             />
 
-            <OutputPanel
-              key={currentTab.id}
-              title={currentTab.title}
-              text={currentTab.text}
-              colorClass={currentTab.colorClass}
-              filename={currentTab.filename}
-            />
+            {currentTab && (
+              <OutputPanel
+                key={currentTab.id}
+                title={currentTab.title}
+                text={currentTab.text}
+                colorClass={currentTab.colorClass}
+                filename={currentTab.filename}
+              />
+            )}
 
-            {currentTab.id === "workflow" && <SetupNote />}
+            {currentTab?.id === "workflow" && <SetupNote />}
           </div>
         )}
 
