@@ -1,7 +1,34 @@
 import { useState } from 'react'
 
+const LIMITS = { repoName: 100, language: 50, framework: 50, description: 500 }
+
 const inputClass =
   'bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500'
+
+const warnClass =
+  'bg-gray-900 border border-yellow-500 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400'
+
+function LimitedInput({ field, value, onChange, placeholder, className }) {
+  const max = LIMITS[field]
+  const over = value.length > max
+  return (
+    <div className="space-y-0.5">
+      <input
+        type="text"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(field, e.target.value)}
+        maxLength={max + 20}
+        className={`${className} ${over ? warnClass : inputClass} w-full`}
+      />
+      {over && (
+        <p className="text-xs text-yellow-400">
+          Max {max} characters ({value.length - max} over)
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default function ManualGenerateForm({
   onGenerateDockerfile,
@@ -15,40 +42,49 @@ export default function ManualGenerateForm({
     repoName: '',
     language: '',
     framework: '',
+    description: '',
   })
 
-  const updateField = (field) => (e) =>
-    setRepoInfo({ ...repoInfo, [field]: e.target.value })
+  const updateField = (field, value) =>
+    setRepoInfo((prev) => ({ ...prev, [field]: value }))
 
-  const canGenerate = !loading && repoInfo.repoName.trim() !== ''
+  const hasOverLimit = Object.entries(LIMITS).some(
+    ([key, max]) => (repoInfo[key] || '').length > max
+  )
+
+  const canGenerate = !loading && repoInfo.repoName.trim() !== '' && !hasOverLimit
 
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-medium text-gray-300">✍️ Or enter details manually</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <input
-          type="text"
-          placeholder="Repo name"
+        <LimitedInput
+          field="repoName"
           value={repoInfo.repoName}
-          onChange={updateField('repoName')}
-          className={inputClass}
+          onChange={updateField}
+          placeholder="Repo name *"
         />
-        <input
-          type="text"
-          placeholder="Language (e.g. JavaScript)"
+        <LimitedInput
+          field="language"
           value={repoInfo.language}
-          onChange={updateField('language')}
-          className={inputClass}
+          onChange={updateField}
+          placeholder="Language (e.g. JavaScript)"
         />
-        <input
-          type="text"
-          placeholder="Framework (e.g. React)"
+        <LimitedInput
+          field="framework"
           value={repoInfo.framework}
-          onChange={updateField('framework')}
-          className={inputClass}
+          onChange={updateField}
+          placeholder="Framework (e.g. React)"
         />
       </div>
+
+      <LimitedInput
+        field="description"
+        value={repoInfo.description}
+        onChange={updateField}
+        placeholder="Description (optional — helps the AI generate a better Dockerfile)"
+      />
 
       <div className="flex gap-3 flex-wrap">
         <button
