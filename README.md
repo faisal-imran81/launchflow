@@ -112,6 +112,22 @@ GITHUB_TOKEN=your_github_token_here   # optional, raises GitHub rate limit
 
 Never commit real keys. Only `.env.example` is tracked in git.
 
+## 🐳 Week 3 — Docker + AWS (Coming Next)
+
+Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a running container on AWS.
+
+| Day | Task |
+|-----|------|
+| Day 15 | Docker integration — build and run containers from the backend |
+| Day 16 | AWS EC2 setup — provision and connect to a cloud instance |
+| Day 17 | AWS ECR — push Docker images to a private registry |
+| Day 18 | Nginx configuration — reverse proxy for the deployed app |
+| Day 19 | Real-time log streaming — live container logs in the UI |
+| Day 20 | Deployment status tracking — polling + status updates in Supabase |
+| Day 21 | Buffer + integration testing |
+
+> The AI Engine (Week 2) generates the Dockerfile and CI/CD workflow. Week 3 executes that workflow end-to-end on real cloud infrastructure.
+
 ## Author
 
 **Faisal Imran**
@@ -127,7 +143,7 @@ cd backend
 npm test
 ```
 
-**276 tests, 0 failures** — no extra dependencies, no network calls.
+**280 tests, 0 failures** — no extra dependencies, no network calls.
 
 | Test file | What it covers |
 |---|---|
@@ -168,7 +184,7 @@ cd backend
 node --test tests/
 ```
 
-276 tests, 0 failures.
+280 tests, 0 failures.
 
 ### Run the manual AI eval (requires GROQ_API_KEY)
 
