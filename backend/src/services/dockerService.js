@@ -148,3 +148,53 @@ export async function runContainer({ imageTag, hostPort, containerPort, name }) 
     throw toDockerError(error)
   }
 }
+
+/**
+ * Stops a running container by ID.
+ * Waits up to 10 seconds for graceful shutdown before forcing it.
+ *
+ * @param {string} containerId - Container ID or name
+ * @returns {Promise<void>}
+ */
+export async function stopContainer(containerId) {
+  if (!containerId || typeof containerId !== 'string') {
+    const err = new Error('containerId is required and must be a string')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  try {
+    const container = docker.getContainer(containerId)
+    await container.stop({ t: 10 })
+  } catch (error) {
+    // 304 means container is already stopped — not an error
+    if (error?.statusCode === 304) return
+    throw toDockerError(error)
+  }
+}
+
+/**
+ * Removes a container by ID.
+ * Passes force: true so it removes even if still running.
+ *
+ * @param {string} containerId - Container ID or name
+ * @returns {Promise<void>}
+ */
+export async function removeContainer(containerId) {
+  if (!containerId || typeof containerId !== 'string') {
+    const err = new Error('containerId is required and must be a string')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  try {
+    const container = docker.getContainer(containerId)
+    await container.remove({ force: true })
+  } catch (error) {
+    // 404 means container already gone — not an error
+    if (error?.statusCode === 404) return
+    throw toDockerError(error)
+  }
+}
