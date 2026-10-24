@@ -54,3 +54,45 @@ export async function buildImage({ dockerfileContent, tag }) {
     })
   })
 }
+
+/**
+ * Lists all Docker images on the local daemon.
+ *
+ * @returns {Promise<Array>} Array of image summary objects
+ */
+export async function listImages() {
+  try {
+    const images = await docker.listImages({ all: false })
+    return images.map((img) => ({
+      id: img.Id,
+      tags: img.RepoTags ?? [],
+      size: img.Size,
+      created: img.Created,
+    }))
+  } catch (error) {
+    throw toDockerError(error)
+  }
+}
+
+/**
+ * Removes a Docker image by tag or ID.
+ * Passes force: true so the image is removed even if tagged multiple times.
+ *
+ * @param {string} imageTag - Image tag or ID to remove
+ * @returns {Promise<void>}
+ */
+export async function removeImage(imageTag) {
+  if (!imageTag || typeof imageTag !== 'string') {
+    const err = new Error('imageTag is required and must be a string')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  try {
+    const image = docker.getImage(imageTag)
+    await image.remove({ force: true })
+  } catch (error) {
+    throw toDockerError(error)
+  }
+}
