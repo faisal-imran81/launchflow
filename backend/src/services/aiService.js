@@ -5,6 +5,11 @@ import { toAiError } from "../utils/aiErrors.js";
 import { validateDockerfile } from "../utils/validateDockerfile.js";
 import { validateWorkflow } from "../utils/validateWorkflow.js";
 
+// Test-only injection hook — lets unit tests swap the Groq client without module mocking
+let _testGroqClient = null
+export const _setTestGroqClient = (c) => { _testGroqClient = c }
+export const _clearTestGroqClient = () => { _testGroqClient = null }
+
 const AI_MODEL = "openai/gpt-oss-20b";
 const AI_TIMEOUT_MS = 30_000;
 
@@ -20,12 +25,13 @@ function logValidationResult(validator, label, { errors, warnings }) {
 }
 
 async function runCompletion(prompt) {
+  const client = _testGroqClient ?? groq;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
   let completion;
   try {
-    completion = await groq.chat.completions.create(
+    completion = await client.chat.completions.create(
       {
         model: AI_MODEL,
         messages: [{ role: "user", content: prompt }],
