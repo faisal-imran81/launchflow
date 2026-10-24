@@ -96,3 +96,55 @@ export async function removeImage(imageTag) {
     throw toDockerError(error)
   }
 }
+
+/**
+ * Creates and starts a container from a given image.
+ * Binds the container's internal port to a host port.
+ *
+ * @param {object} options
+ * @param {string} options.imageTag - Image to run e.g. "myapp:latest"
+ * @param {number|string} options.hostPort - Host port to bind e.g. 3000
+ * @param {number|string} options.containerPort - Container port to expose e.g. 3000
+ * @param {string} [options.name] - Optional container name
+ * @returns {Promise<{ containerId: string, name: string }>}
+ */
+export async function runContainer({ imageTag, hostPort, containerPort, name }) {
+  if (!imageTag || typeof imageTag !== 'string') {
+    const err = new Error('imageTag is required and must be a string')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  if (!hostPort || !containerPort) {
+    const err = new Error('hostPort and containerPort are required')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  const portBinding = `${containerPort}/tcp`
+
+  try {
+    const container = await docker.createContainer({
+      Image: imageTag,
+      ...(name ? { name } : {}),
+      ExposedPorts: { [portBinding]: {} },
+      HostConfig: {
+        PortBindings: {
+          [portBinding]: [{ HostPort: String(hostPort) }],
+        },
+      },
+    })
+
+    await container.start()
+
+    const info = await container.inspect()
+    return {
+      containerId: info.Id,
+      name: info.Name.replace(/^\//, ''),
+    }
+  } catch (error) {
+    throw toDockerError(error)
+  }
+}
