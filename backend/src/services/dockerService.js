@@ -198,3 +198,45 @@ export async function removeContainer(containerId) {
     throw toDockerError(error)
   }
 }
+
+/**
+ * Fetches stdout and stderr logs from a container.
+ * Returns the last 100 lines by default.
+ *
+ * @param {string} containerId - Container ID or name
+ * @param {object} [options]
+ * @param {number} [options.tail=100] - Number of lines to fetch from the end
+ * @returns {Promise<string>} Plain text log output
+ */
+export async function getContainerLogs(containerId, { tail = 100 } = {}) {
+  if (!containerId || typeof containerId !== 'string') {
+    const err = new Error('containerId is required and must be a string')
+    err.status = 400
+    err.code = 'docker/invalid-input'
+    throw err
+  }
+
+  try {
+    const container = docker.getContainer(containerId)
+    const stream = await container.logs({
+      stdout: true,
+      stderr: true,
+      tail,
+      follow: false,
+    })
+
+    // Docker multiplexes stdout/stderr — demux to plain string
+    return stream
+      .toString('utf8')
+      .split('\n')
+      .map((line) => {
+        // Each log line has an 8-byte header — strip it
+        if (line.length > 8) return line.slice(8)
+        return line
+      })
+      .join('\n')
+      .trim()
+  } catch (error) {
+    throw toDockerError(error)
+  }
+}
