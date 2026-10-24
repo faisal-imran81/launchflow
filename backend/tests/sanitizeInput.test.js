@@ -21,6 +21,17 @@ describe('sanitizeInput', () => {
   it('returns empty string for empty input', () => {
     assert.equal(sanitizeInput(''), '')
   })
+
+  it('keeps a string of exactly 500 chars unchanged', () => {
+    const exactly500 = 'b'.repeat(500)
+    assert.equal(sanitizeInput(exactly500).length, 500)
+    assert.equal(sanitizeInput(exactly500), exactly500)
+  })
+
+  it('truncates a 501-char string to exactly 500 chars', () => {
+    const just1over = 'c'.repeat(501)
+    assert.equal(sanitizeInput(just1over).length, 500)
+  })
 })
 
 describe('sanitizeBody', () => {
@@ -42,5 +53,16 @@ describe('sanitizeBody', () => {
     const result = sanitizeBody({ count: 5, active: true })
     assert.equal(result.count, 5)
     assert.equal(result.active, true)
+  })
+
+  it('returns empty object for array input', () => {
+    assert.deepEqual(sanitizeBody(['a', 'b']), {})
+  })
+
+  it('trims and truncates in the same pass', () => {
+    const long = '  ' + 'd'.repeat(502) + '  '
+    const result = sanitizeBody({ val: long })
+    assert.equal(result.val.length, 500)
+    assert.ok(!result.val.startsWith(' '))
   })
 })
