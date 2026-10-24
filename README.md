@@ -143,7 +143,7 @@ cd backend
 npm test
 ```
 
-**280 tests, 0 failures** — no extra dependencies, no network calls.
+**282 tests, 0 failures** — no extra dependencies, no network calls.
 
 | Test file | What it covers |
 |---|---|
@@ -184,7 +184,7 @@ cd backend
 node --test tests/
 ```
 
-280 tests, 0 failures.
+282 tests, 0 failures.
 
 ### Run the manual AI eval (requires GROQ_API_KEY)
 
