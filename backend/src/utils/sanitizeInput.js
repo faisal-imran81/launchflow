@@ -18,7 +18,7 @@ export function sanitizeInput(value) {
  * @returns {Record<string, unknown>} Body with all string values trimmed and truncated
  */
 export function sanitizeBody(body) {
-  if (!body || typeof body !== 'object') return {}
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return {}
   return Object.fromEntries(
     Object.entries(body).map(([k, v]) => [k, sanitizeInput(v)])
   )
