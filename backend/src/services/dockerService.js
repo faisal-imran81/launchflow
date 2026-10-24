@@ -1,3 +1,23 @@
+/**
+ * @module dockerService
+ *
+ * High-level Docker operations built on top of Dockerode.
+ * All functions connect to the local Docker daemon via the shared
+ * client in src/config/docker.js and throw standardised errors
+ * from src/utils/dockerErrors.js.
+ *
+ * Exported functions:
+ *  - buildImage        — build an image from a Dockerfile string
+ *  - listImages        — list all local images
+ *  - removeImage       — remove an image by tag or ID
+ *  - runContainer      — create and start a container with port binding
+ *  - stopContainer     — gracefully stop a running container
+ *  - removeContainer   — force-remove a container
+ *  - getContainerLogs  — fetch stdout/stderr logs as plain text
+ *
+ * @requires dockerode
+ * @requires tar-stream
+ */
 import docker from '../config/docker.js'
 import { toDockerError } from '../utils/dockerErrors.js'
 import tar from 'tar-stream'
