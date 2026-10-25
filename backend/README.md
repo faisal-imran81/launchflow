@@ -103,6 +103,48 @@ npm run dev
 | GET | `/api/github/repo/:owner/:repo` | Get repo details |
 | GET | `/api/github/rate-limit` | Check GitHub API rate limit |
 
+### Docker
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/docker/build` | Build a Docker image from a Dockerfile string |
+| GET | `/api/docker/images` | List all local Docker images |
+| DELETE | `/api/docker/images/:tag` | Remove an image by tag or ID |
+| POST | `/api/docker/containers/run` | Create and start a container with port binding |
+| POST | `/api/docker/containers/:id/stop` | Gracefully stop a running container |
+| DELETE | `/api/docker/containers/:id` | Force-remove a container |
+| GET | `/api/docker/containers/:id/logs` | Fetch stdout/stderr logs as plain text |
+
+**Request body (POST /api/docker/build):**
+```json
+{
+  "dockerfileContent": "FROM node:20-alpine\n...",
+  "tag": "myapp:latest"
+}
+```
+
+**Request body (POST /api/docker/containers/run):**
+```json
+{
+  "imageTag": "myapp:latest",
+  "hostPort": 3000,
+  "containerPort": 3000,
+  "name": "my-container"
+}
+```
+
+**Error codes returned in `code` field:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `docker/not-found` | 404 | Image or container not found |
+| `docker/conflict` | 409 | Name already in use |
+| `docker/unprocessable` | 422 | Invalid Dockerfile |
+| `docker/build-failed` | 422 | Build stream returned an error |
+| `docker/daemon-error` | 502 | Docker daemon internal error |
+| `docker/daemon-unavailable` | 503 | Docker daemon not running |
+| `docker/bad-gateway` | 502 | Unexpected Docker error |
+| `docker/invalid-input` | 400 | Missing or invalid request field |
+
 ### Health
 
 | Method | Endpoint | Description |
@@ -127,6 +169,9 @@ node --test backend/tests/
 | `aiErrors.test.js` | Groq error mapping → status codes + error codes |
 | `aiService.error.test.js` | ai/too-long + ai/empty-response branch coverage |
 | `aiService.integration.test.js` | aiService export shape smoke tests |
+| `dockerErrors.test.js` | Docker error mapping → status codes + error codes |
+| `dockerController.test.js` | Docker endpoint input validation guards (400 responses) |
+| `dockerService.unit.test.js` | dockerService functions with mocked Docker client |
 | `asyncHandler.test.js` | Async error forwarding to next() |
 | `cleanAiOutput.test.js` | Fenced code block extraction |
 | `cleanAiOutput.edge.test.js` | Edge cases — empty, nested fences, whitespace |
