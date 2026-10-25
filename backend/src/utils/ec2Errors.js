@@ -1,4 +1,24 @@
 /**
+ * @module ec2Errors
+ *
+ * Maps raw AWS SDK errors to clean, client-safe error objects.
+ * Every error thrown by ec2Service passes through toEc2Error()
+ * so the client always receives a consistent shape:
+ *   { message, status, code, isEc2Error: true }
+ *
+ * Error codes:
+ *  - ec2/not-found           — instance or AMI ID does not exist
+ *  - ec2/invalid-input       — malformed instance ID or bad request field
+ *  - ec2/auth-failed         — invalid AWS credentials
+ *  - ec2/request-expired     — server clock out of sync with AWS
+ *  - ec2/limit-exceeded      — account instance limit hit
+ *  - ec2/insufficient-capacity — AWS capacity unavailable for this type/region
+ *  - ec2/service-unavailable — could not reach AWS EC2 service
+ *  - ec2/bad-gateway         — unexpected AWS error
+ *
+ * @requires @aws-sdk/client-ec2
+ */
+/**
  * Builds a standardised EC2 error object.
  *
  * @param {string} message - Human-readable error message
