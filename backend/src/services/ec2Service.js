@@ -16,7 +16,7 @@
  * @requires @aws-sdk/client-ec2
  */
 
-import { RunInstancesCommand, DescribeInstancesCommand, StopInstancesCommand, StartInstancesCommand } from '@aws-sdk/client-ec2'
+import { RunInstancesCommand, DescribeInstancesCommand, StopInstancesCommand, StartInstancesCommand, TerminateInstancesCommand } from '@aws-sdk/client-ec2'
 import ec2Client from '../config/ec2.js'
 import { toEc2Error } from '../utils/ec2Errors.js'
 
@@ -177,6 +177,35 @@ export async function startInstance(instanceId) {
     return {
       instanceId: instance.InstanceId,
       state: instance.CurrentState?.Name ?? 'pending',
+    }
+  } catch (error) {
+    throw toEc2Error(error)
+  }
+}
+
+/**
+ * Permanently terminates an EC2 instance.
+ * This action is irreversible — the instance and its root volume are deleted.
+ *
+ * @param {string} instanceId - EC2 instance ID e.g. "i-0abc123def456"
+ * @returns {Promise<{ instanceId: string, state: string }>}
+ */
+export async function terminateInstance(instanceId) {
+  if (!instanceId || typeof instanceId !== 'string') {
+    const err = new Error('instanceId is required and must be a string')
+    err.status = 400
+    err.code = 'ec2/invalid-input'
+    throw err
+  }
+
+  const command = new TerminateInstancesCommand({ InstanceIds: [instanceId] })
+
+  try {
+    const response = await getClient().send(command)
+    const instance = response.TerminatingInstances?.[0]
+    return {
+      instanceId: instance.InstanceId,
+      state: instance.CurrentState?.Name ?? 'shutting-down',
     }
   } catch (error) {
     throw toEc2Error(error)
