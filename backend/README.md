@@ -145,6 +145,40 @@ npm run dev
 | `docker/bad-gateway` | 502 | Unexpected Docker error |
 | `docker/invalid-input` | 400 | Missing or invalid request field |
 
+### EC2
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ec2/launch` | Launch a new EC2 instance |
+| GET | `/api/ec2/instances` | List all LaunchFlow-managed instances |
+| GET | `/api/ec2/instances/:id` | Describe an instance — state, IP, DNS |
+| POST | `/api/ec2/instances/:id/stop` | Stop a running instance |
+| POST | `/api/ec2/instances/:id/start` | Start a stopped instance |
+| DELETE | `/api/ec2/instances/:id` | Permanently terminate an instance |
+
+**Request body (POST /api/ec2/launch):**
+```json
+{
+  "name": "my-app-server",
+  "ami": "ami-0c02fb55956c7d316",
+  "instanceType": "t2.micro",
+  "keyPairName": "my-key-pair",
+  "securityGroupId": "sg-0abc123def456"
+}
+```
+
+**Error codes returned in `code` field:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `ec2/not-found` | 404 | Instance or AMI ID does not exist |
+| `ec2/invalid-input` | 400 | Malformed instance ID or bad request field |
+| `ec2/auth-failed` | 500 | Invalid AWS credentials |
+| `ec2/request-expired` | 400 | Server clock out of sync with AWS |
+| `ec2/limit-exceeded` | 429 | Account instance limit hit |
+| `ec2/insufficient-capacity` | 503 | AWS capacity unavailable for this type/region |
+| `ec2/service-unavailable` | 503 | Could not reach AWS EC2 service |
+| `ec2/bad-gateway` | 502 | Unexpected AWS error |
+
 ### Health
 
 | Method | Endpoint | Description |
@@ -172,6 +206,9 @@ node --test backend/tests/
 | `dockerErrors.test.js` | Docker error mapping → status codes + error codes |
 | `dockerController.test.js` | Docker endpoint input validation guards (400 responses) |
 | `dockerService.unit.test.js` | dockerService functions with mocked Docker client |
+| `ec2Errors.test.js` | AWS error code mapping → status codes + error codes |
+| `ec2Controller.test.js` | EC2 endpoint input validation guards (400 responses) |
+| `ec2Service.unit.test.js` | ec2Service functions with mocked AWS SDK client |
 | `asyncHandler.test.js` | Async error forwarding to next() |
 | `cleanAiOutput.test.js` | Fenced code block extraction |
 | `cleanAiOutput.edge.test.js` | Edge cases — empty, nested fences, whitespace |
