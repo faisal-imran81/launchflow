@@ -8,6 +8,7 @@ import githubRoutes from './routes/githubRoutes.js'
 import aiRoutes from './routes/aiRoutes.js'
 import dockerRoutes from './routes/dockerRoutes.js'
 import ec2Routes from './routes/ec2Routes.js'
+import ecrRoutes from './routes/ecrRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import healthRoutes from './routes/healthRoutes.js'
@@ -34,6 +35,7 @@ app.use('/api/github', githubRoutes)
 app.use('/api/ai', aiRoutes)
 app.use('/api/docker', dockerRoutes)
 app.use('/api/ec2', ec2Routes)
+app.use('/api/ecr', ecrRoutes)
 app.use('/api/health', healthRoutes)
 app.use(notFound)
 app.use(validateJson)
