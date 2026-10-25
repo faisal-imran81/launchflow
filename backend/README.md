@@ -179,6 +179,54 @@ npm run dev
 | `ec2/service-unavailable` | 503 | Could not reach AWS EC2 service |
 | `ec2/bad-gateway` | 502 | Unexpected AWS error |
 
+### ECR (Elastic Container Registry)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ecr/repositories` | Create a new ECR repository |
+| GET | `/api/ecr/repositories` | List all ECR repositories |
+| DELETE | `/api/ecr/repositories/:name` | Delete a repository and all its images |
+| POST | `/api/ecr/push` | Tag and push a local image to ECR |
+| GET | `/api/ecr/repositories/:name/images` | List images in a repository |
+| DELETE | `/api/ecr/repositories/:name/images` | Delete an image by tag or digest |
+
+**Request body (POST /api/ecr/repositories):**
+```json
+{
+  "repositoryName": "myapp"
+}
+```
+
+**Request body (POST /api/ecr/push):**
+```json
+{
+  "localTag": "myapp:latest",
+  "repositoryUri": "123456789.dkr.ecr.us-east-1.amazonaws.com/myapp",
+  "imageTag": "latest"
+}
+```
+
+**Request body (DELETE /api/ecr/repositories/:name/images):**
+```json
+{
+  "imageTag": "latest"
+}
+```
+
+**Error codes returned in `code` field:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `ecr/not-found` | 404 | Repository or image does not exist |
+| `ecr/already-exists` | 409 | Repository name already taken |
+| `ecr/invalid-input` | 400 | Malformed request field |
+| `ecr/auth-failed` | 500 | Invalid AWS credentials |
+| `ecr/no-auth-token` | 502 | ECR did not return an auth token |
+| `ecr/tag-failed` | 422 | Local image tag failed |
+| `ecr/push-failed` | 422 | Image push to ECR failed |
+| `ecr/limit-exceeded` | 429 | Repository limit exceeded |
+| `ecr/service-unavailable` | 503 | Could not reach AWS ECR service |
+| `ecr/bad-gateway` | 502 | Unexpected AWS ECR error |
+
 ### Health
 
 | Method | Endpoint | Description |
@@ -209,6 +257,9 @@ node --test backend/tests/
 | `ec2Errors.test.js` | AWS error code mapping → status codes + error codes |
 | `ec2Controller.test.js` | EC2 endpoint input validation guards (400 responses) |
 | `ec2Service.unit.test.js` | ec2Service functions with mocked AWS SDK client |
+| `ecrErrors.test.js` | AWS ECR error code mapping → status codes + error codes |
+| `ecrController.test.js` | ECR endpoint input validation guards (400 responses) |
+| `ecrService.unit.test.js` | ecrService functions with mocked AWS ECR client |
 | `asyncHandler.test.js` | Async error forwarding to next() |
 | `cleanAiOutput.test.js` | Fenced code block extraction |
 | `cleanAiOutput.edge.test.js` | Edge cases — empty, nested fences, whitespace |
