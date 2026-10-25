@@ -2,6 +2,9 @@ import {
   launchInstance,
   describeInstance,
   listInstances,
+  stopInstance,
+  startInstance,
+  terminateInstance,
 } from '../services/ec2Service.js'
 
 /**
@@ -48,6 +51,60 @@ export async function handleListInstances(req, res, next) {
   try {
     const instances = await listInstances()
     return res.status(200).json({ ok: true, instances })
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * POST /api/ec2/instances/:id/stop
+ */
+export async function handleStopInstance(req, res, next) {
+  const { id } = req.params
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Instance id param is required' })
+  }
+
+  try {
+    const result = await stopInstance(id)
+    return res.status(200).json({ ok: true, ...result })
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * POST /api/ec2/instances/:id/start
+ */
+export async function handleStartInstance(req, res, next) {
+  const { id } = req.params
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Instance id param is required' })
+  }
+
+  try {
+    const result = await startInstance(id)
+    return res.status(200).json({ ok: true, ...result })
+  } catch (err) {
+    return next(err)
+  }
+}
+
+/**
+ * DELETE /api/ec2/instances/:id
+ */
+export async function handleTerminateInstance(req, res, next) {
+  const { id } = req.params
+
+  if (!id || typeof id !== 'string') {
+    return res.status(400).json({ error: 'Instance id param is required' })
+  }
+
+  try {
+    const result = await terminateInstance(id)
+    return res.status(200).json({ ok: true, ...result })
   } catch (err) {
     return next(err)
   }
