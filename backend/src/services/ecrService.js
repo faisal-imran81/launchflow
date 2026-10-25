@@ -17,7 +17,7 @@
  * @requires @aws-sdk/client-ecr
  */
 
-import { CreateRepositoryCommand, DescribeRepositoriesCommand, DeleteRepositoryCommand, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr'
+import { CreateRepositoryCommand, DescribeRepositoriesCommand, DeleteRepositoryCommand, GetAuthorizationTokenCommand, ListImagesCommand, BatchDeleteImageCommand } from '@aws-sdk/client-ecr'
 import ecrClient from '../config/ecr.js'
 import docker from '../config/docker.js'
 import { toEcrError } from '../utils/ecrErrors.js'
