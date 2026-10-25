@@ -19,6 +19,7 @@
 
 import { CreateRepositoryCommand, DescribeRepositoriesCommand, DeleteRepositoryCommand, GetAuthorizationTokenCommand } from '@aws-sdk/client-ecr'
 import ecrClient from '../config/ecr.js'
+import docker from '../config/docker.js'
 import { toEcrError } from '../utils/ecrErrors.js'
 
 // Test-only injection hook
@@ -141,5 +142,83 @@ export async function getAuthToken() {
   } catch (error) {
     if (error?.isEcrError) throw error
     throw toEcrError(error)
+  }
+}
+
+/**
+ * Tags a local Docker image and pushes it to AWS ECR.
+ * Fetches an ECR auth token automatically before pushing.
+ *
+ * @param {object} options
+ * @param {string} options.localTag    - Local image tag e.g. "myapp:latest"
+ * @param {string} options.repositoryUri - Full ECR repository URI e.g. "123456789.dkr.ecr.us-east-1.amazonaws.com/myapp"
+ * @param {string} [options.imageTag]  - Tag to push e.g. "latest" (defaults to "latest")
+ * @returns {Promise<{ pushedUri: string }>}
+ */
+export async function pushImageToEcr({ localTag, repositoryUri, imageTag = 'latest' } = {}) {
+  if (!localTag || typeof localTag !== 'string') {
+    const err = new Error('localTag is required and must be a string')
+    err.status = 400
+    err.code = 'ecr/invalid-input'
+    throw err
+  }
+
+  if (!repositoryUri || typeof repositoryUri !== 'string') {
+    const err = new Error('repositoryUri is required and must be a string')
+    err.status = 400
+    err.code = 'ecr/invalid-input'
+    throw err
+  }
+
+  // 1 — fetch ECR auth token
+  const { username, password, endpoint } = await getAuthToken()
+
+  // 2 — tag the local image with the ECR URI
+  const pushedUri = `${repositoryUri}:${imageTag}`
+
+  try {
+    const image = docker.getImage(localTag)
+    await image.tag({ repo: repositoryUri, tag: imageTag })
+  } catch (error) {
+    const err = new Error(`Failed to tag image "${localTag}": ${error.message}`)
+    err.status = 422
+    err.code = 'ecr/tag-failed'
+    err.isEcrError = true
+    throw err
+  }
+
+  // 3 — push the tagged image to ECR
+  try {
+    const pushStream = await docker.getImage(pushedUri).push({
+      authconfig: {
+        username,
+        password,
+        serveraddress: endpoint,
+      },
+    })
+
+    await new Promise((resolve, reject) => {
+      docker.modem.followProgress(pushStream, (err, output) => {
+        if (err) return reject(err)
+        const lastMessage = output?.[output.length - 1]
+        if (lastMessage?.error) {
+          const pushErr = new Error(lastMessage.error.trim())
+          pushErr.status = 422
+          pushErr.code = 'ecr/push-failed'
+          pushErr.isEcrError = true
+          return reject(pushErr)
+        }
+        resolve()
+      })
+    })
+
+    return { pushedUri }
+  } catch (error) {
+    if (error?.isEcrError) throw error
+    const err = new Error(`Failed to push image to ECR: ${error.message}`)
+    err.status = 502
+    err.code = 'ecr/push-failed'
+    err.isEcrError = true
+    throw err
   }
 }
