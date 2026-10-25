@@ -16,7 +16,7 @@
  * @requires @aws-sdk/client-ec2
  */
 
-import { RunInstancesCommand } from '@aws-sdk/client-ec2'
+import { RunInstancesCommand, DescribeInstancesCommand } from '@aws-sdk/client-ec2'
 import ec2Client from '../config/ec2.js'
 import { toEc2Error } from '../utils/ec2Errors.js'
 
@@ -81,6 +81,48 @@ export async function launchInstance({
       state: instance.State?.Name ?? 'pending',
     }
   } catch (error) {
+    throw toEc2Error(error)
+  }
+}
+
+/**
+ * Describes a single EC2 instance — returns state, public IP and public DNS.
+ *
+ * @param {string} instanceId - EC2 instance ID e.g. "i-0abc123def456"
+ * @returns {Promise<{ instanceId: string, state: string, publicIp: string|null, publicDns: string|null }>}
+ */
+export async function describeInstance(instanceId) {
+  if (!instanceId || typeof instanceId !== 'string') {
+    const err = new Error('instanceId is required and must be a string')
+    err.status = 400
+    err.code = 'ec2/invalid-input'
+    throw err
+  }
+
+  const command = new DescribeInstancesCommand({
+    InstanceIds: [instanceId],
+  })
+
+  try {
+    const response = await getClient().send(command)
+    const instance = response.Reservations?.[0]?.Instances?.[0]
+
+    if (!instance) {
+      const err = new Error(`Instance ${instanceId} not found.`)
+      err.status = 404
+      err.code = 'ec2/not-found'
+      err.isEc2Error = true
+      throw err
+    }
+
+    return {
+      instanceId: instance.InstanceId,
+      state: instance.State?.Name ?? 'unknown',
+      publicIp: instance.PublicIpAddress ?? null,
+      publicDns: instance.PublicDnsName ?? null,
+    }
+  } catch (error) {
+    if (error?.isEc2Error) throw error
     throw toEc2Error(error)
   }
 }
