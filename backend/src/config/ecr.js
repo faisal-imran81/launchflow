@@ -1,3 +1,19 @@
+/**
+ * @module ecr
+ *
+ * Shared AWS ECR (Elastic Container Registry) client.
+ * Instantiated once and reused across all ecrService calls.
+ *
+ * Configuration is read from environment variables:
+ *   AWS_ACCESS_KEY_ID     — AWS access key
+ *   AWS_SECRET_ACCESS_KEY — AWS secret key
+ *   AWS_ECR_REGION        — AWS region (defaults to us-east-1)
+ *
+ * In production, prefer IAM instance roles attached to the EC2 instance
+ * over explicit credentials so no secrets are stored on disk.
+ *
+ * @requires @aws-sdk/client-ecr
+ */
 import { ECRClient } from '@aws-sdk/client-ecr'
 
 /**
