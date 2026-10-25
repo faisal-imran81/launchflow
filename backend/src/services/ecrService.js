@@ -222,3 +222,71 @@ export async function pushImageToEcr({ localTag, repositoryUri, imageTag = 'late
     throw err
   }
 }
+
+/**
+ * Lists all images in an ECR repository.
+ *
+ * @param {string} repositoryName - Name of the ECR repository
+ * @returns {Promise<Array<{ imageTag: string|null, imageDigest: string }>>}
+ */
+export async function listImages(repositoryName) {
+  if (!repositoryName || typeof repositoryName !== 'string') {
+    const err = new Error('repositoryName is required and must be a string')
+    err.status = 400
+    err.code = 'ecr/invalid-input'
+    throw err
+  }
+
+  const command = new ListImagesCommand({ repositoryName })
+
+  try {
+    const response = await getClient().send(command)
+    return (response.imageIds ?? []).map((img) => ({
+      imageTag: img.imageTag ?? null,
+      imageDigest: img.imageDigest,
+    }))
+  } catch (error) {
+    throw toEcrError(error)
+  }
+}
+
+/**
+ * Deletes an image from an ECR repository by tag or digest.
+ *
+ * @param {object} options
+ * @param {string} options.repositoryName - Name of the ECR repository
+ * @param {string} [options.imageTag]     - Image tag to delete e.g. "latest"
+ * @param {string} [options.imageDigest]  - Image digest to delete e.g. "sha256:abc123"
+ * @returns {Promise<{ deleted: number }>}
+ */
+export async function deleteImage({ repositoryName, imageTag, imageDigest } = {}) {
+  if (!repositoryName || typeof repositoryName !== 'string') {
+    const err = new Error('repositoryName is required and must be a string')
+    err.status = 400
+    err.code = 'ecr/invalid-input'
+    throw err
+  }
+
+  if (!imageTag && !imageDigest) {
+    const err = new Error('Either imageTag or imageDigest is required')
+    err.status = 400
+    err.code = 'ecr/invalid-input'
+    throw err
+  }
+
+  const imageId = {}
+  if (imageTag) imageId.imageTag = imageTag
+  if (imageDigest) imageId.imageDigest = imageDigest
+
+  const command = new BatchDeleteImageCommand({
+    repositoryName,
+    imageIds: [imageId],
+  })
+
+  try {
+    const response = await getClient().send(command)
+    return { deleted: response.imageIds?.length ?? 0 }
+  } catch (error) {
+    throw toEcrError(error)
+  }
+}
