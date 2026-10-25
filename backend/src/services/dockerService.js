@@ -22,6 +22,12 @@ import docker from '../config/docker.js'
 import { toDockerError } from '../utils/dockerErrors.js'
 import tar from 'tar-stream'
 
+// Test-only injection hook — lets unit tests swap the Docker client without module mocking
+let _testDockerClient = null
+export const _setTestDockerClient = (c) => { _testDockerClient = c }
+export const _clearTestDockerClient = () => { _testDockerClient = null }
+const getClient = () => _testDockerClient ?? docker
+
 /**
  * Builds a Docker image from a Dockerfile string.
  * Returns a promise that resolves with the final image tag when the build stream ends.
@@ -52,13 +58,13 @@ export async function buildImage({ dockerfileContent, tag }) {
 
   let stream
   try {
-    stream = await docker.buildImage(pack, { t: tag })
+    stream = await getClient().buildImage(pack, { t: tag })
   } catch (error) {
     throw toDockerError(error)
   }
 
   return new Promise((resolve, reject) => {
-    docker.modem.followProgress(stream, (err, output) => {
+    getClient().modem.followProgress(stream, (err, output) => {
       if (err) return reject(toDockerError(err))
 
       const lastMessage = output?.[output.length - 1]
@@ -82,7 +88,7 @@ export async function buildImage({ dockerfileContent, tag }) {
  */
 export async function listImages() {
   try {
-    const images = await docker.listImages({ all: false })
+    const images = await getClient().listImages({ all: false })
     return images.map((img) => ({
       id: img.Id,
       tags: img.RepoTags ?? [],
@@ -110,7 +116,7 @@ export async function removeImage(imageTag) {
   }
 
   try {
-    const image = docker.getImage(imageTag)
+    const image = getClient().getImage(imageTag)
     await image.remove({ force: true })
   } catch (error) {
     throw toDockerError(error)
@@ -146,7 +152,7 @@ export async function runContainer({ imageTag, hostPort, containerPort, name }) 
   const portBinding = `${containerPort}/tcp`
 
   try {
-    const container = await docker.createContainer({
+    const container = await getClient().createContainer({
       Image: imageTag,
       ...(name ? { name } : {}),
       ExposedPorts: { [portBinding]: {} },
@@ -185,7 +191,7 @@ export async function stopContainer(containerId) {
   }
 
   try {
-    const container = docker.getContainer(containerId)
+    const container = getClient().getContainer(containerId)
     await container.stop({ t: 10 })
   } catch (error) {
     // 304 means container is already stopped — not an error
@@ -210,7 +216,7 @@ export async function removeContainer(containerId) {
   }
 
   try {
-    const container = docker.getContainer(containerId)
+    const container = getClient().getContainer(containerId)
     await container.remove({ force: true })
   } catch (error) {
     // 404 means container already gone — not an error
@@ -237,7 +243,7 @@ export async function getContainerLogs(containerId, { tail = 100 } = {}) {
   }
 
   try {
-    const container = docker.getContainer(containerId)
+    const container = getClient().getContainer(containerId)
     const stream = await container.logs({
       stdout: true,
       stderr: true,
