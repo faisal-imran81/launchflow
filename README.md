@@ -19,6 +19,7 @@ A full-stack deployment platform that lets you deploy your GitHub repositories w
 - Supabase (PostgreSQL)
 - GitHub REST API
 - Dockerode (Docker daemon integration)
+- AWS SDK v3 — EC2 (instance lifecycle management)
 
 ## Features
 
@@ -32,6 +33,8 @@ A full-stack deployment platform that lets you deploy your GitHub repositories w
 - 🐳 Docker image build from generated Dockerfile
 - 📦 Container run, stop and remove via REST API
 - 📋 Container log fetching (stdout + stderr)
+- ☁️ AWS EC2 instance launch, stop, start and terminate via REST API
+- 🔍 List and describe LaunchFlow-managed EC2 instances
 
 ## Project Structure
 
@@ -123,7 +126,7 @@ Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a ru
 | Day | Task |
 |-----|------|
 | Day 15 ✅ | Docker integration — build and run containers from the backend |
-| Day 16 | AWS EC2 setup — provision and connect to a cloud instance |
+| Day 16 ✅ | AWS EC2 setup — provision and connect to a cloud instance |
 | Day 17 | AWS ECR — push Docker images to a private registry |
 | Day 18 | Nginx configuration — reverse proxy for the deployed app |
 | Day 19 | Real-time log streaming — live container logs in the UI |
@@ -147,7 +150,7 @@ cd backend
 npm test
 ```
 
-**322 tests, 0 failures** — no extra dependencies, no network calls.
+**361 tests, 0 failures** — no extra dependencies, no network calls.
 
 | Test file | What it covers |
 |---|---|
@@ -188,7 +191,7 @@ cd backend
 node --test tests/
 ```
 
-322 tests, 0 failures.
+361 tests, 0 failures.
 
 ### Run the manual AI eval (requires GROQ_API_KEY)
 
