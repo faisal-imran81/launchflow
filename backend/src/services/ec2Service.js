@@ -211,3 +211,33 @@ export async function terminateInstance(instanceId) {
     throw toEc2Error(error)
   }
 }
+
+/**
+ * Lists all EC2 instances tagged with ManagedBy: LaunchFlow.
+ *
+ * @returns {Promise<Array<{ instanceId: string, name: string, state: string, publicIp: string|null }>>}
+ */
+export async function listInstances() {
+  const command = new DescribeInstancesCommand({
+    Filters: [
+      { Name: 'tag:ManagedBy', Values: ['LaunchFlow'] },
+    ],
+  })
+
+  try {
+    const response = await getClient().send(command)
+    const instances = response.Reservations?.flatMap((r) => r.Instances ?? []) ?? []
+
+    return instances.map((instance) => {
+      const nameTag = instance.Tags?.find((t) => t.Key === 'Name')
+      return {
+        instanceId: instance.InstanceId,
+        name: nameTag?.Value ?? 'unnamed',
+        state: instance.State?.Name ?? 'unknown',
+        publicIp: instance.PublicIpAddress ?? null,
+      }
+    })
+  } catch (error) {
+    throw toEc2Error(error)
+  }
+}
