@@ -13,6 +13,24 @@
  */
 
 import { toNginxError } from '../utils/nginxErrors.js'
+import { validateNginxConfig } from '../utils/validateNginxConfig.js'
+
+/**
+ * Logs validation errors and warnings for a generated Nginx config.
+ *
+ * @param {string} label - Identifier for log output e.g. domain name
+ * @param {{ errors: string[], warnings: string[] }} result
+ */
+function logValidationResult(label, { errors, warnings }) {
+  const tag = `[validateNginxConfig] ${label}`
+  if (errors.length === 0 && warnings.length === 0) {
+    console.log(`${tag} — validation passed`)
+    return
+  }
+  console.warn(`${tag} — ${errors.length} error(s), ${warnings.length} warning(s)`)
+  for (const msg of errors) console.error(`  ERROR: ${msg}`)
+  for (const msg of warnings) console.warn(`  WARN: ${msg}`)
+}
 
 /**
  * Generates a basic Nginx reverse proxy config.
@@ -68,6 +86,7 @@ server {
 }
 `
 
+  logValidationResult(domain, validateNginxConfig(config))
   return { config }
 }
 
@@ -132,6 +151,7 @@ server {
     }
 }
 `
+    logValidationResult(domain, validateNginxConfig(config))
     return { config }
   }
 
@@ -156,6 +176,7 @@ server {
     }
 }
 `
+    logValidationResult(domain, validateNginxConfig(config))
     return { config }
   }
 
@@ -190,6 +211,7 @@ server {
     }
 }
 `
+  logValidationResult(domain, validateNginxConfig(config))
   return { config }
 }
 
@@ -283,5 +305,6 @@ server {
 }
 `
 
+  logValidationResult(domain, validateNginxConfig(config))
   return { config }
 }
