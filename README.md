@@ -21,6 +21,7 @@ A full-stack deployment platform that lets you deploy your GitHub repositories w
 - Dockerode (Docker daemon integration)
 - AWS SDK v3 — EC2 (instance lifecycle management)
 - AWS SDK v3 — ECR (container registry management)
+- Nginx config generation + validation (stack-aware templates)
 
 ## Features
 
@@ -39,6 +40,9 @@ A full-stack deployment platform that lets you deploy your GitHub repositories w
 - 📦 AWS ECR repository create, list and delete via REST API
 - 🚀 Docker image tag and push to ECR with auto auth token fetch
 - 🗂 ECR image list and delete by tag or digest
+- 🌐 Nginx reverse proxy config generation (basic, stack-aware, SSL)
+- 🤖 AI-powered Nginx config generation via Groq
+- ✅ Nginx config validation with error and warning reporting
 
 ## Project Structure
 
@@ -132,7 +136,7 @@ Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a ru
 | Day 15 ✅ | Docker integration — build and run containers from the backend |
 | Day 16 ✅ | AWS EC2 setup — provision and connect to a cloud instance |
 | Day 17 ✅ | AWS ECR — push Docker images to a private registry |
-| Day 18 | Nginx configuration — reverse proxy for the deployed app |
+| Day 18 ✅ | Nginx configuration — reverse proxy config generation + AI-powered generation |
 | Day 19 | Real-time log streaming — live container logs in the UI |
 | Day 20 | Deployment status tracking — polling + status updates in Supabase |
 | Day 21 | Buffer + integration testing |
@@ -154,7 +158,7 @@ cd backend
 npm test
 ```
 
-**401 tests, 0 failures** — no extra dependencies, no network calls.
+**450 tests, 0 failures** — no extra dependencies, no network calls.
 
 | Test file | What it covers |
 |---|---|
@@ -195,7 +199,7 @@ cd backend
 node --test tests/
 ```
 
-401 tests, 0 failures.
+450 tests, 0 failures.
 
 ### Run the manual AI eval (requires GROQ_API_KEY)
 
