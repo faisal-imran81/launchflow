@@ -3,6 +3,7 @@ import {
   generateGithubActionsYAML,
   generateDockerfileFromStack,
   generateGithubActionsFromStack,
+  generateNginxConfig,
 } from "../services/aiService.js";
 import { analyzeRepo } from "../services/repoAnalysisService.js";
 import { generateDockerignore } from "../utils/generateDockerignore.js";
@@ -115,5 +116,32 @@ export async function handleAutoGithubActions(req, res, next) {
     });
   } catch (error) {
     next(error);
+  }
+}
+
+/**
+ * POST /api/ai/nginx
+ * Body: { repoName: string, domain: string, port: number, framework?: string, type?: string }
+ */
+export async function handleGenerateNginxConfig(req, res, next) {
+  const { repoName, domain, port, framework, type } = req.body ?? {}
+
+  if (!repoName || typeof repoName !== 'string') {
+    return res.status(400).json({ error: 'repoName is required and must be a string' })
+  }
+
+  if (!domain || typeof domain !== 'string') {
+    return res.status(400).json({ error: 'domain is required and must be a string' })
+  }
+
+  if (!port) {
+    return res.status(400).json({ error: 'port is required' })
+  }
+
+  try {
+    const config = await generateNginxConfig({ repoName, domain, port, framework, type })
+    return res.status(200).json({ ok: true, config })
+  } catch (err) {
+    return next(err)
   }
 }
