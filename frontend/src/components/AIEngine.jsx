@@ -14,19 +14,21 @@ export default function AIEngine() {
   const {
     dockerfile,
     githubActionsYaml,
+    nginxConfig,
     autoResult,
     autoWorkflow,
     loading,
     error,
     generateDockerfile,
     generateGithubActions,
+    generateNginxConfig,
     generateAutoAll,
     clearError,
     reset,
   } = useAI()
 
   const hasOutput = Boolean(
-    dockerfile || githubActionsYaml || autoResult || autoWorkflow || error
+    dockerfile || githubActionsYaml || nginxConfig || autoResult || autoWorkflow || error
   )
 
   const activeKind = loading ? lastAttempt?.kind : null
@@ -52,6 +54,11 @@ export default function AIEngine() {
     announce(generateGithubActions(info), 'Workflow generated')
   }
 
+  const handleManualNginx = (info) => {
+    setLastAttempt({ kind: 'nginx', payload: info })
+    announce(generateNginxConfig(info), 'Nginx config generated')
+  }
+
   const handleRegenerate = () => {
     if (!lastAutoRepo) return
     setLastAttempt({ kind: 'auto', payload: lastAutoRepo })
@@ -63,6 +70,7 @@ export default function AIEngine() {
     if (lastAttempt.kind === 'auto') announce(generateAutoAll(lastAttempt.payload), 'Dockerfile and workflow generated')
     if (lastAttempt.kind === 'dockerfile') announce(generateDockerfile(lastAttempt.payload), 'Dockerfile generated')
     if (lastAttempt.kind === 'actions') announce(generateGithubActions(lastAttempt.payload), 'Workflow generated')
+    if (lastAttempt.kind === 'nginx') announce(generateNginxConfig(lastAttempt.payload), 'Nginx config generated')
   }
 
   const handleReset = () => {
@@ -91,6 +99,7 @@ export default function AIEngine() {
       <ManualGenerateForm
         onGenerateDockerfile={handleManualDockerfile}
         onGenerateActions={handleManualActions}
+        onGenerateNginx={handleManualNginx}
         onReset={handleReset}
         showReset={hasOutput}
         loading={loading}
@@ -100,6 +109,7 @@ export default function AIEngine() {
       <AIOutput
         dockerfile={dockerfile}
         githubActionsYaml={githubActionsYaml}
+        nginxConfig={nginxConfig}
         autoResult={autoResult}
         autoWorkflow={autoWorkflow}
         loading={loading}

@@ -183,6 +183,7 @@ function LoadingBanner({ hasPrevious }) {
 export default function AIOutput({
   dockerfile,
   githubActionsYaml,
+  nginxConfig,
   autoResult,
   autoWorkflow,
   loading,
@@ -199,7 +200,7 @@ export default function AIOutput({
   }, [autoResult, autoWorkflow]);
 
   const hasResults = Boolean(
-    dockerfile || githubActionsYaml || autoResult || autoWorkflow
+    dockerfile || githubActionsYaml || nginxConfig || autoResult || autoWorkflow
   );
 
   const errorAlert = error ? (
@@ -284,6 +285,15 @@ export default function AIOutput({
             text={githubActionsYaml}
             colorClass="text-blue-400"
             filename="ci.yml"
+          />
+        )}
+
+        {nginxConfig && (
+          <OutputPanel
+            title="🌐 Nginx Config"
+            text={nginxConfig}
+            colorClass="text-teal-400"
+            filename="nginx.conf"
           />
         )}
       </div>

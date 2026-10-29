@@ -4,6 +4,7 @@ import {
   generateGithubActions,
   generateAutoDockerfile,
   generateAutoGithubActions,
+  generateNginxConfig,
 } from "../services/aiService.js";
 import { resolveAiError } from "../utils/aiErrorMessages.js";
 
@@ -12,6 +13,7 @@ export function useAI() {
   const [githubActionsYaml, setGithubActionsYaml] = useState(null);
   const [autoResult, setAutoResult] = useState(null);
   const [autoWorkflow, setAutoWorkflow] = useState(null);
+  const [nginxConfig, setNginxConfig] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -114,6 +116,22 @@ export function useAI() {
     }
   }
 
+  async function handleGenerateNginxConfig(repoInfo) {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await generateNginxConfig(repoInfo);
+      setNginxConfig(data.config);
+      return true;
+    } catch (err) {
+      setNginxConfig(null);
+      setError(resolveAiError(err, "Failed to generate Nginx config"));
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function clearError() {
     setError(null);
   }
@@ -123,6 +141,7 @@ export function useAI() {
     setGithubActionsYaml(null);
     setAutoResult(null);
     setAutoWorkflow(null);
+    setNginxConfig(null);
     setError(null);
     setLoading(false);
   }
@@ -132,6 +151,7 @@ export function useAI() {
     githubActionsYaml,
     autoResult,
     autoWorkflow,
+    nginxConfig,
     loading,
     error,
     generateDockerfile: handleGenerateDockerfile,
@@ -139,6 +159,7 @@ export function useAI() {
     generateAutoDockerfile: handleGenerateAutoDockerfile,
     generateAutoGithubActions: handleGenerateAutoGithubActions,
     generateAutoAll: handleGenerateAutoAll,
+    generateNginxConfig: handleGenerateNginxConfig,
     clearError,
     reset,
   };

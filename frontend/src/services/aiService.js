@@ -19,3 +19,8 @@ export async function generateAutoGithubActions({ owner, repo }) {
   const response = await api.post("/ai/github-actions/auto", { owner, repo });
   return response.data;
 }
+
+export async function generateNginxConfig(repoInfo) {
+  const response = await api.post("/ai/nginx", repoInfo);
+  return response.data;
+}
