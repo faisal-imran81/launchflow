@@ -179,6 +179,43 @@ npm run dev
 | `ec2/service-unavailable` | 503 | Could not reach AWS EC2 service |
 | `ec2/bad-gateway` | 502 | Unexpected AWS error |
 
+### Nginx
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/nginx/generate` | Generate basic reverse proxy config |
+| POST | `/api/nginx/generate/stack` | Generate stack-aware Nginx config |
+| POST | `/api/nginx/generate/ssl` | Generate HTTPS + SSL termination config |
+| POST | `/api/nginx/validate` | Validate an Nginx config string |
+| POST | `/api/ai/nginx` | AI-powered Nginx config generation via Groq |
+
+**Request body (POST /api/nginx/generate):**
+```json
+{
+  "domain": "example.com",
+  "port": 3000,
+  "appName": "my-app"
+}
+```
+
+**Request body (POST /api/nginx/generate/stack):**
+```json
+{
+  "domain": "example.com",
+  "type": "frontend",
+  "port": 3000,
+  "buildOutput": "dist",
+  "appName": "my-app"
+}
+```
+
+**Error codes returned in `code` field:**
+| Code | Status | Meaning |
+|------|--------|---------|
+| `nginx/invalid-input` | 400 | Missing or malformed request field |
+| `nginx/invalid-config` | 422 | Generated config failed validation |
+| `nginx/bad-gateway` | 502 | Unexpected internal error |
+
 ### ECR (Elastic Container Registry)
 
 | Method | Endpoint | Description |
@@ -260,6 +297,9 @@ node --test backend/tests/
 | `ecrErrors.test.js` | AWS ECR error code mapping → status codes + error codes |
 | `ecrController.test.js` | ECR endpoint input validation guards (400 responses) |
 | `ecrService.unit.test.js` | ecrService functions with mocked AWS ECR client |
+| `validateNginxConfig.test.js` | Nginx config validation rules — errors + warnings |
+| `nginxController.test.js` | Nginx endpoint input validation guards (400 responses) |
+| `nginxService.unit.test.js` | nginxService config generator coverage |
 | `asyncHandler.test.js` | Async error forwarding to next() |
 | `cleanAiOutput.test.js` | Fenced code block extraction |
 | `cleanAiOutput.edge.test.js` | Edge cases — empty, nested fences, whitespace |
