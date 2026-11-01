@@ -1,3 +1,9 @@
+/**
+ * @module logStreamService
+ * @description Handles real-time Docker log streaming and polling for LaunchFlow.
+ * Supports live SSE streaming via Dockerode follow:true and a polling-based fallback.
+ */
+
 // backend/src/services/logStreamService.js
 
 import docker from '../config/docker.js';
@@ -10,6 +16,8 @@ import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '
  * @param {string}                      containerId - Docker container ID or name
  * @param {import('express').Request}   req
  * @param {import('express').Response}  res
+ * @returns {Promise<void>}
+ * @throws {Error} If the container is not found or Dockerode fails to open the stream
  */
 export async function streamDockerLogs(containerId, req, res) {
   const container = docker.getContainer(containerId);
@@ -75,6 +83,8 @@ export async function streamDockerLogs(containerId, req, res) {
  * @param {import('express').Response}  res
  * @param {number}                      [tailLines=50]     - Lines to fetch per poll
  * @param {number}                      [intervalMs=2000]  - Poll interval in milliseconds
+ * @returns {Promise<void>}
+ * @throws {Error} If the container is unreachable or polling encounters a fatal error
  */
 export async function pollDockerLogs(
   containerId,
@@ -147,6 +157,8 @@ export async function pollDockerLogs(
  * @param {object}                      buildOpts   - Dockerode buildImage options (t, dockerfile, etc.)
  * @param {import('express').Request}   req
  * @param {import('express').Response}  res
+ * @returns {Promise<void>}
+ * @throws {Error} If docker.buildImage fails or the tar stream is invalid
  */
 export async function streamBuildLogs(tarStream, buildOpts, req, res) {
   // Open SSE connection before the build starts

@@ -1,5 +1,11 @@
 /**
  * @module sseHelper
+ * @description Utility functions for managing Server-Sent Events (SSE) connections.
+ * All log streaming in LaunchFlow routes through these helpers.
+ */
+
+/**
+ * @module sseHelper
  *
  * Server-Sent Events (SSE) helpers for streaming deploy logs and status
  * updates to the client over a long-lived HTTP connection.
@@ -19,6 +25,7 @@
  * disables Nginx proxy buffering so events are forwarded immediately.
  *
  * @param {object} res - Express response object
+ * @returns {void}
  */
 export function setSseHeaders(res) {
   res.writeHead(200, {
@@ -36,6 +43,7 @@ export function setSseHeaders(res) {
  * @param {object} res - Express response object
  * @param {string} event - Event name the client listens for
  * @param {unknown} data - Payload, serialized as JSON
+ * @returns {void}
  */
 export function sendSseEvent(res, event, data) {
   res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)
@@ -47,6 +55,7 @@ export function sendSseEvent(res, event, data) {
  * @param {object} res - Express response object
  * @param {string} line - Raw log line from the process output
  * @param {string} [stream='stdout'] - Output stream the line came from (e.g. "stdout" or "stderr")
+ * @returns {void}
  */
 export function sendLogLine(res, line, stream = 'stdout') {
   sendSseEvent(res, 'log', { line, stream, ts: Date.now() })
@@ -58,6 +67,7 @@ export function sendLogLine(res, line, stream = 'stdout') {
  * @param {object} res - Express response object
  * @param {string} [status='done'] - Terminal status e.g. "done" or "error"
  * @param {string} [message=''] - Optional human-readable status message
+ * @returns {void}
  */
 export function closeSseStream(res, status = 'done', message = '') {
   sendSseEvent(res, 'status', { status, message })
@@ -72,6 +82,7 @@ export function closeSseStream(res, status = 'done', message = '') {
  *
  * @param {object} req - Express request object
  * @param {Function} cleanup - Callback invoked on client disconnect
+ * @returns {void}
  */
 export function onClientDisconnect(req, cleanup) {
   req.on('close', () => {

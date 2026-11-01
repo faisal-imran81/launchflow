@@ -1,3 +1,9 @@
+/**
+ * @module logStreamErrors
+ * @description Centralized error code constants and error mapping for SSE log streams.
+ * Controllers use mapLogStreamError to convert raw Dockerode errors into structured responses.
+ */
+
 // backend/src/utils/logStreamErrors.js
 
 /**
@@ -6,6 +12,11 @@
  */
 
 // Error code constants for log streaming failures
+/**
+ * Enum-like constants representing all possible log stream failure scenarios.
+ * @readonly
+ * @enum {string}
+ */
 export const LOG_STREAM_ERRORS = {
   CONTAINER_NOT_FOUND: 'CONTAINER_NOT_FOUND',
   STREAM_CONNECTION_DROPPED: 'STREAM_CONNECTION_DROPPED',
@@ -21,6 +32,7 @@ export const LOG_STREAM_ERRORS = {
  * Returns a consistent shape: { code, message, statusCode }
  * so controllers can respond or close SSE streams uniformly.
  *
+ * @throws {never} This function always returns a structured object and never throws
  * @param {Error} err - The raw error thrown by Dockerode or Node streams
  * @returns {{ code: string, message: string, statusCode: number }}
  */
