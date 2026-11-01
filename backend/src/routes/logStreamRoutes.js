@@ -7,10 +7,7 @@
  */
 
 import { Router } from 'express';
-import {
-  handleStreamContainerLogs,
-  handleStreamBuildLogs,
-} from '../controllers/logStreamController.js';
+import { handleStreamContainerLogs, handleStreamBuildLogs } from '../controllers/logStreamController.js';
 
 const router = Router();
 

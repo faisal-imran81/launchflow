@@ -6,7 +6,7 @@
 
 // backend/src/services/logStreamService.js
 
-import docker from '../config/docker.js';
+import { getDockerClient } from '../config/docker.js';
 import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '../utils/sseHelper.js';
 
 /**
@@ -20,6 +20,7 @@ import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '
  * @throws {Error} If the container is not found or Dockerode fails to open the stream
  */
 export async function streamDockerLogs(containerId, req, res) {
+  const docker = getDockerClient();
   const container = docker.getContainer(containerId);
 
   // Open SSE connection immediately so the browser starts receiving
@@ -93,6 +94,7 @@ export async function pollDockerLogs(
   tailLines = 50,
   intervalMs = 2000,
 ) {
+  const docker = getDockerClient();
   const container = docker.getContainer(containerId);
 
   // Open SSE connection before the first poll
@@ -161,6 +163,8 @@ export async function pollDockerLogs(
  * @throws {Error} If docker.buildImage fails or the tar stream is invalid
  */
 export async function streamBuildLogs(tarStream, buildOpts, req, res) {
+  const docker = getDockerClient();
+
   // Open SSE connection before the build starts
   setSseHeaders(res);
 
