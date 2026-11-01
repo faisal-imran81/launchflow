@@ -137,7 +137,7 @@ Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a ru
 | Day 16 ✅ | AWS EC2 setup — provision and connect to a cloud instance |
 | Day 17 ✅ | AWS ECR — push Docker images to a private registry |
 | Day 18 ✅ | Nginx configuration — reverse proxy config generation + AI-powered generation |
-| Day 19 | Real-time log streaming — live container logs in the UI |
+| Day 19 ✅ | Real-time log streaming — SSE container logs, build logs, polling fallback, useLogStream hook, LogStreamPanel UI |
 | Day 20 | Deployment status tracking — polling + status updates in Supabase |
 | Day 21 | Buffer + integration testing |
 
@@ -237,3 +237,41 @@ Run on 2026-10-22 against all 10 fixtures using model `openai/gpt-oss-20b`:
 | plain-node | Node.js | ✅ | ✅ |
 
 **10/10 Dockerfiles passed — 10/10 Workflows passed — 0 prompt fixes needed.**
+
+---
+
+## Day 19 — Real-Time Log Streaming ✅
+
+### What was built
+Live Docker container and build log streaming using Server-Sent Events (SSE),
+with a polling-based fallback for SSE-restricted environments.
+
+### Backend
+- `sseHelper.js` — SSE headers, event send, log line, stream close, disconnect hook
+- `logStreamErrors.js` — stream error code constants and structured error mapping
+- `logStreamService.js` — streamDockerLogs (Dockerode follow:true), pollDockerLogs (tail diff), streamBuildLogs (JSON line parser)
+- `logStreamController.js` — handleStreamContainerLogs, handleStreamBuildLogs with input validation
+- `logStreamRoutes.js` — /api/logs routes registered in index.js
+
+### Frontend
+- `useLogStream.js` — EventSource hook with exponential backoff reconnection, pause/resume/clear
+- `LogStreamPanel.jsx` — terminal-style log viewer with status badge, download, reconnect button
+- `Deploy.jsx` — LogStreamPanel wired up after successful deployment
+
+### API Surface
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/logs/:containerId/stream` | Live SSE container logs |
+| `GET /api/logs/:containerId/stream?poll=true` | Polling fallback |
+| `GET /api/logs/build/:imageTag/stream` | Build progress stream |
+
+### Tests added (Day 19)
+| Suite | Count |
+|-------|-------|
+| sseHelper.test.js | 14 |
+| logStreamController.test.js | 12 |
+| logStreamService.unit.test.js | 8 |
+| **Total** | **34** |
+
+### Up next — Day 20
+Deployment status tracking — real-time status updates for running deployments.
