@@ -137,3 +137,76 @@ export async function pollDockerLogs(
   await poll();
   timer = setInterval(poll, intervalMs);
 }
+
+/**
+ * Stream Docker image build progress to the client via SSE.
+ * Parses the JSON objects emitted by Dockerode's buildImage stream
+ * and forwards each meaningful line (status, stream, error) individually.
+ *
+ * @param {string}                      tarStream   - Readable tar archive stream of the build context
+ * @param {object}                      buildOpts   - Dockerode buildImage options (t, dockerfile, etc.)
+ * @param {import('express').Request}   req
+ * @param {import('express').Response}  res
+ */
+export async function streamBuildLogs(tarStream, buildOpts, req, res) {
+  // Open SSE connection before the build starts
+  setSseHeaders(res);
+
+  let buildStream = null;
+
+  // Abort the build stream if the client disconnects mid-build
+  onClientDisconnect(req, () => {
+    if (buildStream) buildStream.destroy();
+  });
+
+  try {
+    buildStream = await docker.buildImage(tarStream, buildOpts);
+
+    // Dockerode build stream emits raw newline-delimited JSON objects
+    buildStream.on('data', (chunk) => {
+      const raw = chunk.toString('utf8');
+
+      // A single chunk may contain multiple JSON lines — split and process each
+      raw
+        .split('\n')
+        .filter((line) => line.trim())
+        .forEach((line) => {
+          try {
+            const parsed = JSON.parse(line);
+
+            if (parsed.error) {
+              // Build-level error reported by Docker daemon
+              sendLogLine(res, `ERROR: ${parsed.error.trim()}`, 'stderr');
+            } else if (parsed.stream) {
+              // Standard build output line (RUN, COPY, layer info, etc.)
+              const text = parsed.stream.trimEnd();
+              if (text) sendLogLine(res, text, 'stdout');
+            } else if (parsed.status) {
+              // Layer pull / push status messages
+              const status = parsed.progress
+                ? `${parsed.status} ${parsed.progress}`
+                : parsed.status;
+              sendLogLine(res, status.trimEnd(), 'stdout');
+            }
+          } catch {
+            // Non-JSON chunk — forward as raw text so nothing is silently dropped
+            const text = line.trimEnd();
+            if (text) sendLogLine(res, text, 'stdout');
+          }
+        });
+    });
+
+    // Build completed successfully
+    buildStream.on('end', () => {
+      closeSseStream(res, 'done', 'Docker image build completed.');
+    });
+
+    // Forward stream-level errors to the client
+    buildStream.on('error', (err) => {
+      closeSseStream(res, 'error', err.message || 'Build stream error.');
+    });
+  } catch (err) {
+    // docker.buildImage itself threw — daemon unreachable or bad tar
+    closeSseStream(res, 'error', err.message || 'Failed to start build stream.');
+  }
+}
