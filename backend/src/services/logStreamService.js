@@ -64,3 +64,76 @@ export async function streamDockerLogs(containerId, req, res) {
     closeSseStream(res, 'error', err.message || 'Failed to start log stream.');
   }
 }
+
+/**
+ * Polling-based fallback for environments where SSE is restricted.
+ * Fetches the last N lines from a container on a fixed interval
+ * and sends each new line to the client via SSE.
+ *
+ * @param {string}                      containerId - Docker container ID or name
+ * @param {import('express').Request}   req
+ * @param {import('express').Response}  res
+ * @param {number}                      [tailLines=50]     - Lines to fetch per poll
+ * @param {number}                      [intervalMs=2000]  - Poll interval in milliseconds
+ */
+export async function pollDockerLogs(
+  containerId,
+  req,
+  res,
+  tailLines = 50,
+  intervalMs = 2000,
+) {
+  const container = docker.getContainer(containerId);
+
+  // Open SSE connection before the first poll
+  setSseHeaders(res);
+
+  let timer = null;
+  let lastSeen = '';
+
+  // Stop polling and close stream when client disconnects
+  onClientDisconnect(req, () => {
+    if (timer) clearInterval(timer);
+    closeSseStream(res, 'done', 'Client disconnected — polling stopped.');
+  });
+
+  /**
+   * Fetch the latest tail lines, diff against the last snapshot,
+   * and push only the new lines to the client.
+   */
+  async function poll() {
+    try {
+      const rawBuffer = await container.logs({
+        follow: false,
+        stdout: true,
+        stderr: true,
+        timestamps: false,
+        tail: tailLines,
+      });
+
+      const rawText = rawBuffer.toString('utf8');
+
+      // Skip if output hasn't changed since the last poll
+      if (rawText === lastSeen) return;
+
+      // Find lines that are genuinely new this cycle
+      const prevLines = lastSeen.split('\n');
+      const currentLines = rawText.split('\n');
+      const newLines = currentLines.filter(
+        (line) => line.trim() && !prevLines.includes(line),
+      );
+
+      newLines.forEach((line) => sendLogLine(res, line.trimEnd(), 'stdout'));
+
+      lastSeen = rawText;
+    } catch (err) {
+      // Container gone or Dockerode error — stop polling
+      clearInterval(timer);
+      closeSseStream(res, 'error', err.message || 'Polling error.');
+    }
+  }
+
+  // Run immediately then repeat on interval
+  await poll();
+  timer = setInterval(poll, intervalMs);
+}
