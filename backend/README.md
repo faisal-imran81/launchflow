@@ -323,3 +323,94 @@ node --test backend/tests/
 ## Environment Variables
 
 See `.env.example` for all required variables.
+
+---
+
+## Real-Time Log Streaming (Day 19)
+
+LaunchFlow supports live Docker container and build log streaming via
+Server-Sent Events (SSE). All log streaming logic is fully separated
+from the existing deploy pipeline.
+
+### Architecture
+
+Client (EventSource)
+└── GET /api/logs/:containerId/stream
+└── logStreamController.js
+├── streamDockerLogs() — Dockerode follow:true SSE stream
+└── pollDockerLogs() — polling fallback (?poll=true)
+
+Client (EventSource)
+└── GET /api/logs/build/:imageTag/stream
+└── logStreamController.js
+└── streamBuildLogs() — Docker build progress JSON line parser
+
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `src/utils/sseHelper.js` | SSE headers, event send, stream close, disconnect hook |
+| `src/utils/logStreamErrors.js` | Stream error code constants and error mapping |
+| `src/services/logStreamService.js` | streamDockerLogs, pollDockerLogs, streamBuildLogs |
+| `src/controllers/logStreamController.js` | handleStreamContainerLogs, handleStreamBuildLogs |
+| `src/routes/logStreamRoutes.js` | /api/logs route definitions |
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/logs/:containerId/stream` | Stream live container logs via SSE |
+| GET | `/api/logs/:containerId/stream?poll=true` | Polling fallback for SSE-restricted environments |
+| GET | `/api/logs/build/:imageTag/stream` | Stream Docker image build progress via SSE |
+
+### Query Parameters
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `poll` | `false` | Set to `true` to use polling fallback |
+| `tail` | `50` | Number of lines fetched per poll cycle |
+| `interval` | `2000` | Polling interval in milliseconds |
+
+### SSE Event Shape
+
+Every event sent to the client follows one of two shapes:
+
+**Log line event:**
+```json
+{
+  "event": "log",
+  "data": { "line": "npm install complete", "stream": "stdout", "ts": 1234567890 }
+}
+```
+
+**Terminal status event:**
+```json
+{
+  "event": "status",
+  "data": { "status": "done", "message": "Container log stream ended." }
+}
+```
+
+Status values: `done` | `error`
+
+### Running Log Streaming Tests
+
+```bash
+# Run all log streaming related tests
+node --test tests/sseHelper.test.js
+node --test tests/logStreamController.test.js
+node --test tests/logStreamService.unit.test.js
+
+# Run full backend test suite
+npm test
+```
+
+### Test Count (Day 19)
+
+| File | Tests |
+|------|-------|
+| `sseHelper.test.js` | 14 |
+| `logStreamController.test.js` | 12 |
+| `logStreamService.unit.test.js` | 8 |
+| **Day 19 Total** | **34** |
