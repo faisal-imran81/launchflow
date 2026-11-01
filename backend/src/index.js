@@ -10,6 +10,7 @@ import dockerRoutes from './routes/dockerRoutes.js'
 import ec2Routes from './routes/ec2Routes.js'
 import ecrRoutes from './routes/ecrRoutes.js'
 import nginxRoutes from './routes/nginxRoutes.js'
+import logStreamRoutes from './routes/logStreamRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import { notFound } from './middleware/notFound.js'
 import healthRoutes from './routes/healthRoutes.js'
@@ -38,6 +39,7 @@ app.use('/api/docker', dockerRoutes)
 app.use('/api/ec2', ec2Routes)
 app.use('/api/ecr', ecrRoutes)
 app.use('/api/nginx', nginxRoutes)
+app.use('/api/logs', logStreamRoutes)
 app.use('/api/health', healthRoutes)
 app.use(notFound)
 app.use(validateJson)
