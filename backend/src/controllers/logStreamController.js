@@ -6,7 +6,7 @@
  * Handles input validation, error mapping, and delegates to logStreamService.
  */
 
-import { streamDockerLogs, pollDockerLogs } from '../services/logStreamService.js';
+import { streamDockerLogs, pollDockerLogs, streamBuildLogs } from '../services/logStreamService.js';
 import { mapLogStreamError } from '../utils/logStreamErrors.js';
 import { closeSseStream, setSseHeaders } from '../utils/sseHelper.js';
 
@@ -43,6 +43,60 @@ export async function handleStreamContainerLogs(req, res) {
     } else {
       await streamDockerLogs(containerId, req, res);
     }
+  } catch (err) {
+    const mapped = mapLogStreamError(err);
+
+    // If SSE headers already sent, close the stream with error event
+    if (res.headersSent) {
+      closeSseStream(res, 'error', mapped.message);
+    } else {
+      res.status(mapped.statusCode).json({
+        error: mapped.message,
+        code: mapped.code,
+      });
+    }
+  }
+}
+
+/**
+ * GET /api/logs/build/:imageTag/stream
+ *
+ * Streams Docker image build progress to the client via SSE.
+ * Expects a pre-built tar stream passed via req.tarStream (set by middleware)
+ * and build options passed via req.buildOpts.
+ *
+ * @param {import('express').Request}  req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ */
+export async function handleStreamBuildLogs(req, res) {
+  const { imageTag } = req.params;
+
+  // Validate imageTag — Docker image tags follow name:tag format
+  if (!imageTag || !/^[a-zA-Z0-9_.\-:/]+$/.test(imageTag)) {
+    return res.status(400).json({
+      error: 'Invalid or missing imageTag parameter.',
+    });
+  }
+
+  // tarStream and buildOpts must be attached by upstream middleware
+  const tarStream = req.tarStream;
+  const buildOpts = req.buildOpts ?? { t: imageTag };
+
+  if (!tarStream) {
+    return res.status(400).json({
+      error: 'Build context tar stream is missing. Ensure build middleware ran.',
+    });
+  }
+
+  // Merge imageTag into buildOpts so Dockerode tags the image correctly
+  const finalBuildOpts = {
+    ...buildOpts,
+    t: imageTag,
+  };
+
+  try {
+    await streamBuildLogs(tarStream, finalBuildOpts, req, res);
   } catch (err) {
     const mapped = mapLogStreamError(err);
 
