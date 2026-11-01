@@ -7,17 +7,24 @@ import SkeletonCard from '../components/SkeletonCard'
 import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
 import AIEngine from '../components/AIEngine'
+import LogStreamPanel from '../components/LogStreamPanel.jsx'
 
 export default function Deploy() {
   usePageTitle('Deploy')
   const { deployments, fetchDeployments, isLoading } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
+  const [activeContainerId, setActiveContainerId] = useState(null)
 
   const handleSuccess = async (result) => {
     const newProject = result.data?.project
     if (newProject) {
       setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
       await fetchDeployments()
+    }
+
+    // result.containerId comes from the backend deploy response
+    if (result?.containerId) {
+      setActiveContainerId(result.containerId)
     }
   }
 
@@ -65,6 +72,22 @@ export default function Deploy() {
           )}
         </div>
       </div>
+
+      {/* ── Real-time log stream ── */}
+      {activeContainerId && (
+        <div className="mt-6">
+          <h2 className="text-sm font-semibold text-zinc-300 mb-2">
+            Container Logs
+          </h2>
+          <LogStreamPanel
+            containerId={activeContainerId}
+            poll={false}
+            tail={50}
+            interval={2000}
+            className="w-full"
+          />
+        </div>
+      )}
 
       <AIEngine />
 
