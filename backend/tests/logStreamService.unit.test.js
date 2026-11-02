@@ -1,15 +1,16 @@
 // backend/tests/logStreamService.unit.test.js
 
-import { describe, it, beforeEach, mock } from 'node:test';
+import { describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
+import {
+  streamDockerLogs,
+  pollDockerLogs,
+} from '../src/services/logStreamService.js';
 
 // ---------------------------------------------------------------------------
 // Mock factory helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Creates a minimal mock Express response object.
- */
 function mockRes() {
   return {
     headers: {},
@@ -20,14 +21,9 @@ function mockRes() {
     flushHeaders() { this.headersSent = true; },
     write(chunk) { this.written.push(chunk); },
     end() { this.ended = true; },
-    status(code) { this.statusCode = code; return this; },
-    json(payload) { this.body = payload; return this; },
   };
 }
 
-/**
- * Creates a minimal mock Express request object.
- */
 function mockReq() {
   return {
     listeners: {},
@@ -39,26 +35,26 @@ function mockReq() {
 }
 
 /**
- * Creates a mock Dockerode stream with controllable events.
- * Exposes emit() so tests can fire data/end/error manually.
+ * Creates a controllable mock Docker stream.
+ * Call stream.emit('end') or stream.emit('error', err) in tests.
  */
 function mockDockerStream() {
   const listeners = {};
   return {
-    listeners,
-    on(event, cb) { listeners[event] = cb; },
+    on(event, cb) { listeners[event] = cb; return this; },
     emit(event, data) { if (listeners[event]) listeners[event](data); },
     destroy: mock.fn(),
   };
 }
 
 /**
- * Creates a mock Dockerode container object.
- * Returns controllable log stream and modem.demuxStream behavior.
+ * Creates a mock Docker container with controllable logs() behavior.
+ *
+ * @param {object|null} logStreamOverride - Mock stream to return from logs()
+ * @param {boolean}     shouldThrow       - If true, logs() throws instead
  */
 function mockContainer(logStreamOverride = null, shouldThrow = false) {
   const stream = logStreamOverride || mockDockerStream();
-
   return {
     stream,
     logs: mock.fn(async () => {
@@ -67,7 +63,7 @@ function mockContainer(logStreamOverride = null, shouldThrow = false) {
     }),
     modem: {
       demuxStream: mock.fn((src, stdout, stderr) => {
-        // Store stdout/stderr writers so tests can invoke them
+        // Store writers so tests can invoke them directly if needed
         src._stdout = stdout;
         src._stderr = stderr;
       }),
@@ -76,12 +72,11 @@ function mockContainer(logStreamOverride = null, shouldThrow = false) {
 }
 
 /**
- * Creates a mock Docker client that returns the given container mock.
+ * Creates a mock Docker client that returns the given container.
  */
 function mockDockerClient(container) {
   return {
     getContainer: mock.fn(() => container),
-    buildImage: mock.fn(),
   };
 }
 
@@ -95,16 +90,10 @@ describe('streamDockerLogs', () => {
     const container = mockContainer(stream);
     const docker = mockDockerClient(container);
 
-    // Dynamically import and override getDockerClient with mock
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
     const req = mockReq();
     const res = mockRes();
 
-    const pending = streamDockerLogs('abc123', req, res);
+    const pending = streamDockerLogs('abc123', req, res, docker);
     stream.emit('end');
     await pending;
 
@@ -117,15 +106,10 @@ describe('streamDockerLogs', () => {
     const container = mockContainer(stream);
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    const pending = streamDockerLogs('abc123', req, res);
+    const pending = streamDockerLogs('abc123', req, res, docker);
     stream.emit('end');
     await pending;
 
@@ -140,15 +124,13 @@ describe('streamDockerLogs', () => {
     const container = mockContainer(stream);
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    const pending = streamDockerLogs('abc123', req, res);
+    const pending = streamDockerLogs('abc123', req, res, docker);
+    // Wait one microtask tick so container.logs() resolves and
+    // on('end') listener is registered before we emit
+    await Promise.resolve();
     stream.emit('end');
     await pending;
 
@@ -162,15 +144,13 @@ describe('streamDockerLogs', () => {
     const container = mockContainer(stream);
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    const pending = streamDockerLogs('abc123', req, res);
+    const pending = streamDockerLogs('abc123', req, res, docker);
+    // Wait one microtask tick so container.logs() resolves and
+    // on('error') listener is registered before we emit
+    await Promise.resolve();
     stream.emit('error', new Error('stream broke'));
     await pending;
 
@@ -180,18 +160,13 @@ describe('streamDockerLogs', () => {
   });
 
   it('closes SSE stream with error when container.logs throws', async () => {
-    const container = mockContainer(null, true); // shouldThrow = true
+    const container = mockContainer(null, true);
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    await streamDockerLogs('bad-id', req, res);
+    await streamDockerLogs('bad-id', req, res, docker);
 
     assert.equal(res.ended, true);
     const lastChunk = res.written[res.written.length - 1];
@@ -203,17 +178,13 @@ describe('streamDockerLogs', () => {
     const container = mockContainer(stream);
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { streamDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    const pending = streamDockerLogs('abc123', req, res);
-
-    // Simulate client disconnect
+    const pending = streamDockerLogs('abc123', req, res, docker);
+    // Wait one microtask tick so container.logs() resolves and
+    // the logStream reference is captured before triggering close
+    await Promise.resolve();
     req.trigger('close');
     stream.emit('end');
     await pending;
@@ -233,17 +204,12 @@ describe('pollDockerLogs', () => {
     };
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { pollDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    // Disconnect immediately after first poll to stop the interval
+    // Trigger disconnect immediately after first poll to stop the interval
     setTimeout(() => req.trigger('close'), 10);
-    await pollDockerLogs('abc123', req, res, 50, 5000);
+    await pollDockerLogs('abc123', req, res, 50, 5000, docker);
 
     assert.equal(res.headers['Content-Type'], 'text/event-stream');
     assert.equal(res.headersSent, true);
@@ -255,16 +221,11 @@ describe('pollDockerLogs', () => {
     };
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { pollDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
     setTimeout(() => req.trigger('close'), 10);
-    await pollDockerLogs('abc123', req, res, 50, 5000);
+    await pollDockerLogs('abc123', req, res, 50, 5000, docker);
 
     const allWritten = res.written.join('');
     assert.ok(allWritten.includes('step 1'));
@@ -277,15 +238,10 @@ describe('pollDockerLogs', () => {
     };
     const docker = mockDockerClient(container);
 
-    mock.module('../src/config/docker.js', {
-      namedExports: { getDockerClient: () => docker },
-    });
-
-    const { pollDockerLogs } = await import('../src/services/logStreamService.js');
     const req = mockReq();
     const res = mockRes();
 
-    await pollDockerLogs('abc123', req, res, 50, 5000);
+    await pollDockerLogs('abc123', req, res, 50, 5000, docker);
 
     assert.equal(res.ended, true);
     const lastChunk = res.written[res.written.length - 1];
