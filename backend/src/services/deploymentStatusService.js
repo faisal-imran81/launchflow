@@ -74,3 +74,38 @@ export async function updateDeploymentStatus(
 
   return data;
 }
+
+/**
+ * Reads the current status of a deployment from Supabase.
+ * Used by the GET endpoint and the SSE polling loop to check for changes.
+ *
+ * @param {string} deploymentId     - UUID of the deployment record
+ * @param {object} [_supabase=null] - Optional Supabase client override for testing
+ * @returns {Promise<object>}       - Deployment row containing status and metadata
+ * @throws {Error}                  - If deploymentId is missing or record not found
+ */
+export async function getDeploymentStatus(deploymentId, _supabase = null) {
+  if (!deploymentId) {
+    throw new Error('deploymentId is required to get deployment status.');
+  }
+
+  const supabase = _supabase ?? getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from('deployments')
+    .select('id, status, updated_at, error, image_tag, container_id')
+    .eq('id', deploymentId)
+    .single();
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch deployment status: ${error.message}`,
+    );
+  }
+
+  if (!data) {
+    throw new Error(`Deployment not found: ${deploymentId}`);
+  }
+
+  return data;
+}
