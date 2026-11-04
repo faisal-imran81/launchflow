@@ -109,3 +109,88 @@ export async function getDeploymentStatus(deploymentId, _supabase = null) {
 
   return data;
 }
+
+/**
+ * Streams real-time deployment status updates to the client via SSE.
+ * Polls Supabase on a fixed interval and pushes a status event whenever
+ * the status changes. Closes the stream when a terminal status is reached.
+ *
+ * Terminal statuses: 'running', 'failed', 'stopped'
+ *
+ * @param {string}                      deploymentId    - UUID of the deployment record
+ * @param {import('express').Request}   req
+ * @param {import('express').Response}  res
+ * @param {number}                      [intervalMs=2000] - Poll interval in milliseconds
+ * @param {object}                      [_supabase=null]  - Optional Supabase client override
+ * @returns {Promise<void>}
+ * @throws {never} All errors are caught and sent as SSE status events
+ */
+export async function streamDeploymentStatus(
+  deploymentId,
+  req,
+  res,
+  intervalMs = 2000,
+  _supabase = null,
+) {
+  // Terminal statuses — stream closes when any of these is reached
+  const TERMINAL_STATUSES = new Set([
+    DEPLOYMENT_STATUS.RUNNING,
+    DEPLOYMENT_STATUS.FAILED,
+    DEPLOYMENT_STATUS.STOPPED,
+  ]);
+
+  // Open SSE connection immediately
+  setSseHeaders(res);
+
+  let timer = null;
+  let lastStatus = null;
+
+  // Stop polling when client disconnects
+  onClientDisconnect(req, () => {
+    if (timer) clearInterval(timer);
+  });
+
+  /**
+   * Poll Supabase for the latest deployment status.
+   * Push a status event only when the status has changed.
+   * Close the stream once a terminal status is reached.
+   */
+  async function poll() {
+    try {
+      const deployment = await getDeploymentStatus(deploymentId, _supabase);
+      const currentStatus = deployment.status;
+
+      // Only send an event if status changed since the last poll
+      if (currentStatus !== lastStatus) {
+        lastStatus = currentStatus;
+
+        sendSseEvent(res, 'status', {
+          deploymentId,
+          status: currentStatus,
+          updatedAt: deployment.updated_at,
+          error: deployment.error ?? null,
+          imageTag: deployment.image_tag ?? null,
+          containerId: deployment.container_id ?? null,
+        });
+
+        // Stop polling once we hit a terminal state
+        if (TERMINAL_STATUSES.has(currentStatus)) {
+          clearInterval(timer);
+          closeSseStream(res, 'done', `Deployment reached terminal status: ${currentStatus}`);
+        }
+      }
+    } catch (err) {
+      // Any Supabase or network error — stop polling and report
+      clearInterval(timer);
+      closeSseStream(res, 'error', err.message || 'Status polling error.');
+    }
+  }
+
+  // Run immediately then repeat on interval
+  await poll();
+
+  // Only start interval if stream is still open after first poll
+  if (!res.ended) {
+    timer = setInterval(poll, intervalMs);
+  }
+}
