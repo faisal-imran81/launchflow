@@ -138,7 +138,7 @@ Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a ru
 | Day 17 ✅ | AWS ECR — push Docker images to a private registry |
 | Day 18 ✅ | Nginx configuration — reverse proxy config generation + AI-powered generation |
 | Day 19 ✅ | Real-time log streaming — SSE container logs, build logs, polling fallback, useLogStream hook, LogStreamPanel UI |
-| Day 20 | Deployment status tracking — polling + status updates in Supabase |
+| Day 20 ✅ | Deployment status tracking — Supabase persistence, SSE stream, pipeline timeline UI, 34 new tests |
 | Day 21 | Buffer + integration testing |
 
 > The AI Engine (Week 2) generates the Dockerfile and CI/CD workflow. Week 3 executes that workflow end-to-end on real cloud infrastructure.
@@ -275,3 +275,43 @@ with a polling-based fallback for SSE-restricted environments.
 
 ### Up next — Day 20
 Deployment status tracking — real-time status updates for running deployments.
+
+---
+
+## Day 20 — Deployment Status Tracking ✅
+
+### What was built
+Real-time deployment status tracking across the full pipeline —
+queued → building → pushing → deploying → running | failed | stopped —
+persisted to Supabase and streamed live to the frontend via SSE.
+
+### Backend
+- `deploymentStatusService.js` — updateDeploymentStatus, getDeploymentStatus, streamDeploymentStatus
+- `deploymentStatusErrors.js` — error code constants and structured error mapping
+- `deploymentStatusController.js` — GET, GET /stream, PATCH endpoints with full input validation
+- `deploymentStatusRoutes.js` — /api/status routes registered in index.js
+- `deployController.js` — updateDeploymentStatus wired at each pipeline step
+
+### Frontend
+- `useDeploymentStatus.js` — SSE hook with status history, metadata, exponential backoff reconnect
+- `DeploymentStatusBadge.jsx` — colored status pill with sm/md/lg size variants
+- `DeploymentTimeline.jsx` — vertical pipeline timeline with completed/active/failed/pending states
+- `Deploy.jsx` — status badge, stream indicator, and pipeline timeline wired after deploy
+
+### API Surface
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/status/:deploymentId` | Current deployment status as JSON |
+| `GET /api/status/:deploymentId/stream` | Live SSE status stream |
+| `PATCH /api/status/:deploymentId` | Internal status update |
+
+### Tests added (Day 20)
+| Suite | Count |
+|-------|-------|
+| deploymentStatusService.unit.test.js | 16 |
+| deploymentStatusController.test.js | 18 |
+| **Day 20 Total** | **34** |
+| **Cumulative (Day 19 + 20)** | **68** |
+
+### Up next — Day 21
+Buffer + testing — full end-to-end flow test, edge case fixes, and test suite cleanup.
