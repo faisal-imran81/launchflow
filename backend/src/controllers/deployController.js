@@ -1,7 +1,9 @@
 import { createProject } from '../db/projectsService.js'
 import { createDeployment, updateDeploymentStatus, getDeploymentById } from '../db/deploymentsService.js'
+import { updateDeploymentStatus as updateDeploymentStatusService, DEPLOYMENT_STATUS } from '../services/deploymentStatusService.js'
 
 export const triggerDeploy = async (req, res) => {
+  let deploymentId = null
   try {
     const { repoUrl, appName, environment } = req.body
 
@@ -23,12 +25,25 @@ export const triggerDeploy = async (req, res) => {
       status: 'queued'
     })
 
+    deploymentId = deployment.id
+
+    try {
+      await updateDeploymentStatusService(deploymentId, DEPLOYMENT_STATUS.QUEUED, {});
+    } catch (_) { /* status update failure must not break deploy */ }
+
     res.status(201).json({
       success: true,
       data: { project, deployment },
       message: 'Deployment triggered successfully'
     })
   } catch (error) {
+    if (deploymentId) {
+      try {
+        await updateDeploymentStatusService(deploymentId, DEPLOYMENT_STATUS.FAILED, {
+          error: error?.message || 'Deployment failed.',
+        });
+      } catch (_) { /* status update failure must not break error handling */ }
+    }
     res.status(500).json({ error: error.message })
   }
 }
