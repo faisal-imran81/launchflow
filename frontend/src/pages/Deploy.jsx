@@ -8,12 +8,24 @@ import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
 import AIEngine from '../components/AIEngine'
 import LogStreamPanel from '../components/LogStreamPanel.jsx'
+import { useDeploymentStatus } from '../hooks/useDeploymentStatus.js'
+import DeploymentStatusBadge from '../components/DeploymentStatusBadge.jsx'
+import DeploymentTimeline from '../components/DeploymentTimeline.jsx'
 
 export default function Deploy() {
   usePageTitle('Deploy')
   const { deployments, fetchDeployments, isLoading } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
   const [activeContainerId, setActiveContainerId] = useState(null)
+
+  const {
+    status: deploymentStatus,
+    history: statusHistory,
+    meta: statusMeta,
+    streamStatus,
+    isTerminal,
+    reconnect: reconnectStatus,
+  } = useDeploymentStatus(activeContainerId, { interval: 2000, autoStart: !!activeContainerId })
 
   const handleSuccess = async (result) => {
     const newProject = result.data?.project
@@ -86,6 +98,56 @@ export default function Deploy() {
             interval={2000}
             className="w-full"
           />
+        </div>
+      )}
+
+      {activeContainerId && (
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Deployment status badge + stream indicator */}
+          <div className="lg:col-span-1 flex flex-col gap-4">
+            <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-sm font-semibold text-zinc-200">
+                  Status
+                </h2>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  streamStatus === 'live'
+                    ? 'bg-green-900 text-green-300'
+                    : streamStatus === 'reconnecting'
+                    ? 'bg-orange-900 text-orange-300'
+                    : 'bg-zinc-800 text-zinc-400'
+                }`}>
+                  {streamStatus === 'live' ? '● Live' : streamStatus === 'reconnecting' ? 'Reconnecting…' : streamStatus}
+                </span>
+              </div>
+              <DeploymentStatusBadge
+                status={deploymentStatus}
+                size="lg"
+                className="w-full justify-center"
+              />
+              {isTerminal && (
+                <button
+                  onClick={reconnectStatus}
+                  className="mt-3 w-full px-3 py-1.5 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors"
+                >
+                  Refresh Status
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Deployment pipeline timeline */}
+          <div className="lg:col-span-2">
+            <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4">
+              <DeploymentTimeline
+                status={deploymentStatus}
+                history={statusHistory}
+                meta={statusMeta}
+              />
+            </div>
+          </div>
+
         </div>
       )}
 
