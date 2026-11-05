@@ -111,3 +111,59 @@ export async function handleStreamDeploymentStatus(req, res) {
     }
   }
 }
+
+/**
+ * PATCH /api/status/:deploymentId
+ *
+ * Internal endpoint for updating deployment status and metadata.
+ * Called by the deploy pipeline at each step to persist progress.
+ *
+ * Request body:
+ *   { status: string, ...meta }
+ *
+ * @param {import('express').Request}  req
+ * @param {import('express').Response} res
+ * @returns {Promise<void>}
+ */
+export async function handleUpdateDeploymentStatus(req, res) {
+  const { deploymentId } = req.params;
+
+  // Validate deploymentId format
+  if (!isValidDeploymentId(deploymentId)) {
+    return res.status(400).json({
+      error: 'Invalid or missing deploymentId parameter.',
+    });
+  }
+
+  const { status, ...meta } = req.body ?? {};
+
+  // Status field is required in request body
+  if (!status) {
+    return res.status(400).json({
+      error: 'Request body must include a status field.',
+    });
+  }
+
+  // Validate status value against allowed enum
+  if (!Object.values(DEPLOYMENT_STATUS).includes(status)) {
+    return res.status(400).json({
+      error: `Invalid status value: "${status}". Must be one of: ${Object.values(DEPLOYMENT_STATUS).join(', ')}.`,
+    });
+  }
+
+  try {
+    const updated = await updateDeploymentStatus(deploymentId, status, meta);
+
+    return res.status(200).json({
+      deploymentId: updated.id,
+      status: updated.status,
+      updatedAt: updated.updated_at,
+    });
+  } catch (err) {
+    const mapped = mapDeploymentStatusError(err);
+    return res.status(mapped.statusCode).json({
+      error: mapped.message,
+      code: mapped.code,
+    });
+  }
+}
