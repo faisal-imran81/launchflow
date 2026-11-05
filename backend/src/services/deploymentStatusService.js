@@ -2,16 +2,19 @@
 
 /**
  * @module deploymentStatusService
- * @description Handles deployment status persistence and real-time streaming
- * for LaunchFlow. All status updates are written to Supabase and streamed
- * to the frontend via SSE.
+ * @description Manages deployment status persistence and real-time SSE streaming
+ * for LaunchFlow. Writes status updates to Supabase at each pipeline step and
+ * streams live progress to connected clients via Server-Sent Events.
+ *
+ * Status flow: queued → building → pushing → deploying → running | failed | stopped
  */
 
 import { getSupabaseClient } from '../config/supabase.js';
 import { setSseHeaders, sendSseEvent, closeSseStream, onClientDisconnect } from '../utils/sseHelper.js';
 
 /**
- * Valid deployment status values representing each stage of the deploy pipeline.
+ * All valid deployment pipeline status values.
+ * Controllers and services must only use values from this enum.
  * @readonly
  * @enum {string}
  */
@@ -34,7 +37,7 @@ export const DEPLOYMENT_STATUS = {
  * @param {object} [meta={}]           - Optional metadata (error message, image tag, etc.)
  * @param {object} [_supabase=null]    - Optional Supabase client override for testing
  * @returns {Promise<object>}          - Updated deployment row from Supabase
- * @throws {Error}                     - If deploymentId is missing or Supabase write fails
+ * @throws {Error}                     - If deploymentId is missing, status is invalid, or Supabase write fails
  */
 export async function updateDeploymentStatus(
   deploymentId,
@@ -82,7 +85,7 @@ export async function updateDeploymentStatus(
  * @param {string} deploymentId     - UUID of the deployment record
  * @param {object} [_supabase=null] - Optional Supabase client override for testing
  * @returns {Promise<object>}       - Deployment row containing status and metadata
- * @throws {Error}                  - If deploymentId is missing or record not found
+ * @throws {Error}                  - If deploymentId is missing or deployment record is not found
  */
 export async function getDeploymentStatus(deploymentId, _supabase = null) {
   if (!deploymentId) {
