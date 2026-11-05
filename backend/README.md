@@ -414,3 +414,85 @@ npm test
 | `logStreamController.test.js` | 12 |
 | `logStreamService.unit.test.js` | 8 |
 | **Day 19 Total** | **34** |
+
+---
+
+## Deployment Status Tracking (Day 20)
+
+### New Files
+
+| File | Purpose |
+|------|---------|
+| `src/services/deploymentStatusService.js` | updateDeploymentStatus, getDeploymentStatus, streamDeploymentStatus |
+| `src/utils/deploymentStatusErrors.js` | Error code constants and structured error mapping |
+| `src/controllers/deploymentStatusController.js` | handleGetDeploymentStatus, handleStreamDeploymentStatus, handleUpdateDeploymentStatus |
+| `src/routes/deploymentStatusRoutes.js` | /api/status route definitions |
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/status/:deploymentId` | Get current deployment status as JSON |
+| GET | `/api/status/:deploymentId/stream` | Stream live status updates via SSE |
+| PATCH | `/api/status/:deploymentId` | Update deployment status (internal) |
+
+### Query Parameters
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `interval` | `2000` | SSE polling interval in ms (clamped 500–10000) |
+
+### SSE Event Shape
+
+**Status change event:**
+```json
+{
+  "event": "status",
+  "data": {
+    "deploymentId": "dep-123",
+    "status": "building",
+    "updatedAt": "2026-10-24T10:00:00.000Z",
+    "error": null,
+    "imageTag": null,
+    "containerId": null
+  }
+}
+```
+
+**Terminal status event (stream closes after this):**
+```json
+{
+  "event": "status",
+  "data": { "status": "done", "message": "Deployment reached terminal status: running" }
+}
+```
+
+### PATCH Request Body
+
+```json
+{
+  "status": "building",
+  "imageTag": "myapp:v1.0",
+  "containerId": "abc123def456"
+}
+```
+
+### Running Status Tracking Tests
+
+```bash
+# Run Day 20 tests individually
+node --test tests/deploymentStatusService.unit.test.js
+node --test tests/deploymentStatusController.test.js
+
+# Run full backend test suite
+npm test
+```
+
+### Test Count (Day 20)
+
+| File | Tests |
+|------|-------|
+| `deploymentStatusService.unit.test.js` | 16 |
+| `deploymentStatusController.test.js` | 18 |
+| **Day 20 Total** | **34** |
+| **Cumulative Total** | **68** |
