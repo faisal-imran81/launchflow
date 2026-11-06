@@ -167,6 +167,8 @@ export async function streamDeploymentStatus(
       if (currentStatus !== lastStatus) {
         lastStatus = currentStatus;
 
+        // Skip write if client already disconnected
+        if (res.ended) return;
         sendSseEvent(res, 'status', {
           deploymentId,
           status: currentStatus,
@@ -179,13 +181,20 @@ export async function streamDeploymentStatus(
         // Stop polling once we hit a terminal state
         if (TERMINAL_STATUSES.has(currentStatus)) {
           clearInterval(timer);
-          closeSseStream(res, 'done', `Deployment reached terminal status: ${currentStatus}`);
+          // Guard against write-after-end if client already disconnected
+          if (!res.ended) {
+            closeSseStream(res, 'done', `Deployment reached terminal status: ${currentStatus}`);
+          }
+          return;
         }
       }
     } catch (err) {
       // Any Supabase or network error — stop polling and report
       clearInterval(timer);
-      closeSseStream(res, 'error', err.message || 'Status polling error.');
+      // Guard against write-after-end if client already disconnected
+      if (!res.ended) {
+        closeSseStream(res, 'error', err.message || 'Status polling error.');
+      }
     }
   }
 
