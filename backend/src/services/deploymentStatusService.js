@@ -106,8 +106,16 @@ export async function getDeploymentStatus(deploymentId, _supabase = null) {
     );
   }
 
-  if (!data) {
+  // Supabase returns null data with no error when the row does not exist
+  if (data === null || data === undefined) {
     throw new Error(`Deployment not found: ${deploymentId}`);
+  }
+
+  // Validate that the returned row has the expected status field
+  if (!data.status) {
+    throw new Error(
+      `Deployment record is malformed — missing status field: ${deploymentId}`,
+    );
   }
 
   return data;
