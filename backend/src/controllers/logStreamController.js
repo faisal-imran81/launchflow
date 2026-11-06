@@ -100,6 +100,9 @@ export async function handleStreamBuildLogs(req, res) {
   } catch (err) {
     const mapped = mapLogStreamError(err);
 
+    // Guard against write-after-end if client already disconnected
+    if (res.ended) return;
+
     // If SSE headers already sent, close the stream with error event
     if (res.headersSent) {
       closeSseStream(res, 'error', mapped.message);
