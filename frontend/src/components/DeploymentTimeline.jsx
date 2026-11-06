@@ -28,11 +28,17 @@ function getStepState(stepStatus, current) {
   const currentIdx = order.indexOf(current);
   const stepIdx = order.indexOf(stepStatus);
 
-  // Failed or stopped — mark active step as failed, prior steps completed
-  if (current === 'failed' || current === 'stopped') {
+  // Failed — mark current step as failed, prior steps completed
+  if (current === 'failed') {
     if (stepIdx < currentIdx) return 'completed';
     if (stepIdx === currentIdx) return 'failed';
     return 'pending';
+  }
+
+  // Stopped — all steps up to and including running are completed
+  // since stopped only happens after a successful running state
+  if (current === 'stopped') {
+    return 'completed';
   }
 
   if (stepIdx < currentIdx) return 'completed';
@@ -51,6 +57,7 @@ function getCircleClasses(state) {
     completed: 'bg-green-500 border-green-500 text-white',
     active:    'bg-indigo-500 border-indigo-500 text-white animate-pulse',
     failed:    'bg-red-500 border-red-500 text-white',
+    stopped:   'bg-zinc-500 border-zinc-500 text-white',
     pending:   'bg-zinc-800 border-zinc-600 text-zinc-500',
   };
   return map[state] ?? map.pending;
@@ -170,6 +177,14 @@ export default function DeploymentTimeline({
       {status === 'failed' && meta?.error && (
         <div className="mt-4 px-3 py-2 rounded-lg bg-red-950 border border-red-800 text-xs text-red-300">
           <span className="font-semibold">Error: </span>{meta.error}
+        </div>
+      )}
+
+      {/* ── Stopped message — shown when deployment was manually stopped ── */}
+      {status === 'stopped' && (
+        <div className="mt-4 px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-600 text-xs text-zinc-400">
+          <span className="font-semibold">■ Stopped: </span>
+          Deployment was stopped manually.
         </div>
       )}
     </div>
