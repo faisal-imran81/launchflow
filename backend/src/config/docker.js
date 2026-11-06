@@ -8,3 +8,12 @@ import Docker from 'dockerode'
 const docker = new Docker()
 
 export default docker
+
+/**
+ * Returns the shared Dockerode client.
+ * Provided as a named export so module-level mocks in tests can override it.
+ * @returns {import('dockerode')} Shared Dockerode instance
+ */
+export function getDockerClient() {
+  return docker
+}

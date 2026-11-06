@@ -211,8 +211,15 @@ export default function LogStreamPanel({
 
       {/* ── Footer — paused indicator ── */}
       {isPaused && (
-        <div className="px-4 py-1.5 border-t border-zinc-700 text-xs text-yellow-400 bg-zinc-800 rounded-b-xl">
-          ⏸ Stream paused — new lines are buffered on the server.
+        <div className="px-4 py-1.5 border-t border-zinc-700 text-xs text-yellow-400 bg-zinc-800 rounded-b-xl flex items-center gap-2">
+          <span>⏸</span>
+          <span>Stream paused — new lines are buffered. Click Resume to continue.</span>
+        </div>
+      )}
+      {status === 'error' && !isPaused && (
+        <div className="px-4 py-1.5 border-t border-zinc-700 text-xs text-red-400 bg-zinc-800 rounded-b-xl flex items-center gap-2">
+          <span>⚠️</span>
+          <span>Stream disconnected — click Reconnect to retry.</span>
         </div>
       )}
     </div>
