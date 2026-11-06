@@ -8,6 +8,7 @@ import EmptyState from '../components/EmptyState'
 import SuccessToast from '../components/SuccessToast'
 import AIEngine from '../components/AIEngine'
 import LogStreamPanel from '../components/LogStreamPanel.jsx'
+import LogStreamErrorBoundary from '../components/LogStreamErrorBoundary.jsx'
 import { useDeploymentStatus } from '../hooks/useDeploymentStatus.js'
 import DeploymentStatusBadge from '../components/DeploymentStatusBadge.jsx'
 import DeploymentTimeline from '../components/DeploymentTimeline.jsx'
@@ -91,13 +92,15 @@ export default function Deploy() {
           <h2 className="text-sm font-semibold text-zinc-300 mb-2">
             Container Logs
           </h2>
-          <LogStreamPanel
-            containerId={activeContainerId}
-            poll={false}
-            tail={50}
-            interval={2000}
-            className="w-full"
-          />
+          <LogStreamErrorBoundary>
+            <LogStreamPanel
+              containerId={activeContainerId}
+              poll={false}
+              tail={50}
+              interval={2000}
+              className="w-full"
+            />
+          </LogStreamErrorBoundary>
         </div>
       )}
 
@@ -140,11 +143,13 @@ export default function Deploy() {
           {/* Deployment pipeline timeline */}
           <div className="lg:col-span-2">
             <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4">
-              <DeploymentTimeline
-                status={deploymentStatus}
-                history={statusHistory}
-                meta={statusMeta}
-              />
+              <LogStreamErrorBoundary>
+                <DeploymentTimeline
+                  status={deploymentStatus}
+                  history={statusHistory}
+                  meta={statusMeta}
+                />
+              </LogStreamErrorBoundary>
             </div>
           </div>
 
