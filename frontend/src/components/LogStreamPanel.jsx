@@ -134,9 +134,56 @@ export default function LogStreamPanel({
       {/* ── Log output area ── */}
       <div className="flex-1 overflow-y-auto max-h-96 px-4 py-3 font-mono text-xs leading-relaxed">
         {logs.length === 0 ? (
-          <p className="text-zinc-500 select-none">
-            {status === 'idle' ? 'No container selected.' : 'Waiting for logs…'}
-          </p>
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            {status === 'idle' && (
+              <>
+                <span className="text-2xl select-none">📋</span>
+                <p className="text-zinc-500 text-xs select-none">
+                  No container selected.
+                </p>
+              </>
+            )}
+            {status === 'connecting' && (
+              <>
+                <span className="text-2xl select-none animate-pulse">🔌</span>
+                <p className="text-zinc-500 text-xs select-none">
+                  Connecting to log stream…
+                </p>
+              </>
+            )}
+            {status === 'live' && (
+              <>
+                <span className="text-2xl select-none animate-pulse">📡</span>
+                <p className="text-zinc-500 text-xs select-none">
+                  Connected — waiting for first log line…
+                </p>
+              </>
+            )}
+            {status === 'reconnecting' && (
+              <>
+                <span className="text-2xl select-none animate-pulse">🔄</span>
+                <p className="text-zinc-500 text-xs select-none">
+                  Reconnecting to log stream…
+                </p>
+              </>
+            )}
+            {status === 'done' && (
+              <>
+                <span className="text-2xl select-none">✅</span>
+                <p className="text-zinc-500 text-xs select-none">
+                  Stream ended — no logs were captured.
+                </p>
+              </>
+            )}
+            {status === 'error' && (
+              <>
+                <span className="text-2xl select-none">⚠️</span>
+                <p className="text-red-400 text-xs select-none">
+                  Stream error — check container status and reconnect.
+                </p>
+              </>
+            )}
+          </div>
         ) : (
           logs.map((entry, idx) => (
             <div
