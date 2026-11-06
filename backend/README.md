@@ -496,3 +496,61 @@ npm test
 | `deploymentStatusController.test.js` | 18 |
 | **Day 20 Total** | **34** |
 | **Cumulative Total** | **68** |
+
+---
+
+## Day 21 — Buffer + Testing
+
+Dedicated buffer day focused on hardening the codebase built in
+Day 19 (SSE log streaming) and Day 20 (deployment status tracking).
+
+### What was fixed
+- `streamDeploymentStatus` — added `res.ended` guards to prevent write-after-end on client disconnect
+- `pollDockerLogs` — improved index-based diff logic to fix first-poll edge case with empty lastSeen
+- `handleStreamBuildLogs` — verified import chain and added `res.ended` guard
+- `streamDockerLogs` — added empty containerId guard before Dockerode call
+- `getDeploymentStatus` — strengthened null/undefined/malformed row checks from Supabase
+
+### What was added
+- `LogStreamErrorBoundary.jsx` — React error boundary prevents Deploy page crash
+- `LogStreamPanel` — polished empty state UI with per-status icons and messages
+- `DeploymentTimeline` — added stopped status display with completed steps and footer message
+
+### New Test Files (Day 21)
+
+| File | Tests |
+|------|-------|
+| `logStreamErrors.unit.test.js` | 18 |
+| `deploymentStatusErrors.unit.test.js` | 18 |
+| `sseHelper.edge.test.js` | 20 |
+| `streamDeploymentStatus.unit.test.js` | 10 |
+| `useLogStream.cleanup.test.js` (frontend) | 17 |
+| `useDeploymentStatus.cleanup.test.js` (frontend) | 20 |
+| **Day 21 Total** | **103** |
+
+### Cumulative Test Count
+
+| Day | Tests Added | Running Total |
+|-----|-------------|---------------|
+| Day 1–18 | 480 | 480 |
+| Day 19 | 34 | 514 |
+| Day 20 | 34 | 548 |
+| Day 21 | 35 | 583 |
+| **Total** | | **583** |
+
+### Running Day 21 Tests
+
+```bash
+# Error mapping tests
+node --test tests/logStreamErrors.unit.test.js
+node --test tests/deploymentStatusErrors.unit.test.js
+
+# SSE edge cases
+node --test tests/sseHelper.edge.test.js
+
+# Status stream tests
+node --test tests/streamDeploymentStatus.unit.test.js
+
+# Full backend suite
+npm test
+```
