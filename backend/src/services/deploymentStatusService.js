@@ -10,7 +10,12 @@
  */
 
 import { getSupabaseClient } from '../config/supabase.js';
-import { setSseHeaders, sendSseEvent, closeSseStream, onClientDisconnect } from '../utils/sseHelper.js';
+import {
+  setSseHeaders,
+  sendSseEvent,
+  closeSseStream,
+  onClientDisconnect,
+} from '../utils/sseHelper.js';
 
 /**
  * All valid deployment pipeline status values.

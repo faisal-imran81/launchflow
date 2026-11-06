@@ -7,7 +7,12 @@
 // backend/src/services/logStreamService.js
 
 import { getDockerClient } from '../config/docker.js';
-import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '../utils/sseHelper.js';
+import {
+  setSseHeaders,
+  sendLogLine,
+  closeSseStream,
+  onClientDisconnect,
+} from '../utils/sseHelper.js';
 
 /**
  * Stream live logs from a running Docker container to the client via SSE.
