@@ -19,8 +19,8 @@ import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '
  * @returns {Promise<void>}
  * @throws {Error} If the container is not found or Dockerode fails to open the stream
  */
-export async function streamDockerLogs(containerId, req, res) {
-  const docker = getDockerClient();
+export async function streamDockerLogs(containerId, req, res, _docker = null) {
+  const docker = _docker ?? getDockerClient();
   const container = docker.getContainer(containerId);
 
   // Open SSE connection immediately so the browser starts receiving
@@ -93,8 +93,9 @@ export async function pollDockerLogs(
   res,
   tailLines = 50,
   intervalMs = 2000,
+  _docker = null,
 ) {
-  const docker = getDockerClient();
+  const docker = _docker ?? getDockerClient();
   const container = docker.getContainer(containerId);
 
   // Open SSE connection before the first poll
@@ -128,12 +129,21 @@ export async function pollDockerLogs(
       // Skip if output hasn't changed since the last poll
       if (rawText === lastSeen) return;
 
-      // Find lines that are genuinely new this cycle
-      const prevLines = lastSeen.split('\n');
+      // Find lines that are genuinely new this cycle using index-based diff.
+      // Split both snapshots into arrays and only send lines that appear
+      // after the previous snapshot's last line — avoids false dedup when
+      // the same log line appears multiple times legitimately.
+      const prevLines = lastSeen ? lastSeen.split('\n') : [];
       const currentLines = rawText.split('\n');
-      const newLines = currentLines.filter(
-        (line) => line.trim() && !prevLines.includes(line),
-      );
+
+      // New lines start after the last line of the previous snapshot
+      const prevLastLine = prevLines[prevLines.length - 1] ?? '';
+      const lastMatchIdx = currentLines.lastIndexOf(prevLastLine);
+      const startIdx = lastMatchIdx !== -1 ? lastMatchIdx + 1 : prevLines.length;
+
+      const newLines = currentLines
+        .slice(startIdx)
+        .filter((line) => line.trim());
 
       newLines.forEach((line) => sendLogLine(res, line.trimEnd(), 'stdout'));
 
@@ -162,8 +172,8 @@ export async function pollDockerLogs(
  * @returns {Promise<void>}
  * @throws {Error} If docker.buildImage fails or the tar stream is invalid
  */
-export async function streamBuildLogs(tarStream, buildOpts, req, res) {
-  const docker = getDockerClient();
+export async function streamBuildLogs(tarStream, buildOpts, req, res, _docker = null) {
+  const docker = _docker ?? getDockerClient();
 
   // Open SSE connection before the build starts
   setSseHeaders(res);
