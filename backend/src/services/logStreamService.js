@@ -20,6 +20,13 @@ import { setSseHeaders, sendLogLine, closeSseStream, onClientDisconnect } from '
  * @throws {Error} If the container is not found or Dockerode fails to open the stream
  */
 export async function streamDockerLogs(containerId, req, res, _docker = null) {
+  // Guard against empty or invalid containerId before opening SSE connection
+  if (!containerId || typeof containerId !== 'string' || !containerId.trim()) {
+    setSseHeaders(res);
+    closeSseStream(res, 'error', 'containerId is required to stream logs.');
+    return;
+  }
+
   const docker = _docker ?? getDockerClient();
   const container = docker.getContainer(containerId);
 
