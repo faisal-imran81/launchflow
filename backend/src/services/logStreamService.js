@@ -142,20 +142,23 @@ export async function pollDockerLogs(
       if (rawText === lastSeen) return;
 
       // Find lines that are genuinely new this cycle using index-based diff.
-      // Split both snapshots into arrays and only send lines that appear
-      // after the previous snapshot's last line — avoids false dedup when
-      // the same log line appears multiple times legitimately.
-      const prevLines = lastSeen ? lastSeen.split('\n') : [];
       const currentLines = rawText.split('\n');
 
-      // New lines start after the last line of the previous snapshot
-      const prevLastLine = prevLines[prevLines.length - 1] ?? '';
-      const lastMatchIdx = currentLines.lastIndexOf(prevLastLine);
-      const startIdx = lastMatchIdx !== -1 ? lastMatchIdx + 1 : prevLines.length;
+      let newLines;
 
-      const newLines = currentLines
-        .slice(startIdx)
-        .filter((line) => line.trim());
+      if (!lastSeen) {
+        // First poll — send all non-empty lines directly
+        newLines = currentLines.filter((line) => line.trim());
+      } else {
+        // Subsequent polls — find lines after the last known line
+        const prevLines = lastSeen.split('\n');
+        const prevLastLine = prevLines[prevLines.length - 1] ?? '';
+        const lastMatchIdx = currentLines.lastIndexOf(prevLastLine);
+        const startIdx = lastMatchIdx !== -1 ? lastMatchIdx + 1 : prevLines.length;
+        newLines = currentLines
+          .slice(startIdx)
+          .filter((line) => line.trim());
+      }
 
       newLines.forEach((line) => sendLogLine(res, line.trimEnd(), 'stdout'));
 
