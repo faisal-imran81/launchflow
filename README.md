@@ -139,7 +139,7 @@ Week 3 builds on the AI Engine to take generated Dockerfiles all the way to a ru
 | Day 18 ✅ | Nginx configuration — reverse proxy config generation + AI-powered generation |
 | Day 19 ✅ | Real-time log streaming — SSE container logs, build logs, polling fallback, useLogStream hook, LogStreamPanel UI |
 | Day 20 ✅ | Deployment status tracking — Supabase persistence, SSE stream, pipeline timeline UI, 34 new tests |
-| Day 21 | Buffer + integration testing |
+| Day 21 ✅ | Buffer + testing — 103 new tests, 6 bug fixes, error boundary, UI polish, 583 total |
 
 > The AI Engine (Week 2) generates the Dockerfile and CI/CD workflow. Week 3 executes that workflow end-to-end on real cloud infrastructure.
 
@@ -315,3 +315,41 @@ persisted to Supabase and streamed live to the frontend via SSE.
 
 ### Up next — Day 21
 Buffer + testing — full end-to-end flow test, edge case fixes, and test suite cleanup.
+
+---
+
+## Day 21 — Buffer + Testing ✅
+
+### What was built
+Dedicated hardening day — fixed edge cases discovered during testing,
+strengthened error handling across SSE and status services,
+added 103 new tests, and polished the frontend log streaming UI.
+
+### Bug Fixes
+- `streamDeploymentStatus` — res.ended guards prevent write-after-end
+- `pollDockerLogs` — fixed first-poll diff edge case with empty lastSeen
+- `handleStreamBuildLogs` — verified import chain + res.ended guard
+- `streamDockerLogs` — empty containerId guard before Dockerode call
+- `getDeploymentStatus` — null/undefined/malformed Supabase row handling
+- `LogStreamPanel` — per-status empty state icons and messages
+
+### New Files
+- `LogStreamErrorBoundary.jsx` — React error boundary for Deploy page
+- `logStreamErrors.unit.test.js` — mapLogStreamError all branches
+- `deploymentStatusErrors.unit.test.js` — mapDeploymentStatusError all branches
+- `sseHelper.edge.test.js` — unicode, rapid fire, long lines, empty payloads
+- `streamDeploymentStatus.unit.test.js` — polling loop, terminal status, disconnect
+- `useLogStream.cleanup.test.js` — EventSource lifecycle, buffer cap, backoff
+- `useDeploymentStatus.cleanup.test.js` — terminal guard, reconnect, history
+
+### Test Summary
+| Day | Tests Added | Running Total |
+|-----|-------------|---------------|
+| Day 1–18 | 480 | 480 |
+| Day 19 | 34 | 514 |
+| Day 20 | 34 | 548 |
+| Day 21 | 35 | 583 |
+| **Total** | | **583** |
+
+### Up next — Day 22
+Full flow end-to-end testing — GitHub → AI → Docker → ECR → EC2 → Logs → Status.
