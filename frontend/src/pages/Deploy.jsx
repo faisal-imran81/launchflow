@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useHistory } from '../hooks/useHistory'
+import { useDeploy } from '../hooks/useDeploy'
+import { useGitHub } from '../hooks/useGitHub'
 import DeployForm from '../components/DeployForm'
 import DeploymentCard from '../components/DeploymentCard'
 import SkeletonCard from '../components/SkeletonCard'
@@ -17,7 +19,27 @@ export default function Deploy() {
   usePageTitle('Deploy')
   const { deployments, fetchDeployments, isLoading } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
-  const [activeContainerId, setActiveContainerId] = useState(null)
+
+  const {
+    deploy,
+    loading: deployLoading,
+    error: deployError,
+    deploymentId,
+    containerId,
+    status,
+    clearError: clearDeployError,
+    reset,
+  } = useDeploy()
+
+  const {
+    repos,
+    loading: repoLoading,
+    error: repoError,
+    fetchRepos,
+    fetchFiles,
+    clearError: clearRepoError,
+    clearRepos,
+  } = useGitHub()
 
   const {
     status: deploymentStatus,
@@ -26,18 +48,31 @@ export default function Deploy() {
     streamStatus,
     isTerminal,
     reconnect: reconnectStatus,
-  } = useDeploymentStatus(activeContainerId, { interval: 2000, autoStart: !!activeContainerId })
+  } = useDeploymentStatus(deploymentId, { interval: 2000, autoStart: !!deploymentId })
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      pending:   'Preparing deployment...',
+      queued:    'Preparing deployment...',
+      cloning:   'Cloning repository...',
+      building:  'Building Docker image...',
+      pushing:   'Pushing to ECR...',
+      deploying: 'Deploying to EC2...',
+      running:   'Deployment live!',
+      failed:    'Deployment failed.',
+      stopped:   'Deployment stopped.',
+    };
+    return labels[status] ?? 'Processing...';
+  };
+
+  const activeStatus = deploymentStatus ?? status
+  const logContainerId = containerId ?? statusMeta?.containerId ?? null
 
   const handleSuccess = async (result) => {
-    const newProject = result.data?.project
+    const newProject = result?.data?.project
     if (newProject) {
       setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
       await fetchDeployments()
-    }
-
-    // result.containerId comes from the backend deploy response
-    if (result?.containerId) {
-      setActiveContainerId(result.containerId)
     }
   }
 
@@ -51,7 +86,25 @@ export default function Deploy() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DeployForm onSuccess={handleSuccess} />
+        <DeployForm
+          onSuccess={handleSuccess}
+          repos={repos}
+          repoLoading={repoLoading}
+          repoError={repoError}
+          fetchRepos={fetchRepos}
+          fetchFiles={fetchFiles}
+          clearRepoError={clearRepoError}
+          clearRepos={clearRepos}
+          deploy={deploy}
+          deployLoading={deployLoading}
+          deployError={deployError}
+          clearDeployError={clearDeployError}
+          status={activeStatus}
+          getStatusLabel={getStatusLabel}
+          reset={reset}
+          deploymentId={deploymentId}
+          containerId={containerId}
+        />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -87,14 +140,14 @@ export default function Deploy() {
       </div>
 
       {/* ── Real-time log stream ── */}
-      {activeContainerId && (
+      {logContainerId && (
         <div className="mt-6">
           <h2 className="text-sm font-semibold text-zinc-300 mb-2">
             Container Logs
           </h2>
           <LogStreamErrorBoundary>
             <LogStreamPanel
-              containerId={activeContainerId}
+              containerId={logContainerId}
               poll={false}
               tail={50}
               interval={2000}
@@ -104,7 +157,7 @@ export default function Deploy() {
         </div>
       )}
 
-      {activeContainerId && (
+      {deploymentId && (
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Deployment status badge + stream indicator */}
