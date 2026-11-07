@@ -5,7 +5,14 @@ import { updateDeploymentStatus as updateDeploymentStatusService, DEPLOYMENT_STA
 export const triggerDeploy = async (req, res) => {
   let deploymentId = null
   try {
-    const { repoUrl, appName, environment } = req.body
+    const { repoUrl, appName, environment, deploymentId: requestedDeploymentId } = req.body ?? {}
+
+    if (requestedDeploymentId !== undefined && requestedDeploymentId !== null) {
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      if (typeof requestedDeploymentId !== 'string' || !uuidRegex.test(requestedDeploymentId)) {
+        return res.status(400).json({ error: 'deploymentId must be a valid UUID if provided' })
+      }
+    }
 
     if (!repoUrl || !appName || !environment) {
       return res.status(400).json({
@@ -27,9 +34,11 @@ export const triggerDeploy = async (req, res) => {
 
     deploymentId = deployment.id
 
-    try {
-      await updateDeploymentStatusService(deploymentId, DEPLOYMENT_STATUS.QUEUED, {});
-    } catch (_) { /* status update failure must not break deploy */ }
+    if (deploymentId) {
+      try {
+        await updateDeploymentStatusService(deploymentId, DEPLOYMENT_STATUS.QUEUED, {});
+      } catch (_) { /* status update failure must not break deploy */ }
+    }
 
     res.status(201).json({
       success: true,
