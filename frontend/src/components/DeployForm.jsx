@@ -1,15 +1,25 @@
 import { useState } from 'react'
-import { useDeploy } from '../hooks/useDeploy'
-import { useGitHub } from '../hooks/useGitHub'
 import RepoSearchBar from './RepoSearchBar'
 import RepoList from './RepoList'
 import Spinner from './Spinner'
 import ErrorAlert from './ErrorAlert'
 
-export default function DeployForm({ onSuccess }) {
-  const { deploy, isLoading, error, clearError } = useDeploy()
-  const { repos, getRepos, clearRepos, isLoading: repoLoading, error: repoError } = useGitHub()
-
+export default function DeployForm({
+  onSuccess,
+  repos,
+  repoLoading,
+  repoError,
+  fetchRepos,
+  clearRepoError,
+  clearRepos,
+  deploy,
+  deployLoading,
+  deployError,
+  clearDeployError,
+  status,
+  getStatusLabel,
+  reset,
+}) {
   const [selectedRepo, setSelectedRepo] = useState(null)
   const [searched, setSearched] = useState(false)
   const [form, setForm] = useState({
@@ -21,7 +31,7 @@ export default function DeployForm({ onSuccess }) {
     clearRepos()
     setSelectedRepo(null)
     setSearched(false)
-    await getRepos(username)
+    await fetchRepos(username)
     setSearched(true)
   }
 
@@ -37,13 +47,13 @@ export default function DeployForm({ onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!selectedRepo) return
-    clearError()
+    clearDeployError()
 
-    const result = await deploy(
-      selectedRepo.cloneUrl,
-      form.appName,
-      form.environment
-    )
+    const result = await deploy({
+      repoUrl: selectedRepo.cloneUrl,
+      appName: form.appName,
+      environment: form.environment,
+    })
 
     if (result) {
       setForm({ appName: '', environment: 'production' })
@@ -51,6 +61,14 @@ export default function DeployForm({ onSuccess }) {
       clearRepos()
       if (onSuccess) onSuccess(result)
     }
+  }
+
+  const handleReset = () => {
+    reset()
+    clearRepos()
+    setSelectedRepo(null)
+    setSearched(false)
+    setForm({ appName: '', environment: 'production' })
   }
 
   return (
@@ -62,8 +80,16 @@ export default function DeployForm({ onSuccess }) {
         </p>
       </div>
 
-      {(error || repoError) && (
-        <ErrorAlert message={error || repoError} onDismiss={clearError} />
+      {repoError && (
+        <div className="mt-2">
+          <ErrorAlert message={repoError} onDismiss={clearRepoError} />
+        </div>
+      )}
+
+      {deployError && (
+        <div className="mt-2">
+          <ErrorAlert message={deployError} onDismiss={clearDeployError} />
+        </div>
       )}
 
       <RepoSearchBar
@@ -71,6 +97,13 @@ export default function DeployForm({ onSuccess }) {
         onClear={() => { clearRepos(); setSelectedRepo(null); setSearched(false) }}
         isLoading={repoLoading}
       />
+
+      {repoLoading && (
+        <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
+          <Spinner size="sm" />
+          <span>Fetching repositories...</span>
+        </div>
+      )}
 
       <RepoList
         repos={repos}
@@ -117,11 +150,32 @@ export default function DeployForm({ onSuccess }) {
 
         <button
           type="submit"
-          disabled={isLoading || !selectedRepo}
-          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          disabled={deployLoading || repoLoading || !selectedRepo}
+          className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+            deployLoading || repoLoading || !selectedRepo
+              ? 'bg-gray-600 cursor-not-allowed opacity-60'
+              : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+          } text-white`}
         >
-          {isLoading ? <Spinner size="sm" text="" /> : '🚀 Deploy Now'}
+          {deployLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <Spinner size="sm" />
+              {getStatusLabel(status)}
+            </span>
+          ) : (
+            'Deploy'
+          )}
         </button>
+
+        {(status === 'running' || status === 'failed') && (
+          <button
+            type="button"
+            onClick={handleReset}
+            className="mt-4 text-sm text-gray-400 hover:text-white underline transition-colors"
+          >
+            Start a new deployment
+          </button>
+        )}
 
         {!selectedRepo && (
           <p className="text-gray-600 text-xs text-center">

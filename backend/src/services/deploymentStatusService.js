@@ -101,7 +101,7 @@ export async function getDeploymentStatus(deploymentId, _supabase = null) {
 
   const { data, error } = await supabase
     .from('deployments')
-    .select('id, status, updated_at, error, image_tag, container_id')
+    .select('id, status, updated_at')
     .eq('id', deploymentId)
     .single();
 
@@ -123,7 +123,15 @@ export async function getDeploymentStatus(deploymentId, _supabase = null) {
     );
   }
 
-  return data;
+  return {
+    id: data.id,
+    status: data.status,
+    updated_at: data.updated_at,
+    // Optional columns — may not exist in all schema versions
+    error: data.error ?? null,
+    image_tag: data.image_tag ?? null,
+    container_id: data.container_id ?? null,
+  };
 }
 
 /**
