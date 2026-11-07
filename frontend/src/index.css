@@ -1,3 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: #0c0c0c;
+    color: #f2f2f2;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.08);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.14);
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(82,183,136,0.25);
+    color: #f2f2f2;
+  }
+}
+
+@layer components {
+  /* Glass card — Raycast style */
+  .card {
+    @apply bg-surface-glass backdrop-blur-sm
+           border border-surface-border rounded-xl shadow-glass;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200
+           hover:bg-surface-hover hover:border-white/10 hover:-translate-y-0.5;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full bg-base-800 border border-surface-border rounded-lg
+           px-3 py-2 text-text-primary placeholder-text-muted text-sm
+           focus:outline-none focus:ring-2 focus:ring-green/50 focus:border-green/40
+           transition-all duration-150;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply bg-green text-base-950 font-semibold
+           px-4 py-2 rounded-lg text-sm transition-all duration-150
+           hover:bg-green-light hover:shadow-green-glow
+           focus:outline-none focus:ring-2 focus:ring-green/50 focus:ring-offset-2
+           focus:ring-offset-base-950
+           disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:shadow-none;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border border-surface-border text-text-secondary
+           hover:text-text-primary hover:bg-surface-hover hover:border-white/10
+           px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150
+           focus:outline-none focus:ring-2 focus:ring-green/30;
+  }
+
+  .btn-danger {
+    @apply bg-crimson-muted border border-crimson/20 text-crimson-light
+           hover:bg-crimson/20 hover:border-crimson/30
+           px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5
+           rounded-full text-xs font-medium border;
+  }
+
+  .badge-green {
+    @apply badge bg-green-muted border-green/20 text-green-light;
+  }
+
+  .badge-crimson {
+    @apply badge bg-crimson-muted border-crimson/20 text-crimson-light;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.03) 25%,
+      rgba(255,255,255,0.07) 50%,
+      rgba(255,255,255,0.03) 75%
+    );
+    background-size: 700px 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+
+  /* Labels */
+  .label {
+    @apply text-xs font-medium text-text-muted uppercase tracking-widest;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-surface-border my-4;
+  }
+}
+
+@layer utilities {
+  .text-gradient-green {
+    @apply bg-gradient-to-r from-green-light to-green bg-clip-text text-transparent;
+  }
+
+  .text-gradient-crimson {
+    @apply bg-gradient-to-r from-crimson-light to-crimson bg-clip-text text-transparent;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .border-subtle {
+    border-color: rgba(255,255,255,0.06);
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
