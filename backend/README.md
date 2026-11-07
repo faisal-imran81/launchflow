@@ -554,3 +554,37 @@ node --test tests/streamDeploymentStatus.unit.test.js
 # Full backend suite
 npm test
 ```
+
+---
+
+## Day 22 — Full Flow End-to-End Integration Testing
+
+**Goal:** GitHub → AI → Docker → ECR → EC2 → Logs → Status — full pipeline tested end-to-end with zero integration gaps.
+
+### Integration Test Suite Added
+| File | Coverage |
+|------|----------|
+| `tests/integration/helpers/startServer.js` | Shared test server boot/stop helper |
+| `tests/integration/healthCheck.test.js` | Server boot, /api/health, 404 fallback, route registration |
+| `tests/integration/githubFlow.test.js` | Repo fetch, file read, input validation |
+| `tests/integration/aiFlow.test.js` | Dockerfile + workflow generation, malformed JSON |
+| `tests/integration/dockerFlow.test.js` | Build/run/stop validation, daemon unreachable guard |
+| `tests/integration/deployFlow.test.js` | Full pipeline mock, null deploymentId guard, status UUID |
+| `tests/integration/logStreamFlow.test.js` | SSE headers, keep-alive, data event, invalid UUID |
+| `tests/integration/statusFlow.test.js` | Status enum guard, SSE stream, UUID validation |
+| `tests/integration/errorFlow.test.js` | All error paths — malformed JSON, empty body, extreme inputs |
+
+### Backend Fixes
+- `deployController.js` — null/invalid deploymentId guard added
+- `githubController.js` — empty repo and null owner/username guard added
+- `aiController.js` — malformed Groq response guard, safe optional chaining
+- `dockerController.js` — Docker daemon unreachable ECONNREFUSED handler
+
+### Frontend Updates
+- `useGitHub.js` — granular error states for 404/403/400, rate limit, offline
+- `useDeploy.js` — robust deploymentId/containerId extraction, reset function
+- `Deploy.jsx` — per-step loading labels, spinner states, error alerts, log stream wiring
+
+### Test Results
+- **691 tests / 208 suites — 0 failures**
+- 108 new integration tests added on top of 583 existing unit tests
