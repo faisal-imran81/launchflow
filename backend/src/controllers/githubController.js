@@ -4,19 +4,22 @@ export const fetchUserRepos = async (req, res) => {
   try {
     const { username } = req.params
 
-    if (!username) {
-      return res.status(400).json({
-        success: false,
-        error: 'GitHub username is required'
-      })
+    if (!username || typeof username !== 'string' || username.trim() === '') {
+      return res.status(400).json({ error: 'username parameter is required' })
     }
 
-    const repos = await getUserRepos(username)
+    if (username.trim().length > 100) {
+      return res.status(400).json({ error: 'username is too long' })
+    }
+
+    const cleanUsername = username.trim()
+
+    const repos = await getUserRepos(cleanUsername)
 
     res.status(200).json({
       success: true,
       data: repos,
-      message: `Fetched ${repos.length} repositories for ${username}`
+      message: `Fetched ${repos.length} repositories for ${cleanUsername}`
     })
   } catch (error) {
     res.status(500).json({ error: error.message })
@@ -27,14 +30,18 @@ export const fetchRepoDetails = async (req, res) => {
   try {
     const { owner, repo } = req.params
 
-    if (!owner || !repo) {
-      return res.status(400).json({
-        success: false,
-        error: 'Owner and repo name are required'
-      })
+    if (!owner || typeof owner !== 'string' || owner.trim() === '') {
+      return res.status(400).json({ error: 'owner parameter is required' })
     }
 
-    const repoDetails = await getRepoDetails(owner, repo)
+    if (!repo || typeof repo !== 'string' || repo.trim() === '') {
+      return res.status(400).json({ error: 'repo parameter is required' })
+    }
+
+    const cleanOwner = owner.trim()
+    const cleanRepo = repo.trim()
+
+    const repoDetails = await getRepoDetails(cleanOwner, cleanRepo)
 
     res.status(200).json({
       success: true,
