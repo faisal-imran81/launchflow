@@ -1,54 +1,87 @@
-// frontend/src/components/DeploymentStatusBadge.jsx
+import StatusBadge from './StatusBadge';
 
-/**
- * Maps each deployment status to a Tailwind color class and display label.
- * Mirrors the backend DEPLOYMENT_STATUS enum values.
- */
-const STATUS_CONFIG = {
-  queued:    { label: 'Queued',     className: 'bg-zinc-700 text-zinc-300' },
-  building:  { label: 'Building…',  className: 'bg-yellow-600 text-yellow-100 animate-pulse' },
-  pushing:   { label: 'Pushing…',   className: 'bg-blue-600 text-blue-100 animate-pulse' },
-  deploying: { label: 'Deploying…', className: 'bg-indigo-600 text-indigo-100 animate-pulse' },
-  running:   { label: '● Running',  className: 'bg-green-600 text-green-100' },
-  failed:    { label: '✕ Failed',   className: 'bg-red-600 text-red-100' },
-  stopped:   { label: '■ Stopped',  className: 'bg-zinc-600 text-zinc-200' },
+const stepOrder = [
+  'pending',
+  'cloning',
+  'building',
+  'pushing',
+  'deploying',
+  'running',
+];
+
+const stepLabels = {
+  pending:   'Preparing',
+  cloning:   'Cloning repo',
+  building:  'Building image',
+  pushing:   'Pushing to ECR',
+  deploying: 'Deploying to EC2',
+  running:   'Live',
+  failed:    'Failed',
 };
 
-/** Fallback config for unknown or null status values. */
-const FALLBACK_CONFIG = { label: 'Unknown', className: 'bg-zinc-800 text-zinc-400' };
+export default function DeploymentStatusBadge({ status, showProgress = false }) {
+  if (!showProgress) {
+    return <StatusBadge status={status} />;
+  }
 
-/**
- * DeploymentStatusBadge — displays a colored pill for the current deployment status.
- * Size variants: 'sm' | 'md' | 'lg'
- *
- * @param {object}      props
- * @param {string|null} props.status         - Current deployment status value
- * @param {'sm'|'md'|'lg'} [props.size='md'] - Badge size variant
- * @param {string}      [props.className]    - Extra Tailwind classes for wrapper
- */
-export default function DeploymentStatusBadge({
-  status,
-  size = 'md',
-  className = '',
-}) {
-  const config = STATUS_CONFIG[status] ?? FALLBACK_CONFIG;
-
-  const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-3 py-1 text-sm',
-    lg: 'px-4 py-1.5 text-base',
-  };
+  const currentIndex = stepOrder.indexOf(status);
+  const isFailed = status === 'failed';
 
   return (
-    <span
-      className={`
-        inline-flex items-center rounded-full font-medium
-        ${sizeClasses[size] ?? sizeClasses.md}
-        ${config.className}
-        ${className}
-      `}
-    >
-      {config.label}
-    </span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      {/* Badge */}
+      <StatusBadge status={status} />
+
+      {/* Progress bar */}
+      {!isFailed && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          {stepOrder.map((step, i) => {
+            const done    = i < currentIndex;
+            const active  = i === currentIndex;
+            const pending = i > currentIndex;
+
+            return (
+              <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <div
+                  title={stepLabels[step]}
+                  style={{
+                    width: active ? '20px' : '8px',
+                    height: '4px',
+                    borderRadius: '999px',
+                    background: done
+                      ? '#52b788'
+                      : active
+                      ? '#52b788'
+                      : 'rgba(255,255,255,0.08)',
+                    opacity: pending ? 0.4 : 1,
+                    transition: 'all 0.3s ease',
+                    boxShadow: active ? '0 0 6px rgba(82,183,136,0.5)' : 'none',
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {isFailed && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <div
+            style={{
+              width: '100%',
+              height: '4px',
+              borderRadius: '999px',
+              background: 'rgba(229,62,62,0.3)',
+              boxShadow: '0 0 6px rgba(229,62,62,0.2)',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Step label */}
+      <p style={{ color: '#5a5a62', fontSize: '11px', fontWeight: 500 }}>
+        {stepLabels[status] ?? 'Processing'}
+      </p>
+    </div>
   );
 }
