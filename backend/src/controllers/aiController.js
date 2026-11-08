@@ -10,7 +10,10 @@ import { generateDockerignore } from "../utils/generateDockerignore.js";
 
 export async function handleGenerateDockerfile(req, res, next) {
   try {
-    const { repoName, language, framework, description } = req.body;
+    const { repoName: providedRepoName, repoUrl, language, framework, description } = req.body;
+    const repoName = providedRepoName
+      ?? repoUrl?.split('/').filter(Boolean).pop()
+      ?? null;
 
     if (!repoName) {
       return res.status(400).json({ error: "repoName is required" });
@@ -31,7 +34,10 @@ export async function handleGenerateDockerfile(req, res, next) {
 
 export async function handleGenerateGithubActions(req, res, next) {
   try {
-    const { repoName, language, framework } = req.body;
+    const { repoName: providedRepoName, repoUrl, language, framework } = req.body;
+    const repoName = providedRepoName
+      ?? repoUrl?.split('/').filter(Boolean).pop()
+      ?? null;
 
     if (!repoName) {
       return res.status(400).json({ error: "repoName is required" });
