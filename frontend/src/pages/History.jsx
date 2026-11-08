@@ -18,11 +18,21 @@ export default function History() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" style={{ animation: 'fadeIn 0.3s ease-out' }}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">Deployment History</h1>
-          <p className="text-gray-400 text-sm mt-1">All your past and current deployments</p>
+          <h1
+            className="text-2xl font-bold text-white"
+            style={{ color: '#f2f2f2', fontWeight: 700, fontSize: '24px', letterSpacing: '-0.02em' }}
+          >
+            Deployment History
+          </h1>
+          <p
+            className="text-gray-400 text-sm mt-1"
+            style={{ color: '#5a5a62', fontSize: '14px', marginTop: '4px' }}
+          >
+            All your past and current deployments
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full whitespace-nowrap">
@@ -55,7 +65,15 @@ export default function History() {
           description="Deploy your first app to see history here"
         />
       ) : (
-        <div className="space-y-3">
+        <div
+          className="space-y-3"
+          style={{
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: '14px',
+            overflow: 'hidden',
+          }}
+        >
           {deployments.map((deployment) => (
             <DeploymentCard
               key={deployment.id}
