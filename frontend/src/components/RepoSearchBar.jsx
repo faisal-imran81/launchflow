@@ -1,50 +1,94 @@
-import { useState } from 'react'
-import Spinner from './Spinner'
+import Spinner from './Spinner';
 
-export default function RepoSearchBar({ onSearch, onClear, isLoading }) {
-  const [username, setUsername] = useState('')
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (!username.trim()) return
-    onSearch(username.trim().toLowerCase())
-  }
-
-  const handleClear = () => {
-    setUsername('')
-    if (onClear) onClear()
-  }
+export default function RepoSearchBar({ value, onChange, onSearch, loading }) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') onSearch?.();
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-1">
-      <label className="text-gray-400 text-sm">GitHub Username</label>
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="e.g. faisal-imran81"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors pr-8"
-          />
-          {username && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              ✕
-            </button>
-          )}
-        </div>
-        <button
-          type="submit"
-          disabled={isLoading || !username.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white text-sm font-medium px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2"
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ position: 'relative', flex: 1 }}>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+          style={{
+            position: 'absolute',
+            left: '11px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#5a5a62',
+            pointerEvents: 'none',
+          }}
         >
-          {isLoading ? <Spinner size="sm" text="" /> : '🔍 Search'}
-        </button>
+          <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5"/>
+          <path d="M10 10 L14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+        <input
+          type="text"
+          value={value}
+          onChange={e => onChange?.(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Enter GitHub username..."
+          style={{
+            width: '100%',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '8px',
+            padding: '9px 12px 9px 32px',
+            fontSize: '13px',
+            color: '#f2f2f2',
+            outline: 'none',
+            transition: 'all 0.15s ease',
+          }}
+          onFocus={e => {
+            e.target.style.borderColor = 'rgba(82,183,136,0.4)';
+            e.target.style.boxShadow   = '0 0 0 3px rgba(82,183,136,0.08)';
+            e.target.style.background  = 'rgba(255,255,255,0.05)';
+          }}
+          onBlur={e => {
+            e.target.style.borderColor = 'rgba(255,255,255,0.08)';
+            e.target.style.boxShadow   = 'none';
+            e.target.style.background  = 'rgba(255,255,255,0.04)';
+          }}
+        />
       </div>
-    </form>
-  )
+
+      <button
+        onClick={onSearch}
+        disabled={loading || !value?.trim()}
+        style={{
+          padding: '9px 16px',
+          borderRadius: '8px',
+          fontSize: '13px',
+          fontWeight: 600,
+          border: '1px solid rgba(82,183,136,0.2)',
+          background: 'rgba(82,183,136,0.08)',
+          color: '#52b788',
+          cursor: loading || !value?.trim() ? 'not-allowed' : 'pointer',
+          opacity: !value?.trim() ? 0.5 : 1,
+          transition: 'all 0.15s ease',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+        }}
+        onMouseEnter={e => {
+          if (!loading && value?.trim()) {
+            e.currentTarget.style.background  = 'rgba(82,183,136,0.14)';
+            e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)';
+          }
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background  = 'rgba(82,183,136,0.08)';
+          e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)';
+        }}
+      >
+        {loading ? <Spinner size="sm" color="green" /> : null}
+        {loading ? 'Searching...' : 'Search'}
+      </button>
+    </div>
+  );
 }
