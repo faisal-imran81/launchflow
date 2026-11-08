@@ -1,125 +1,41 @@
-import { useState, useCallback } from 'react'
-import { useAI } from '../hooks/useAI'
-import AutoDetectForm from './AutoDetectForm'
-import ManualGenerateForm from './ManualGenerateForm'
-import AIOutput from './AIOutput'
-import SuccessToast from './SuccessToast'
+import Spinner from './Spinner';
 
-export default function AIEngine() {
-  const [lastAutoRepo, setLastAutoRepo] = useState(null)
-  const [lastAttempt, setLastAttempt] = useState(null)
-  const [toast, setToast] = useState(null)
-  const dismissToast = useCallback(() => setToast(null), [])
-
-  const {
-    dockerfile,
-    githubActionsYaml,
-    nginxConfig,
-    autoResult,
-    autoWorkflow,
-    loading,
-    error,
-    generateDockerfile,
-    generateGithubActions,
-    generateNginxConfig,
-    generateAutoAll,
-    clearError,
-    reset,
-  } = useAI()
-
-  const hasOutput = Boolean(
-    dockerfile || githubActionsYaml || nginxConfig || autoResult || autoWorkflow || error
-  )
-
-  const activeKind = loading ? lastAttempt?.kind : null
-
-  const announce = async (request, message) => {
-    const ok = await request
-    if (ok) setToast(message)
-  }
-
-  const handleAutoSubmit = (repo) => {
-    setLastAutoRepo(repo)
-    setLastAttempt({ kind: 'auto', payload: repo })
-    announce(generateAutoAll(repo), 'Dockerfile and workflow generated')
-  }
-
-  const handleManualDockerfile = (info) => {
-    setLastAttempt({ kind: 'dockerfile', payload: info })
-    announce(generateDockerfile(info), 'Dockerfile generated')
-  }
-
-  const handleManualActions = (info) => {
-    setLastAttempt({ kind: 'actions', payload: info })
-    announce(generateGithubActions(info), 'Workflow generated')
-  }
-
-  const handleManualNginx = (info) => {
-    setLastAttempt({ kind: 'nginx', payload: info })
-    announce(generateNginxConfig(info), 'Nginx config generated')
-  }
-
-  const handleRegenerate = () => {
-    if (!lastAutoRepo) return
-    setLastAttempt({ kind: 'auto', payload: lastAutoRepo })
-    announce(generateAutoAll(lastAutoRepo), 'Dockerfile and workflow generated')
-  }
-
-  const handleRetry = () => {
-    if (!lastAttempt) return
-    if (lastAttempt.kind === 'auto') announce(generateAutoAll(lastAttempt.payload), 'Dockerfile and workflow generated')
-    if (lastAttempt.kind === 'dockerfile') announce(generateDockerfile(lastAttempt.payload), 'Dockerfile generated')
-    if (lastAttempt.kind === 'actions') announce(generateGithubActions(lastAttempt.payload), 'Workflow generated')
-    if (lastAttempt.kind === 'nginx') announce(generateNginxConfig(lastAttempt.payload), 'Nginx config generated')
-  }
-
-  const handleReset = () => {
-    reset()
-    setLastAutoRepo(null)
-    setLastAttempt(null)
-  }
-
+export default function AIEngine({ children, loading, error, onGenerate }) {
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-xl p-4 sm:p-6 space-y-6">
-      <div>
-        <h2 className="text-white font-semibold text-lg">🤖 AI Engine</h2>
-        <p className="text-gray-400 text-sm mt-1">
-          Generate Dockerfile, .dockerignore and GitHub Actions workflow for your repo
-        </p>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {children}
 
-      <AutoDetectForm
-        onSubmit={handleAutoSubmit}
-        loading={loading}
-        busy={activeKind === 'auto'}
-      />
+      {loading && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: '12px 14px',
+            background: 'rgba(82,183,136,0.05)',
+            border: '1px solid rgba(82,183,136,0.1)',
+            borderRadius: '8px',
+          }}
+        >
+          <Spinner size="sm" color="green" />
+          <span style={{ color: '#74c69d', fontSize: '13px', fontWeight: 500 }}>
+            AI is generating your configuration...
+          </span>
+        </div>
+      )}
 
-      <div className="border-t border-gray-700" />
-
-      <ManualGenerateForm
-        onGenerateDockerfile={handleManualDockerfile}
-        onGenerateActions={handleManualActions}
-        onGenerateNginx={handleManualNginx}
-        onReset={handleReset}
-        showReset={hasOutput}
-        loading={loading}
-        busyKind={activeKind}
-      />
-
-      <AIOutput
-        dockerfile={dockerfile}
-        githubActionsYaml={githubActionsYaml}
-        nginxConfig={nginxConfig}
-        autoResult={autoResult}
-        autoWorkflow={autoWorkflow}
-        loading={loading}
-        error={error}
-        onRegenerate={lastAutoRepo ? handleRegenerate : null}
-        onRetry={lastAttempt ? handleRetry : null}
-        onDismissError={clearError}
-      />
-
-      <SuccessToast message={toast} onDismiss={dismissToast} />
+      {error && (
+        <div
+          style={{
+            padding: '12px 14px',
+            background: 'rgba(229,62,62,0.06)',
+            border: '1px solid rgba(229,62,62,0.15)',
+            borderRadius: '8px',
+          }}
+        >
+          <p style={{ color: '#fc8181', fontSize: '13px' }}>{error}</p>
+        </div>
+      )}
     </div>
-  )
+  );
 }
