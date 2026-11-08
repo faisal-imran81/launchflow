@@ -1,225 +1,301 @@
-// frontend/src/components/LogStreamPanel.jsx
+import { useEffect, useRef, useState } from 'react';
+import { useLogStream } from '../hooks/useLogStream';
 
-import { useEffect, useRef } from 'react';
-import { useLogStream } from '../hooks/useLogStream.js';
+export default function LogStreamPanel({ containerId, deploymentId }) {
+  const { logs, status, pause, resume, reconnect, isPaused } = useLogStream({
+    containerId,
+    deploymentId,
+  });
 
-/**
- * Maps stream status to a human-readable badge label and Tailwind color class.
- *
- * @param {'idle'|'connecting'|'live'|'reconnecting'|'done'|'error'} status
- * @returns {{ label: string, className: string }}
- */
-function getStatusBadge(status) {
-  const map = {
-    idle:         { label: 'Idle',         className: 'bg-zinc-700 text-zinc-300' },
-    connecting:   { label: 'Connecting…',  className: 'bg-yellow-600 text-yellow-100' },
-    live:         { label: '● Live',        className: 'bg-green-600 text-green-100' },
-    reconnecting: { label: 'Reconnecting…',className: 'bg-orange-500 text-orange-100' },
-    done:         { label: 'Done',          className: 'bg-blue-600 text-blue-100' },
-    error:        { label: 'Error',         className: 'bg-red-600 text-red-100' },
-  };
-  return map[status] ?? map.idle;
-}
+  const bottomRef  = useRef(null);
+  const panelRef   = useRef(null);
+  const [autoScroll, setAutoScroll] = useState(true);
 
-/**
- * Formats a Unix timestamp (ms) to HH:MM:SS string.
- *
- * @param {number} ts - Milliseconds since epoch
- * @returns {string}
- */
-function formatTs(ts) {
-  return new Date(ts).toTimeString().slice(0, 8);
-}
-
-/**
- * LogStreamPanel — terminal-style real-time log viewer.
- * Consumes useLogStream and renders each log line with
- * timestamp, stream type badge, and ANSI-safe text.
- *
- * @param {object}      props
- * @param {string|null} props.containerId  - Docker container ID to stream
- * @param {boolean}     [props.poll=false] - Use polling fallback
- * @param {number}      [props.tail=50]    - Lines per poll cycle
- * @param {number}      [props.interval=2000] - Poll interval ms
- * @param {string}      [props.className]  - Extra Tailwind classes for wrapper
- */
-export default function LogStreamPanel({
-  containerId,
-  poll = false,
-  tail = 50,
-  interval = 2000,
-  className = '',
-}) {
-  const { logs, status, isPaused, pause, resume, clear, reconnect } =
-    useLogStream(containerId, { poll, tail, interval, autoStart: !!containerId });
-
-  // Auto-scroll to bottom whenever new log lines arrive and not paused
-  const bottomRef = useRef(null);
+  // Auto scroll to bottom
   useEffect(() => {
-    if (!isPaused && bottomRef.current) {
+    if (autoScroll && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [logs, isPaused]);
+  }, [logs, autoScroll]);
 
-  const badge = getStatusBadge(status);
+  // Detect manual scroll up — disable autoscroll
+  const handleScroll = () => {
+    const el = panelRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 40;
+    setAutoScroll(atBottom);
+  };
 
-  /**
-   * Download all current log lines as a plain .txt file.
-   */
-  function handleDownload() {
-    const text = logs.map((l) => `[${formatTs(l.ts)}] ${l.line}`).join('\n');
-    const blob = new Blob([text], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `logs-${containerId ?? 'stream'}-${Date.now()}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const isConnected    = status === 'live';
+  const isConnecting   = status === 'connecting' || status === 'reconnecting';
+  const isDisconnected = status === 'idle' || status === 'done' || status === 'error';
+
+  const statusDot = isConnected
+    ? { color: '#52b788', shadow: '0 0 6px rgba(82,183,136,0.6)', label: 'Live' }
+    : isConnecting
+    ? { color: '#f59e0b', shadow: '0 0 6px rgba(245,158,11,0.5)', label: 'Connecting...' }
+    : { color: '#e53e3e', shadow: '0 0 6px rgba(229,62,62,0.5)', label: 'Disconnected' };
 
   return (
-    <div className={`flex flex-col rounded-xl border border-zinc-700 bg-zinc-900 ${className}`}>
-
-      {/* ── Header bar ── */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-700">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-zinc-200">Logs</span>
-          {/* Stream status badge */}
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${badge.className}`}>
-            {badge.label}
+    <div
+      style={{
+        background: '#0a0a0a',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '380px',
+      }}
+    >
+      {/* Terminal header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '10px 14px',
+          background: 'rgba(255,255,255,0.03)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          flexShrink: 0,
+        }}
+      >
+        {/* Left — macOS dots + title */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {['#e53e3e', '#f59e0b', '#52b788'].map((c) => (
+              <div
+                key={c}
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '50%',
+                  background: c,
+                  opacity: 0.7,
+                }}
+              />
+            ))}
+          </div>
+          <span
+            style={{
+              color: '#5a5a62',
+              fontSize: '12px',
+              fontFamily: 'JetBrains Mono, monospace',
+              fontWeight: 500,
+            }}
+          >
+            deployment logs
           </span>
-          {/* Log line count */}
-          <span className="text-xs text-zinc-500">{logs.length} lines</span>
         </div>
 
-        {/* Controls */}
-        <div className="flex items-center gap-2">
-          {/* Pause / Resume */}
-          <button
-            onClick={isPaused ? resume : pause}
-            className="px-3 py-1 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors"
-          >
-            {isPaused ? 'Resume' : 'Pause'}
-          </button>
-
-          {/* Clear buffer */}
-          <button
-            onClick={clear}
-            className="px-3 py-1 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors"
-          >
-            Clear
-          </button>
-
-          {/* Download logs */}
-          <button
-            onClick={handleDownload}
-            disabled={logs.length === 0}
-            className="px-3 py-1 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            Download
-          </button>
-
-          {/* Manual reconnect — only shown when stream is not live */}
-          {status !== 'live' && status !== 'connecting' && (
-            <button
-              onClick={reconnect}
-              className="px-3 py-1 text-xs rounded-md bg-indigo-600 hover:bg-indigo-500 text-white transition-colors"
+        {/* Right — status + controls */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Status dot */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                background: statusDot.color,
+                boxShadow: statusDot.shadow,
+                display: 'inline-block',
+              }}
+            />
+            <span
+              style={{
+                color: statusDot.color,
+                fontSize: '11px',
+                fontWeight: 600,
+                fontFamily: 'JetBrains Mono, monospace',
+              }}
             >
-              Reconnect
+              {statusDot.label}
+            </span>
+          </div>
+
+          {/* Pause / Resume */}
+          {isConnected && (
+            <button
+              onClick={isPaused ? resume : pause}
+              style={{
+                padding: '3px 10px',
+                borderRadius: '5px',
+                fontSize: '11px',
+                fontWeight: 600,
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.04)',
+                color: '#a0a0a8',
+                cursor: 'pointer',
+                fontFamily: 'JetBrains Mono, monospace',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background   = 'rgba(255,255,255,0.08)';
+                e.currentTarget.style.color        = '#f2f2f2';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background   = 'rgba(255,255,255,0.04)';
+                e.currentTarget.style.color        = '#a0a0a8';
+              }}
+            >
+              {isPaused ? '▶ Resume' : '⏸ Pause'}
             </button>
           )}
+
+          {/* Reconnect */}
+          {isDisconnected && (
+            <button
+              onClick={reconnect}
+              style={{
+                padding: '3px 10px',
+                borderRadius: '5px',
+                fontSize: '11px',
+                fontWeight: 600,
+                border: '1px solid rgba(229,62,62,0.2)',
+                background: 'rgba(229,62,62,0.08)',
+                color: '#fc8181',
+                cursor: 'pointer',
+                fontFamily: 'JetBrains Mono, monospace',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(229,62,62,0.14)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
+              }}
+            >
+              ↺ Reconnect
+            </button>
+          )}
+
+          {/* Log count */}
+          <span
+            style={{
+              color: '#3a3a42',
+              fontSize: '11px',
+              fontFamily: 'JetBrains Mono, monospace',
+            }}
+          >
+            {logs.length} lines
+          </span>
         </div>
       </div>
 
-      {/* ── Log output area ── */}
-      <div className="flex-1 overflow-y-auto max-h-96 px-4 py-3 font-mono text-xs leading-relaxed">
+      {/* Log body */}
+      <div
+        ref={panelRef}
+        onScroll={handleScroll}
+        style={{
+          flex: 1,
+          overflowY: 'auto',
+          padding: '12px 16px',
+          fontFamily: 'JetBrains Mono, Fira Code, monospace',
+          fontSize: '12px',
+          lineHeight: '1.8',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1px',
+        }}
+      >
         {logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 gap-2">
-            {status === 'idle' && (
-              <>
-                <span className="text-2xl select-none">📋</span>
-                <p className="text-zinc-500 text-xs select-none">
-                  No container selected.
-                </p>
-              </>
-            )}
-            {status === 'connecting' && (
-              <>
-                <span className="text-2xl select-none animate-pulse">🔌</span>
-                <p className="text-zinc-500 text-xs select-none">
-                  Connecting to log stream…
-                </p>
-              </>
-            )}
-            {status === 'live' && (
-              <>
-                <span className="text-2xl select-none animate-pulse">📡</span>
-                <p className="text-zinc-500 text-xs select-none">
-                  Connected — waiting for first log line…
-                </p>
-              </>
-            )}
-            {status === 'reconnecting' && (
-              <>
-                <span className="text-2xl select-none animate-pulse">🔄</span>
-                <p className="text-zinc-500 text-xs select-none">
-                  Reconnecting to log stream…
-                </p>
-              </>
-            )}
-            {status === 'done' && (
-              <>
-                <span className="text-2xl select-none">✅</span>
-                <p className="text-zinc-500 text-xs select-none">
-                  Stream ended — no logs were captured.
-                </p>
-              </>
-            )}
-            {status === 'error' && (
-              <>
-                <span className="text-2xl select-none">⚠️</span>
-                <p className="text-red-400 text-xs select-none">
-                  Stream error — check container status and reconnect.
-                </p>
-              </>
-            )}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              color: '#3a3a42',
+              paddingTop: '8px',
+            }}
+          >
+            <span style={{ color: '#52b788' }}>$</span>
+            <span>Waiting for logs</span>
+            <span
+              style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '14px',
+                background: '#52b788',
+                opacity: 0.7,
+                animation: 'fadeIn 0.8s ease infinite alternate',
+              }}
+            />
           </div>
         ) : (
-          logs.map((entry, idx) => (
-            <div
-              key={idx}
-              className={`flex gap-2 ${
-                entry.stream === 'stderr' ? 'text-red-400' : 'text-green-300'
-              }`}
-            >
-              {/* Timestamp */}
-              <span className="shrink-0 text-zinc-500 select-none">
-                {formatTs(entry.ts)}
-              </span>
-              {/* Stream type tag */}
-              <span className="shrink-0 text-zinc-600 select-none">
-                {entry.stream === 'stderr' ? '[err]' : '[out]'}
-              </span>
-              {/* Log line text */}
-              <span className="break-all whitespace-pre-wrap">{entry.line}</span>
-            </div>
-          ))
+          logs.map((entry, i) => {
+            const line      = typeof entry === 'string' ? entry : entry.line ?? '';
+            const isError   = /error|fail|fatal|exception/i.test(line);
+            const isSuccess = /success|done|complete|running|started/i.test(line);
+            const isWarn    = /warn|warning/i.test(line);
+            const isStep    = line.startsWith('>>') || line.startsWith('==');
+
+            const color = isError
+              ? '#e53e3e'
+              : isSuccess
+              ? '#52b788'
+              : isWarn
+              ? '#f59e0b'
+              : isStep
+              ? '#74c69d'
+              : '#a0a0a8';
+
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'flex-start',
+                }}
+              >
+                <span
+                  style={{
+                    color: '#3a3a42',
+                    fontSize: '10px',
+                    userSelect: 'none',
+                    minWidth: '28px',
+                    textAlign: 'right',
+                    paddingTop: '1px',
+                    flexShrink: 0,
+                  }}
+                >
+                  {i + 1}
+                </span>
+                <span style={{ color, wordBreak: 'break-all' }}>
+                  {line}
+                </span>
+              </div>
+            );
+          })
         )}
-        {/* Scroll anchor */}
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Footer — paused indicator ── */}
-      {isPaused && (
-        <div className="px-4 py-1.5 border-t border-zinc-700 text-xs text-yellow-400 bg-zinc-800 rounded-b-xl flex items-center gap-2">
-          <span>⏸</span>
-          <span>Stream paused — new lines are buffered. Click Resume to continue.</span>
-        </div>
-      )}
-      {status === 'error' && !isPaused && (
-        <div className="px-4 py-1.5 border-t border-zinc-700 text-xs text-red-400 bg-zinc-800 rounded-b-xl flex items-center gap-2">
-          <span>⚠️</span>
-          <span>Stream disconnected — click Reconnect to retry.</span>
+      {/* Scroll to bottom hint */}
+      {!autoScroll && logs.length > 0 && (
+        <div
+          style={{
+            padding: '6px 14px',
+            borderTop: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            justifyContent: 'center',
+            flexShrink: 0,
+          }}
+        >
+          <button
+            onClick={() => {
+              setAutoScroll(true);
+              bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              fontSize: '11px',
+              color: '#52b788',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontFamily: 'JetBrains Mono, monospace',
+            }}
+          >
+            ↓ Jump to latest
+          </button>
         </div>
       )}
     </div>
