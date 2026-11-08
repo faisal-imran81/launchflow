@@ -1,24 +1,33 @@
-import { useState } from 'react'
-import { usePageTitle } from '../hooks/usePageTitle'
-import { useHistory } from '../hooks/useHistory'
-import { useDeploy } from '../hooks/useDeploy'
-import { useGitHub } from '../hooks/useGitHub'
-import DeployForm from '../components/DeployForm'
-import DeploymentCard from '../components/DeploymentCard'
-import SkeletonCard from '../components/SkeletonCard'
-import EmptyState from '../components/EmptyState'
-import SuccessToast from '../components/SuccessToast'
-import AIEngine from '../components/AIEngine'
-import LogStreamPanel from '../components/LogStreamPanel.jsx'
-import LogStreamErrorBoundary from '../components/LogStreamErrorBoundary.jsx'
-import { useDeploymentStatus } from '../hooks/useDeploymentStatus.js'
-import DeploymentStatusBadge from '../components/DeploymentStatusBadge.jsx'
-import DeploymentTimeline from '../components/DeploymentTimeline.jsx'
+import { useState } from 'react';
+import { useDeploy } from '../hooks/useDeploy';
+import { useGitHub } from '../hooks/useGitHub';
+import AutoDetectForm from '../components/AutoDetectForm';
+import ManualGenerateForm from '../components/ManualGenerateForm';
+import DeployForm from '../components/DeployForm';
+import AIEngine from '../components/AIEngine';
+import AIOutput from '../components/AIOutput';
+import LogStreamPanel from '../components/LogStreamPanel';
+import DeploymentStatusBadge from '../components/DeploymentStatusBadge';
+import ErrorAlert from '../components/ErrorAlert';
+import Spinner from '../components/Spinner';
+
+const tabs = ['Auto Detect', 'Manual'];
+
+const getStatusLabel = (status) => {
+  const labels = {
+    pending:   'Preparing deployment...',
+    cloning:   'Cloning repository...',
+    building:  'Building Docker image...',
+    pushing:   'Pushing to ECR...',
+    deploying: 'Deploying to EC2...',
+    running:   '🚀 Deployment live!',
+    failed:    'Deployment failed.',
+  };
+  return labels[status] ?? 'Processing...';
+};
 
 export default function Deploy() {
-  usePageTitle('Deploy')
-  const { deployments, fetchDeployments, isLoading } = useHistory()
-  const [toastMessage, setToastMessage] = useState('')
+  const [activeTab, setActiveTab] = useState(0);
 
   const {
     deploy,
@@ -29,7 +38,7 @@ export default function Deploy() {
     status,
     clearError: clearDeployError,
     reset,
-  } = useDeploy()
+  } = useDeploy();
 
   const {
     repos,
@@ -38,183 +47,299 @@ export default function Deploy() {
     fetchRepos,
     fetchFiles,
     clearError: clearRepoError,
-    clearRepos,
-  } = useGitHub()
+  } = useGitHub();
 
-  const {
-    status: deploymentStatus,
-    history: statusHistory,
-    meta: statusMeta,
-    streamStatus,
-    isTerminal,
-    reconnect: reconnectStatus,
-  } = useDeploymentStatus(deploymentId, { interval: 2000, autoStart: !!deploymentId })
-
-  const getStatusLabel = (status) => {
-    const labels = {
-      pending:   'Preparing deployment...',
-      queued:    'Preparing deployment...',
-      cloning:   'Cloning repository...',
-      building:  'Building Docker image...',
-      pushing:   'Pushing to ECR...',
-      deploying: 'Deploying to EC2...',
-      running:   'Deployment live!',
-      failed:    'Deployment failed.',
-      stopped:   'Deployment stopped.',
-    };
-    return labels[status] ?? 'Processing...';
-  };
-
-  const activeStatus = deploymentStatus ?? status
-  const logContainerId = containerId ?? statusMeta?.containerId ?? null
-
-  const handleSuccess = async (result) => {
-    const newProject = result?.data?.project
-    if (newProject) {
-      setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
-      await fetchDeployments()
-    }
-  }
+  const hasOutput = deploymentId || containerId || status;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Deploy</h1>
-        <p className="text-gray-400 text-sm mt-1">
-          Trigger a new deployment for your app
+    <div
+      style={{ animation: 'fadeIn 0.3s ease-out' }}
+      className="max-w-7xl mx-auto"
+    >
+      {/* Header */}
+      <div className="mb-8">
+        <h1
+          style={{
+            color: '#f2f2f2',
+            fontWeight: 700,
+            fontSize: '24px',
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Deploy
+        </h1>
+        <p style={{ color: '#5a5a62', fontSize: '14px', marginTop: '4px' }}>
+          Connect a GitHub repository and deploy to EC2 in one click
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <DeployForm
-          onSuccess={handleSuccess}
-          repos={repos}
-          repoLoading={repoLoading}
-          repoError={repoError}
-          fetchRepos={fetchRepos}
-          fetchFiles={fetchFiles}
-          clearRepoError={clearRepoError}
-          clearRepos={clearRepos}
-          deploy={deploy}
-          deployLoading={deployLoading}
-          deployError={deployError}
-          clearDeployError={clearDeployError}
-          status={activeStatus}
-          getStatusLabel={getStatusLabel}
-          reset={reset}
-          deploymentId={deploymentId}
-          containerId={containerId}
-        />
+      {/* Two column layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-white font-semibold">Recent Deployments</h2>
-            <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full">
-              {isLoading ? '...' : `${deployments.length} total`}
-            </span>
+        {/* LEFT — Input panel */}
+        <div className="flex flex-col gap-5">
+
+          {/* AI Config card */}
+          <div
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '14px',
+              padding: '24px',
+            }}
+          >
+            {/* Card header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                style={{
+                  background: 'rgba(82,183,136,0.1)',
+                  border: '1px solid rgba(82,183,136,0.15)',
+                  borderRadius: '8px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="3" stroke="#52b788" strokeWidth="1.5"/>
+                  <path d="M8 1 L8 3M8 13 L8 15M1 8 L3 8M13 8 L15 8" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ color: '#f2f2f2', fontSize: '14px', fontWeight: 600 }}>
+                  AI Configuration
+                </p>
+                <p style={{ color: '#5a5a62', fontSize: '12px' }}>
+                  Generate Dockerfile + GitHub Actions workflow
+                </p>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div
+              style={{
+                display: 'flex',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '8px',
+                padding: '3px',
+                marginBottom: '20px',
+              }}
+            >
+              {tabs.map((tab, i) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(i)}
+                  style={{
+                    flex: 1,
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    background: activeTab === i
+                      ? 'rgba(82,183,136,0.12)'
+                      : 'transparent',
+                    color: activeTab === i ? '#74c69d' : '#5a5a62',
+                    borderColor: activeTab === i
+                      ? 'rgba(82,183,136,0.2)'
+                      : 'transparent',
+                  }}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* AI form */}
+            <AIEngine>
+              {activeTab === 0
+                ? <AutoDetectForm />
+                : <ManualGenerateForm />
+              }
+            </AIEngine>
           </div>
 
-          {isLoading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <SkeletonCard key={i} rows={2} />
-              ))}
+          {/* Deploy card */}
+          <div
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '14px',
+              padding: '24px',
+            }}
+          >
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                style={{
+                  background: 'rgba(82,183,136,0.1)',
+                  border: '1px solid rgba(82,183,136,0.15)',
+                  borderRadius: '8px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 2 L8 10" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M5 5 L8 2 L11 5" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M3 12 C3 13.1 3.9 14 5 14 L11 14 C12.1 14 13 13.1 13 12" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div>
+                <p style={{ color: '#f2f2f2', fontSize: '14px', fontWeight: 600 }}>
+                  Deploy
+                </p>
+                <p style={{ color: '#5a5a62', fontSize: '12px' }}>
+                  Select a repository and launch
+                </p>
+              </div>
             </div>
-          ) : deployments.length === 0 ? (
-            <EmptyState
-              icon="🚀"
-              title="No deployments yet"
-              description="Fill the form and hit Deploy Now to get started"
+
+            {repoError && (
+              <div className="mb-4">
+                <ErrorAlert message={repoError} onDismiss={clearRepoError} />
+              </div>
+            )}
+
+            {deployError && (
+              <div className="mb-4">
+                <ErrorAlert message={deployError} onDismiss={clearDeployError} />
+              </div>
+            )}
+
+            <DeployForm
+              repos={repos}
+              repoLoading={repoLoading}
+              fetchRepos={fetchRepos}
+              fetchFiles={fetchFiles}
+              onDeploy={deploy}
+              deployLoading={deployLoading}
+              status={status}
+              getStatusLabel={getStatusLabel}
             />
-          ) : (
-            <div className="space-y-3">
-              {deployments.slice(0, 5).map((deployment) => (
-                <DeploymentCard
-                  key={deployment.id}
-                  deployment={deployment}
-                />
-              ))}
-            </div>
+
+            {(status === 'running' || status === 'failed') && (
+              <button
+                onClick={reset}
+                style={{
+                  marginTop: '12px',
+                  fontSize: '12px',
+                  color: '#5a5a62',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#a0a0a8'}
+                onMouseLeave={e => e.currentTarget.style.color = '#5a5a62'}
+              >
+                Start a new deployment
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* RIGHT — Output panel */}
+        <div className="flex flex-col gap-5">
+
+          {/* AI Output */}
+          <div
+            style={{
+              background: 'rgba(255,255,255,0.03)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: '14px',
+              padding: '24px',
+              minHeight: '200px',
+            }}
+          >
+            <p
+              style={{
+                color: '#5a5a62',
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                marginBottom: '16px',
+              }}
+            >
+              AI Output
+            </p>
+            <AIOutput />
+          </div>
+
+          {/* Status + Logs — only when deployment started */}
+          {hasOutput && (
+            <>
+              {/* Status */}
+              <div
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '14px',
+                  padding: '20px',
+                  animation: 'slideUp 0.25s ease-out',
+                }}
+              >
+                <p
+                  style={{
+                    color: '#5a5a62',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    marginBottom: '14px',
+                  }}
+                >
+                  Deployment Status
+                </p>
+                <DeploymentStatusBadge status={status} showProgress />
+                {deployLoading && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginTop: '12px',
+                    }}
+                  >
+                    <Spinner size="sm" />
+                    <span style={{ color: '#a0a0a8', fontSize: '13px' }}>
+                      {getStatusLabel(status)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Log stream */}
+              {containerId && (
+                <div
+                  style={{
+                    borderRadius: '14px',
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    animation: 'slideUp 0.3s ease-out',
+                  }}
+                >
+                  <LogStreamPanel
+                    containerId={containerId}
+                    deploymentId={deploymentId}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
-
-      {/* ── Real-time log stream ── */}
-      {logContainerId && (
-        <div className="mt-6">
-          <h2 className="text-sm font-semibold text-zinc-300 mb-2">
-            Container Logs
-          </h2>
-          <LogStreamErrorBoundary>
-            <LogStreamPanel
-              containerId={logContainerId}
-              poll={false}
-              tail={50}
-              interval={2000}
-              className="w-full"
-            />
-          </LogStreamErrorBoundary>
-        </div>
-      )}
-
-      {deploymentId && (
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Deployment status badge + stream indicator */}
-          <div className="lg:col-span-1 flex flex-col gap-4">
-            <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-zinc-200">
-                  Status
-                </h2>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  streamStatus === 'live'
-                    ? 'bg-green-900 text-green-300'
-                    : streamStatus === 'reconnecting'
-                    ? 'bg-orange-900 text-orange-300'
-                    : 'bg-zinc-800 text-zinc-400'
-                }`}>
-                  {streamStatus === 'live' ? '● Live' : streamStatus === 'reconnecting' ? 'Reconnecting…' : streamStatus}
-                </span>
-              </div>
-              <DeploymentStatusBadge
-                status={deploymentStatus}
-                size="lg"
-                className="w-full justify-center"
-              />
-              {isTerminal && (
-                <button
-                  onClick={reconnectStatus}
-                  className="mt-3 w-full px-3 py-1.5 text-xs rounded-md bg-zinc-700 hover:bg-zinc-600 text-zinc-200 transition-colors"
-                >
-                  Refresh Status
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Deployment pipeline timeline */}
-          <div className="lg:col-span-2">
-            <div className="rounded-xl border border-zinc-700 bg-zinc-900 px-4 py-4">
-              <LogStreamErrorBoundary>
-                <DeploymentTimeline
-                  status={deploymentStatus}
-                  history={statusHistory}
-                  meta={statusMeta}
-                />
-              </LogStreamErrorBoundary>
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      <AIEngine />
-
-      <SuccessToast
-        message={toastMessage}
-        onDismiss={() => setToastMessage('')}
-      />
     </div>
-  )
+  );
 }
