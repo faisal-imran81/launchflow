@@ -38,13 +38,21 @@ const MAX_RECONNECT_DELAY = 15000;
  *   reconnect: () => void,
  * }}
  */
-export function useLogStream(containerId, options = {}) {
+export function useLogStream(containerIdOrOptions, options = {}) {
+  const isOptionsObject =
+    containerIdOrOptions && typeof containerIdOrOptions === 'object'
+  const containerId = isOptionsObject
+    ? containerIdOrOptions.containerId
+    : containerIdOrOptions
+  const mergedOptions = isOptionsObject
+    ? { ...containerIdOrOptions, ...options }
+    : options
   const {
     poll = false,
     tail = 50,
     interval = 2000,
-    autoStart = true,
-  } = options;
+    autoStart = Boolean(containerId),
+  } = mergedOptions;
 
   const [logs, setLogs] = useState([]);
   const [status, setStatus] = useState('idle');
