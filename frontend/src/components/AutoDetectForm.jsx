@@ -1,66 +1,44 @@
-import { useState } from 'react'
-import { parseRepoInput } from '../utils/parseRepoInput'
-
-const STORAGE_KEY = 'launchflow:lastRepoInput'
-
-function readSavedInput() {
-  try {
-    return localStorage.getItem(STORAGE_KEY) || ''
-  } catch {
-    return ''
-  }
-}
-
-function saveInput(value) {
-  try {
-    localStorage.setItem(STORAGE_KEY, value)
-  } catch {
-    // storage can be blocked (private mode), the form still works without it
-  }
-}
-
-export default function AutoDetectForm({ onSubmit, loading, busy }) {
-  const [input, setInput] = useState(readSavedInput)
-  const parsed = parseRepoInput(input)
-
-  const handleSubmit = () => {
-    if (!parsed) return
-    saveInput(input.trim())
-    onSubmit(parsed)
-  }
-
+export default function AutoDetectForm({ onSubmit, loading }) {
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-medium text-gray-300">🔍 Auto-detect from GitHub</h3>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <input
-          type="text"
-          placeholder="owner/repo (e.g. faisal-imran81/my-app)"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !loading && handleSubmit()}
-          className="flex-1 bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
-        />
-        <button
-          onClick={handleSubmit}
-          disabled={loading || !parsed}
-          className="px-4 py-2 bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
-        >
-          {busy ? (
-            <span className="inline-flex items-center gap-2">
-              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Analyzing...
-            </span>
-          ) : (
-            '🔍 Auto-detect & Generate All'
-          )}
-        </button>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      <p style={{ color: '#a0a0a8', fontSize: '13px', lineHeight: '1.6' }}>
+        LaunchFlow will automatically detect your stack and generate an
+        optimized Dockerfile and GitHub Actions workflow.
+      </p>
+
+      <div
+        style={{
+          background: 'rgba(82,183,136,0.05)',
+          border: '1px solid rgba(82,183,136,0.1)',
+          borderRadius: '8px',
+          padding: '12px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+        }}
+      >
+        {[
+          'Detects Node.js, Python, Go, and more',
+          'Generates production-ready Dockerfile',
+          'Creates GitHub Actions CI/CD workflow',
+        ].map((item) => (
+          <div
+            key={item}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path
+                d="M2 6 L5 9 L10 3"
+                stroke="#52b788"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span style={{ color: '#a0a0a8', fontSize: '12px' }}>{item}</span>
+          </div>
+        ))}
       </div>
-      {input && !parsed && (
-        <p className="text-xs text-yellow-500">
-          Format should be owner/repo (or a full GitHub URL)
-        </p>
-      )}
     </div>
-  )
+  );
 }

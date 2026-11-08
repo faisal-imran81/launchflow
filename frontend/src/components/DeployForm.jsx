@@ -1,188 +1,186 @@
-import { useState } from 'react'
-import RepoSearchBar from './RepoSearchBar'
-import RepoList from './RepoList'
-import Spinner from './Spinner'
-import ErrorAlert from './ErrorAlert'
+import { useState } from 'react';
+import RepoSearchBar from './RepoSearchBar';
+import RepoList from './RepoList';
+import Spinner from './Spinner';
 
 export default function DeployForm({
-  onSuccess,
   repos,
   repoLoading,
-  repoError,
   fetchRepos,
-  clearRepoError,
-  clearRepos,
-  deploy,
+  fetchFiles,
+  onDeploy,
   deployLoading,
-  deployError,
-  clearDeployError,
   status,
   getStatusLabel,
-  reset,
 }) {
-  const [selectedRepo, setSelectedRepo] = useState(null)
-  const [searched, setSearched] = useState(false)
-  const [form, setForm] = useState({
-    appName: '',
-    environment: 'production',
-  })
+  const [username, setUsername]       = useState('');
+  const [selectedRepo, setSelectedRepo] = useState(null);
 
-  const handleSearch = async (username) => {
-    clearRepos()
-    setSelectedRepo(null)
-    setSearched(false)
-    await fetchRepos(username)
-    setSearched(true)
-  }
+  const handleSearch = (searchTerm) => {
+    const name = (searchTerm ?? username).trim();
+    if (name) fetchRepos(name);
+  };
 
-  const handleRepoSelect = (repo) => {
-    setSelectedRepo(repo)
-    setForm((prev) => ({ ...prev, appName: repo.name }))
-  }
+  const handleDeploy = () => {
+    if (!selectedRepo) return;
+    onDeploy({
+      repoUrl: selectedRepo.cloneUrl ?? selectedRepo.url,
+      appName: selectedRepo.name,
+      environment: 'production',
+      stack: 'auto',
+    });
+  };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!selectedRepo) return
-    clearDeployError()
-
-    const result = await deploy({
-      repoUrl: selectedRepo.cloneUrl,
-      appName: form.appName,
-      environment: form.environment,
-    })
-
-    if (result) {
-      setForm({ appName: '', environment: 'production' })
-      setSelectedRepo(null)
-      clearRepos()
-      if (onSuccess) onSuccess(result)
-    }
-  }
-
-  const handleReset = () => {
-    reset()
-    clearRepos()
-    setSelectedRepo(null)
-    setSearched(false)
-    setForm({ appName: '', environment: 'production' })
-  }
+  const repoName = selectedRepo?.fullName ?? selectedRepo?.name;
 
   return (
-    <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 space-y-5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      {/* Username search */}
       <div>
-        <h2 className="text-white font-semibold text-lg">New Deployment</h2>
-        <p className="text-gray-400 text-sm mt-1">
-          Search your GitHub repos and deploy instantly
-        </p>
+        <label
+          style={{
+            display: 'block',
+            color: '#5a5a62',
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            marginBottom: '8px',
+          }}
+        >
+          GitHub Username
+        </label>
+        <RepoSearchBar
+          value={username}
+          onChange={setUsername}
+          onSearch={handleSearch}
+          loading={repoLoading}
+          isLoading={repoLoading}
+        />
       </div>
 
-      {repoError && (
-        <div className="mt-2">
-          <ErrorAlert message={repoError} onDismiss={clearRepoError} />
-        </div>
-      )}
-
-      {deployError && (
-        <div className="mt-2">
-          <ErrorAlert message={deployError} onDismiss={clearDeployError} />
-        </div>
-      )}
-
-      <RepoSearchBar
-        onSearch={handleSearch}
-        onClear={() => { clearRepos(); setSelectedRepo(null); setSearched(false) }}
-        isLoading={repoLoading}
-      />
-
-      {repoLoading && (
-        <div className="flex items-center gap-2 text-sm text-gray-400 mt-2">
-          <Spinner size="sm" />
-          <span>Fetching repositories...</span>
-        </div>
-      )}
-
-      <RepoList
-        repos={repos}
-        onSelect={handleRepoSelect}
-        selectedRepo={selectedRepo}
-        searched={searched}
-      />
-
-      {selectedRepo && (
-        <div className="bg-blue-600/10 border border-blue-500/20 rounded-lg px-4 py-3 space-y-1">
-          <p className="text-blue-400 text-xs font-medium">Selected Repo</p>
-          <p className="text-white text-sm font-semibold">{selectedRepo.fullName}</p>
-          <p className="text-gray-400 text-xs">{selectedRepo.cloneUrl}</p>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-1">
-          <label className="text-gray-400 text-sm">App Name</label>
-          <input
-            type="text"
-            name="appName"
-            value={form.appName}
-            onChange={handleChange}
-            placeholder="my-awesome-app"
-            required
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+      {/* Repo list */}
+      {repos?.length > 0 && (
+        <div>
+          <label
+            style={{
+              display: 'block',
+              color: '#5a5a62',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              marginBottom: '8px',
+            }}
+          >
+            Select Repository
+          </label>
+          <RepoList
+            repos={repos}
+            selectedRepo={selectedRepo}
+            searched
+            onSelect={setSelectedRepo}
           />
         </div>
+      )}
 
-        <div className="space-y-1">
-          <label className="text-gray-400 text-sm">Environment</label>
-          <select
-            name="environment"
-            value={form.environment}
-            onChange={handleChange}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
-          >
-            <option value="production">Production</option>
-            <option value="staging">Staging</option>
-            <option value="development">Development</option>
-          </select>
+      {/* Loading repos */}
+      {repoLoading && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Spinner size="sm" />
+          <span style={{ color: '#5a5a62', fontSize: '13px' }}>
+            Fetching repositories...
+          </span>
         </div>
+      )}
 
-        <button
-          type="submit"
-          disabled={deployLoading || repoLoading || !selectedRepo}
-          className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-            deployLoading || repoLoading || !selectedRepo
-              ? 'bg-gray-600 cursor-not-allowed opacity-60'
-              : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
-          } text-white`}
+      {/* Selected repo indicator */}
+      {selectedRepo && (
+        <div
+          style={{
+            background: 'rgba(82,183,136,0.06)',
+            border: '1px solid rgba(82,183,136,0.15)',
+            borderRadius: '8px',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
         >
-          {deployLoading ? (
-            <span className="flex items-center justify-center gap-2">
-              <Spinner size="sm" />
-              {getStatusLabel(status)}
-            </span>
-          ) : (
-            'Deploy'
-          )}
-        </button>
-
-        {(status === 'running' || status === 'failed') && (
+          <span style={{ color: '#74c69d', fontSize: '13px', fontWeight: 500 }}>
+            {repoName}
+          </span>
           <button
-            type="button"
-            onClick={handleReset}
-            className="mt-4 text-sm text-gray-400 hover:text-white underline transition-colors"
+            onClick={() => setSelectedRepo(null)}
+            style={{
+              color: '#5a5a62',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '16px',
+              lineHeight: 1,
+              padding: '0 2px',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = '#a0a0a8'}
+            onMouseLeave={e => e.currentTarget.style.color = '#5a5a62'}
           >
-            Start a new deployment
+            ×
           </button>
-        )}
+        </div>
+      )}
 
-        {!selectedRepo && (
-          <p className="text-gray-600 text-xs text-center">
-            Search and select a repo above to enable deployment
-          </p>
+      {/* Deploy button */}
+      <button
+        onClick={handleDeploy}
+        disabled={deployLoading || !selectedRepo}
+        style={{
+          width: '100%',
+          padding: '10px 16px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: 600,
+          border: 'none',
+          cursor: deployLoading || !selectedRepo ? 'not-allowed' : 'pointer',
+          transition: 'all 0.15s ease',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          background: deployLoading || !selectedRepo
+            ? 'rgba(82,183,136,0.15)'
+            : '#52b788',
+          color: deployLoading || !selectedRepo ? '#52b788' : '#0c0c0c',
+          opacity: !selectedRepo ? 0.5 : 1,
+        }}
+        onMouseEnter={e => {
+          if (!deployLoading && selectedRepo) {
+            e.currentTarget.style.background = '#74c69d';
+            e.currentTarget.style.boxShadow = '0 0 16px rgba(82,183,136,0.25)';
+          }
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = deployLoading || !selectedRepo
+            ? 'rgba(82,183,136,0.15)'
+            : '#52b788';
+          e.currentTarget.style.boxShadow = 'none';
+        }}
+      >
+        {deployLoading ? (
+          <>
+            <Spinner size="sm" color="green" />
+            {getStatusLabel?.(status) ?? 'Deploying...'}
+          </>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2 L8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M5 5 L8 2 L11 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 12 C3 13.1 3.9 14 5 14 L11 14 C12.1 14 13 13.1 13 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            Deploy
+          </>
         )}
-      </form>
+      </button>
     </div>
-  )
+  );
 }
