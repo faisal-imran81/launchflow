@@ -7,8 +7,8 @@ import DeploymentCard from '../components/DeploymentCard'
 const statCardStyle = {
   background: 'rgba(255,255,255,0.03)',
   border: '1px solid rgba(255,255,255,0.07)',
-  borderRadius: '12px',
-  padding: '20px',
+  borderRadius: '10px',
+  padding: '16px',
   transition: 'all 0.2s ease',
 }
 
@@ -26,10 +26,47 @@ export default function Dashboard() {
   const recentDeployments = deployments.slice(0, 5)
 
   const statCards = [
-    { label: 'Total Deployments', value: stats.total, icon: '📦' },
-    { label: 'Successful', value: stats.success, icon: '✅' },
-    { label: 'Failed', value: stats.failed, icon: '❌' },
-    { label: 'Running', value: stats.running, icon: '⏳' },
+    {
+      label: 'Total Deployments',
+      value: stats.total,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 2 L8 10" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M5 5 L8 2 L11 5" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <path d="M3 12 C3 13.1 3.9 14 5 14 L11 14 C12.1 14 13 13.1 13 12" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'Successful',
+      value: stats.success,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="#52b788" strokeWidth="1.5"/>
+          <path d="M5 8 L7 10 L11 6" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'Failed',
+      value: stats.failed,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="#e53e3e" strokeWidth="1.5"/>
+          <path d="M5.5 5.5 L10.5 10.5 M10.5 5.5 L5.5 10.5" stroke="#e53e3e" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+      ),
+    },
+    {
+      label: 'Running',
+      value: stats.running,
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6.5" stroke="#52b788" strokeWidth="1.5"/>
+          <path d="M6 5.5 L11 8 L6 10.5 Z" fill="#52b788"/>
+        </svg>
+      ),
+    },
   ]
 
   return (
@@ -37,7 +74,7 @@ export default function Dashboard() {
       style={{ animation: 'fadeIn 0.3s ease-out' }}
       className="max-w-6xl mx-auto space-y-8"
     >
-      <div className="mb-8">
+      <div style={{ marginBottom: '20px' }}>
         <h1
           style={{
             color: '#f2f2f2',
@@ -91,8 +128,8 @@ export default function Dashboard() {
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '12px',
-              marginBottom: '32px',
+              gap: '10px',
+              marginBottom: '24px',
             }}
           >
             {statCards.map((stat) => (
@@ -110,19 +147,19 @@ export default function Dashboard() {
                   e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
-                <span className="text-2xl">{stat.icon}</span>
+                <span className="text-2xl" style={{ display: 'inline-flex' }}>{stat.icon}</span>
                 <p
                   style={{
                     color: '#f2f2f2',
-                    fontSize: '28px',
+                    fontSize: '24px',
                     fontWeight: 700,
                     lineHeight: 1,
-                    marginTop: '12px',
+                    margin: '8px 0 4px',
                   }}
                 >
                   {stat.value}
                 </p>
-                <p style={{ color: '#5a5a62', fontSize: '12px', marginTop: '6px', fontWeight: 500 }}>
+                <p style={{ color: '#5a5a62', fontSize: '12px', fontWeight: 500 }}>
                   {stat.label}
                 </p>
               </div>
