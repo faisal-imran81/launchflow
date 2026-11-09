@@ -588,3 +588,34 @@ npm test
 ### Test Results
 - **691 tests / 208 suites — 0 failures**
 - 108 new integration tests added on top of 583 existing unit tests
+
+---
+
+## Day 24 — Error States + Loading States
+
+**Goal:** Bulletproof every error path and loading state across the full stack — crimson errors, green success, graceful fallbacks everywhere.
+
+### Frontend Changes
+| File | What changed |
+|------|-------------|
+| `LogStreamErrorBoundary.jsx` | Crimson error boundary UI with retry button |
+| `ErrorAlert.jsx` | Retry countdown timer with spin indicator |
+| `useGitHub.js` | Network offline detection, online/offline event listeners |
+| `useAI.js` | 30s timeout guard, retry logic, max 3 retries, offline detection |
+| `AutoDetectForm.jsx` | Loading skeleton with step indicators during stack detection |
+| `RepoList.jsx` | Empty state icon, no-match message, count label polish |
+| `DeployForm.jsx` | Disabled button states, input focus rings, label polish |
+| `Deploy.jsx` | Error container styles, crimson error boundary, empty state |
+| `Dashboard.jsx` | Crimson error state with retry button, loading polish |
+| `History.jsx` | Crimson error state, empty state with green CTA |
+| `DeploymentCard.jsx` | Crimson highlight for failed status, hover states |
+| `DeploymentTimeline.jsx` | Failed step error message, crimson line, icon glow |
+| `LogStreamPanel.jsx` | Crimson connection error state, reconnect button |
+| `Spinner.jsx` | Loading overlay variant with blur backdrop |
+| `SkeletonCard.jsx` | Row, stat, repo skeleton variants |
+| `Navbar.jsx` | Backend health check, green/crimson live/offline indicator |
+
+### Design System
+- Crimson (`#e53e3e`) — all error, failed, offline states
+- Forest Green (`#52b788`) — all success, live, active states
+- Charcoal (`#0c0c0c`) — all backgrounds and surfaces
