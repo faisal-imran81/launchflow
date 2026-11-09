@@ -102,6 +102,63 @@ export default function AutoDetectForm({ onSubmit, loading, busy }) {
           )}
         </button>
       </div>
+      {(loading || busy) && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            padding: '4px 0',
+            animation: 'fadeIn 0.2s ease-out',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                border: '2px solid rgba(82,183,136,0.2)',
+                borderTopColor: '#52b788',
+                animation: 'spin 0.7s linear infinite',
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: '#74c69d', fontSize: '13px', fontWeight: 500 }}>
+              Detecting stack from repository...
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingLeft: '26px' }}>
+            {['Fetching repository files', 'Analyzing stack', 'Generating config'].map((step, i) => (
+              <div
+                key={step}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  opacity: 1,
+                  animation: `fadeIn 0.3s ease-out ${i * 0.15}s both`,
+                }}
+              >
+                <div
+                  style={{
+                    height: '10px',
+                    borderRadius: '3px',
+                    background: 'linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%)',
+                    backgroundSize: '700px 100%',
+                    animation: 'shimmer 1.8s infinite linear',
+                    width: i === 0 ? '55%' : i === 1 ? '40%' : '65%',
+                  }}
+                />
+                <span style={{ color: '#3a3a42', fontSize: '11px', whiteSpace: 'nowrap' }}>
+                  {step}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {input && !parsed && (
         <p style={{ color: '#fbbf24', fontSize: '11px' }}>
           Format should be owner/repo (or a full GitHub URL)
