@@ -44,20 +44,14 @@ export default function Sidebar() {
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderRight: '1px solid rgba(255,255,255,0.07)',
-        width: '220px',
+        width: '200px',
+        padding: '12px 10px',
         minHeight: 'calc(100vh - 56px)',
       }}
-      className="flex flex-col py-4 px-3 shrink-0"
+      className="flex flex-col shrink-0"
     >
       {/* Nav section */}
-      <div className="flex flex-col gap-0.5">
-        <p
-          style={{ color: '#5a5a62' }}
-          className="text-xs font-medium uppercase tracking-widest px-3 mb-2"
-        >
-          Navigation
-        </p>
-
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         {links.map(({ to, label, icon }) => (
           <NavLink
             key={to}
@@ -67,7 +61,7 @@ export default function Sidebar() {
               display: 'flex',
               alignItems: 'center',
               gap: '10px',
-              padding: '8px 12px',
+              padding: '6px 10px',
               borderRadius: '8px',
               fontSize: '14px',
               fontWeight: 500,
@@ -98,25 +92,6 @@ export default function Sidebar() {
             {label}
           </NavLink>
         ))}
-      </div>
-
-      {/* Bottom section */}
-      <div className="mt-auto">
-        <div
-          style={{
-            background: 'rgba(82,183,136,0.06)',
-            border: '1px solid rgba(82,183,136,0.1)',
-            borderRadius: '10px',
-            padding: '12px',
-          }}
-        >
-          <p style={{ color: '#52b788' }} className="text-xs font-semibold mb-1">
-            LaunchFlow
-          </p>
-          <p style={{ color: '#5a5a62' }} className="text-xs leading-relaxed">
-            AI-powered deployment platform
-          </p>
-        </div>
       </div>
     </aside>
   );

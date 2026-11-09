@@ -29,8 +29,10 @@ export default function Navbar() {
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         borderBottom: '1px solid rgba(255,255,255,0.07)',
+        height: '48px',
+        padding: '0 20px',
       }}
-      className="sticky top-0 z-50 h-14 flex items-center px-6 gap-6"
+      className="sticky top-0 z-50 flex items-center gap-6"
     >
       {/* Logo */}
       <div className="flex items-center gap-2 mr-4">
@@ -38,8 +40,10 @@ export default function Navbar() {
           style={{
             background: 'linear-gradient(135deg, #52b788, #40916c)',
             boxShadow: '0 0 12px rgba(82,183,136,0.3)',
+            width: '24px',
+            height: '24px',
           }}
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
+          className="rounded-lg flex items-center justify-center"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path
@@ -62,6 +66,8 @@ export default function Navbar() {
             background: 'linear-gradient(90deg, #74c69d, #52b788)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
+            fontSize: '13px',
+            fontWeight: 700,
           }}
           className="text-sm font-semibold tracking-tight"
         >
@@ -87,6 +93,8 @@ export default function Navbar() {
                 ? '1px solid rgba(82,183,136,0.15)'
                 : '1px solid transparent',
               transition: 'all 0.15s ease',
+              padding: '5px 10px',
+              fontSize: '13px',
             })}
             className="px-3 py-1.5 rounded-lg text-sm font-medium hover:text-[#f2f2f2] hover:bg-white/5"
           >
