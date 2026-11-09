@@ -32,7 +32,7 @@ export default function AutoDetectForm({ onSubmit, loading, busy }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <h3 style={{ color: '#a0a0a8', fontSize: '13px', fontWeight: 600 }}>
-        🔍 Auto-detect from GitHub
+        Auto-detect from GitHub
       </h3>
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <input
@@ -98,7 +98,7 @@ export default function AutoDetectForm({ onSubmit, loading, busy }) {
               Analyzing...
             </span>
           ) : (
-            '🔍 Auto-detect & Generate All'
+            'Auto-detect & Generate All'
           )}
         </button>
       </div>

@@ -20,7 +20,7 @@ const cardStyle = {
   background: 'rgba(255,255,255,0.03)',
   border: '1px solid rgba(255,255,255,0.07)',
   borderRadius: '14px',
-  padding: '24px',
+  padding: '16px',
 }
 
 const sectionLabelStyle = {
@@ -99,7 +99,7 @@ export default function Deploy() {
       className="max-w-7xl mx-auto space-y-6"
     >
       {/* Header */}
-      <div className="mb-8">
+      <div style={{ marginBottom: '16px' }}>
         <h1
           style={{
             color: '#f2f2f2',
@@ -146,11 +146,11 @@ export default function Deploy() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* LEFT — AI config + deploy form */}
         <div className="flex flex-col gap-5">
           <div style={cardStyle}>
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3" style={{ marginBottom: '14px' }}>
               <div
                 style={{
                   background: 'rgba(82,183,136,0.1)',
@@ -183,7 +183,7 @@ export default function Deploy() {
           </div>
 
           <div style={cardStyle}>
-            <div className="flex items-center gap-3 mb-6">
+            <div className="flex items-center gap-3" style={{ marginBottom: '14px' }}>
               <div
                 style={{
                   background: 'rgba(82,183,136,0.1)',

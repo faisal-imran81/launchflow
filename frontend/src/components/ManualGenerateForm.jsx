@@ -116,11 +116,7 @@ export default function ManualGenerateForm({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <h3 style={{ color: '#a0a0a8', fontSize: '13px', fontWeight: 600 }}>
-        ✍️ Or enter details manually
-      </h3>
-
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
         <LimitedInput
           field="repoName"
@@ -178,7 +174,7 @@ export default function ManualGenerateForm({
               Generating...
             </span>
           ) : (
-            '🐳 Generate Dockerfile'
+            'Generate Dockerfile'
           )}
         </button>
         <button
@@ -209,7 +205,7 @@ export default function ManualGenerateForm({
               Generating...
             </span>
           ) : (
-            '⚙️ Generate GitHub Actions'
+            'Generate Actions'
           )}
         </button>
         {showReset && (
@@ -240,7 +236,7 @@ export default function ManualGenerateForm({
         }}
       >
         <h4 style={{ color: '#5a5a62', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          🌐 Nginx Config (optional)
+          Nginx Config (optional)
         </h4>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
           <LimitedInput
@@ -297,7 +293,7 @@ export default function ManualGenerateForm({
               Generating...
             </span>
           ) : (
-            '🌐 Generate Nginx Config'
+            'Generate Nginx'
           )}
         </button>
       </div>
