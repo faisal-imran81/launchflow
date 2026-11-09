@@ -138,6 +138,7 @@ export default function DeploymentTimeline({
           const state = getStepState(step.status, status);
           const isLast = idx === PIPELINE_STEPS.length - 1;
           const c = getCircleColors(state);
+          const isFailed = state === 'failed';
 
           // Find timestamp for this step from history
           const historyEntry = history
@@ -168,6 +169,8 @@ export default function DeploymentTimeline({
                     transition: 'all 0.3s ease',
                     boxShadow: state === 'active'
                       ? '0 0 10px rgba(82,183,136,0.2)'
+                      : isFailed
+                      ? '0 0 10px rgba(229,62,62,0.15)'
                       : 'none',
                   }}
                 >
@@ -180,10 +183,12 @@ export default function DeploymentTimeline({
                     style={{
                       width: '1px',
                       flex: 1,
-                      minHeight: '24px',
+                      minHeight: '20px',
                       background: state === 'completed'
-                        ? 'linear-gradient(to bottom, #52b788, rgba(82,183,136,0.2))'
-                        : 'rgba(255,255,255,0.06)',
+                        ? 'linear-gradient(to bottom, #52b788, rgba(82,183,136,0.15))'
+                        : isFailed
+                        ? 'linear-gradient(to bottom, rgba(229,62,62,0.3), rgba(229,62,62,0.05))'
+                        : 'rgba(255,255,255,0.05)',
                       margin: '3px 0',
                       transition: 'background 0.3s ease',
                     }}
@@ -207,6 +212,30 @@ export default function DeploymentTimeline({
                 <p style={{ color: c.desc, fontSize: '12px', marginTop: '2px' }}>
                   {step.description}
                 </p>
+
+                {(isFailed || (status === 'failed' && state === 'active')) && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      marginTop: '6px',
+                      padding: '6px 10px',
+                      background: 'rgba(229,62,62,0.06)',
+                      border: '1px solid rgba(229,62,62,0.15)',
+                      borderRadius: '6px',
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+                      <circle cx="6" cy="6" r="5" stroke="#e53e3e" strokeWidth="1.2"/>
+                      <path d="M6 4 L6 6.5" stroke="#e53e3e" strokeWidth="1.2" strokeLinecap="round"/>
+                      <circle cx="6" cy="8.5" r="0.6" fill="#e53e3e"/>
+                    </svg>
+                    <span style={{ color: '#fc8181', fontSize: '11px', fontWeight: 500 }}>
+                      {meta?.error ?? 'Deployment failed at this step'}
+                    </span>
+                  </div>
+                )}
 
                 {/* Timestamp from history */}
                 {historyEntry?.updatedAt && (
