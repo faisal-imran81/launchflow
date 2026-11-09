@@ -21,23 +21,26 @@ function timeAgo(dateStr) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function DeploymentCard({ deployment }) {
-  if (!deployment) return null;
+export default function DeploymentCard({ deployment: rawDeployment, onDelete }) {
+  if (!rawDeployment) return null;
 
-  const {
-    id,
-    repo_url,
-    status = 'pending',
-    created_at,
-    stack,
-    image_tag,
-  } = deployment;
+  const id = rawDeployment?.id;
+  const stack = rawDeployment?.stack;
+  const image_tag = rawDeployment?.image_tag;
+  const status = rawDeployment?.status ?? rawDeployment?.state ?? 'pending';
+  const created_at = rawDeployment?.created_at ?? rawDeployment?.createdAt ?? null;
+
+  const repoName =
+    rawDeployment?.repoUrl?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
+    rawDeployment?.repo_url?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
+    rawDeployment?.url?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
+    rawDeployment?.fullName ??
+    rawDeployment?.name ??
+    'Unknown repository';
 
   const c = statusColors[status] ?? statusColors.pending;
 
-  const repoName = repo_url
-    ? repo_url.replace('https://github.com/', '').replace('http://github.com/', '')
-    : 'Unknown repository';
+  const deployment = rawDeployment;
 
   return (
     <div
@@ -150,6 +153,50 @@ export default function DeploymentCard({ deployment }) {
           />
           {status}
         </span>
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(deployment.id);
+            }}
+            title="Delete deployment"
+            style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: '1px solid rgba(229,62,62,0.15)',
+              background: 'transparent',
+              color: '#5a5a62',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
+              e.currentTarget.style.borderColor = 'rgba(229,62,62,0.25)';
+              e.currentTarget.style.color = '#fc8181';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'rgba(229,62,62,0.15)';
+              e.currentTarget.style.color = '#5a5a62';
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path
+                d="M2 3 L10 3 M4 3 L4 2 L8 2 L8 3 M5 5.5 L5 9 M7 5.5 L7 9 M3 3 L3.5 10 L8.5 10 L9 3"
+                stroke="currentColor"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Bottom row */}
