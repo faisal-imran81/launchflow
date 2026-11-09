@@ -8,7 +8,7 @@ export default function Navbar() {
     const checkHealth = async () => {
       try {
         const res = await fetch(
-          `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/health`,
+          `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000/api'}/health`,
           { signal: AbortSignal.timeout(3000) }
         );
         setBackendOnline(res.ok);
