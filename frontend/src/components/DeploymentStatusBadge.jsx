@@ -5,7 +5,7 @@
  * Mirrors the backend DEPLOYMENT_STATUS enum values.
  */
 const STATUS_CONFIG = {
-  queued:    { label: 'Queued',     dot: '#a0a0a8', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.08)', text: '#a0a0a8' },
+  queued:    { label: 'Queued',     dot: '#f59e0b', bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.2)',   text: '#fbbf24' },
   building:  { label: 'Building…',  dot: '#a78bfa', bg: 'rgba(139,92,246,0.1)',   border: 'rgba(139,92,246,0.2)',   text: '#a78bfa' },
   pushing:   { label: 'Pushing…',   dot: '#22d3ee', bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.2)',    text: '#22d3ee' },
   deploying: { label: 'Deploying…', dot: '#fb923c', bg: 'rgba(249,115,22,0.1)',   border: 'rgba(249,115,22,0.2)',   text: '#fb923c' },
