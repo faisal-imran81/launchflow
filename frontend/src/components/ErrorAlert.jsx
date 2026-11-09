@@ -1,4 +1,22 @@
+import { useState } from 'react'
+
 export default function ErrorAlert({ message, onDismiss, onRetry }) {
+  const [countdown, setCountdown] = useState(null);
+
+  const startCountdown = (seconds = 5) => {
+    setCountdown(seconds);
+    const interval = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          onRetry?.();
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   if (!message) return null
 
   return (
@@ -39,7 +57,7 @@ export default function ErrorAlert({ message, onDismiss, onRetry }) {
       <div className="flex items-center gap-3 shrink-0">
         {onRetry && (
           <button
-            onClick={onRetry}
+            onClick={() => startCountdown(5)}
             className="text-red-400 hover:text-red-300 text-xs underline underline-offset-2"
             style={{
               color: '#fc8181',
@@ -56,6 +74,31 @@ export default function ErrorAlert({ message, onDismiss, onRetry }) {
           >
             Try again
           </button>
+        )}
+        {countdown !== null && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginTop: '8px',
+            }}
+          >
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                border: '2px solid rgba(229,62,62,0.2)',
+                borderTopColor: '#e53e3e',
+                animation: 'spin 0.7s linear infinite',
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: '#5a5a62', fontSize: '12px' }}>
+              Retrying in {countdown}s...
+            </span>
+          </div>
         )}
         {onDismiss && (
           <button
