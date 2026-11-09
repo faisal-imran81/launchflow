@@ -150,11 +150,13 @@ export default function DeployForm({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label
             style={{
+              display: 'block',
               color: '#5a5a62',
               fontSize: '11px',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
+              marginBottom: '8px',
             }}
           >
             App Name
@@ -181,11 +183,13 @@ export default function DeployForm({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <label
             style={{
+              display: 'block',
               color: '#5a5a62',
               fontSize: '11px',
               fontWeight: 600,
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
+              marginBottom: '8px',
             }}
           >
             Environment
@@ -194,7 +198,12 @@ export default function DeployForm({
             name="environment"
             value={form.environment}
             onChange={handleChange}
-            style={inputStyle}
+            style={{
+              ...inputStyle,
+              cursor: 'pointer',
+              appearance: 'none',
+              WebkitAppearance: 'none',
+            }}
             onFocus={e => {
               e.target.style.borderColor = 'rgba(82,183,136,0.4)'
               e.target.style.boxShadow = '0 0 0 3px rgba(82,183,136,0.08)'
@@ -219,18 +228,26 @@ export default function DeployForm({
             borderRadius: '8px',
             fontSize: '14px',
             fontWeight: 600,
-            border: 'none',
             cursor: deployLoading || repoLoading || !selectedRepo ? 'not-allowed' : 'pointer',
             transition: 'all 0.15s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            background: deployLoading || repoLoading || !selectedRepo
+            background: deployLoading || repoLoading
               ? 'rgba(82,183,136,0.15)'
+              : !selectedRepo
+              ? 'rgba(255,255,255,0.04)'
               : '#52b788',
-            color: deployLoading || repoLoading || !selectedRepo ? '#52b788' : '#0c0c0c',
-            opacity: !selectedRepo ? 0.5 : 1,
+            color: deployLoading || repoLoading
+              ? '#52b788'
+              : !selectedRepo
+              ? '#3a3a42'
+              : '#0c0c0c',
+            border: !selectedRepo
+              ? '1px solid rgba(255,255,255,0.06)'
+              : 'none',
+            opacity: 1,
           }}
           onMouseEnter={e => {
             if (!deployLoading && !repoLoading && selectedRepo) {
@@ -260,7 +277,7 @@ export default function DeployForm({
             type="button"
             onClick={handleReset}
             style={{
-              marginTop: '4px',
+              marginTop: '8px',
               fontSize: '12px',
               color: '#5a5a62',
               background: 'none',
@@ -268,8 +285,9 @@ export default function DeployForm({
               cursor: 'pointer',
               textDecoration: 'underline',
               transition: 'color 0.15s ease',
+              padding: 0,
             }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#a0a0a8' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#e53e3e' }}
             onMouseLeave={e => { e.currentTarget.style.color = '#5a5a62' }}
           >
             Start a new deployment
