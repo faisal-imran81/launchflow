@@ -146,7 +146,14 @@ export default function LogStreamPanel({
           >
             {badge.label}
           </span>
-          <span style={{ color: '#3a3a42', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace' }}>
+          <span
+            style={{
+              color: logs.length > 0 ? '#5a5a62' : '#3a3a42',
+              fontSize: '11px',
+              fontFamily: 'JetBrains Mono, monospace',
+              transition: 'color 0.3s ease',
+            }}
+          >
             {logs.length} lines
           </span>
         </div>
@@ -241,6 +248,92 @@ export default function LogStreamPanel({
           gap: '1px',
         }}
       >
+        {status === 'error' && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+              gap: '12px',
+              textAlign: 'center',
+              padding: '24px',
+              animation: 'fadeIn 0.3s ease-out',
+            }}
+          >
+            <div
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                background: 'rgba(229,62,62,0.08)',
+                border: '1px solid rgba(229,62,62,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M3 10 C3 6.13 6.13 3 10 3"
+                  stroke="#e53e3e"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeDasharray="3 2"
+                />
+                <path
+                  d="M17 10 C17 13.87 13.87 17 10 17 C6.13 17 3 13.87 3 10"
+                  stroke="#e53e3e"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M7 7 L13 13 M13 7 L7 13"
+                  stroke="#e53e3e"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <p style={{ color: '#fc8181', fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>
+                Stream connection lost
+              </p>
+              <p style={{ color: '#5a5a62', fontSize: '12px', lineHeight: '1.5' }}>
+                Unable to connect to log stream.
+                Check if the container is running.
+              </p>
+            </div>
+
+            <button
+              onClick={reconnect}
+              style={{
+                padding: '7px 18px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: '1px solid rgba(229,62,62,0.2)',
+                background: 'rgba(229,62,62,0.08)',
+                color: '#fc8181',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                fontFamily: 'JetBrains Mono, monospace',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(229,62,62,0.14)';
+                e.currentTarget.style.borderColor = 'rgba(229,62,62,0.3)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
+                e.currentTarget.style.borderColor = 'rgba(229,62,62,0.2)';
+              }}
+            >
+              ↺ Reconnect
+            </button>
+          </div>
+        )}
         {logs.length === 0 ? (
           <div
             style={{
