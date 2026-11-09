@@ -70,7 +70,15 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <div className="space-y-3">
+          <div
+            className="space-y-3"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
+              animation: 'fadeIn 0.2s ease-out',
+            }}
+          >
             {Array.from({ length: 3 }).map((_, i) => (
               <SkeletonCard key={i} rows={2} />
             ))}
@@ -78,7 +86,15 @@ export default function Dashboard() {
         </>
       ) : (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gap: '12px',
+              marginBottom: '32px',
+            }}
+          >
             {statCards.map((stat) => (
               <div
                 key={stat.label}
