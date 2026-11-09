@@ -11,6 +11,7 @@ import SuccessToast from '../components/SuccessToast'
 import AIEngine from '../components/AIEngine'
 import LogStreamPanel from '../components/LogStreamPanel.jsx'
 import LogStreamErrorBoundary from '../components/LogStreamErrorBoundary.jsx'
+import ErrorAlert from '../components/ErrorAlert'
 import { useDeploymentStatus } from '../hooks/useDeploymentStatus.js'
 import DeploymentStatusBadge from '../components/DeploymentStatusBadge.jsx'
 import DeploymentTimeline from '../components/DeploymentTimeline.jsx'
@@ -114,6 +115,37 @@ export default function Deploy() {
         </p>
       </div>
 
+      {/* Page-level error state */}
+      {repoError && (
+        <div
+          style={{
+            padding: '16px',
+            background: 'rgba(229,62,62,0.06)',
+            border: '1px solid rgba(229,62,62,0.15)',
+            borderRadius: '12px',
+            marginBottom: '16px',
+            animation: 'slideUp 0.2s ease-out',
+          }}
+        >
+          <ErrorAlert message={repoError} onDismiss={clearRepoError} />
+        </div>
+      )}
+
+      {deployError && (
+        <div
+          style={{
+            padding: '16px',
+            background: 'rgba(229,62,62,0.06)',
+            border: '1px solid rgba(229,62,62,0.15)',
+            borderRadius: '12px',
+            marginBottom: '16px',
+            animation: 'slideUp 0.2s ease-out',
+          }}
+        >
+          <ErrorAlert message={deployError} onDismiss={clearDeployError} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* LEFT — AI config + deploy form */}
         <div className="flex flex-col gap-5">
@@ -206,7 +238,7 @@ export default function Deploy() {
         {/* RIGHT — Recent deployments */}
         <div style={cardStyle}>
           <div className="flex items-center justify-between mb-4">
-            <h2 style={{ color: '#f2f2f2', fontSize: '16px', fontWeight: 600 }}>
+            <h2 style={{ color: '#f2f2f2', fontSize: '15px', fontWeight: 600, letterSpacing: '-0.01em' }}>
               Recent Deployments
             </h2>
             <span
@@ -237,7 +269,18 @@ export default function Deploy() {
               description="Fill the form and hit Deploy Now to get started"
             />
           ) : (
-            <div className="space-y-3">
+            <div
+              className="space-y-3"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
+                marginTop: '12px',
+                maxHeight: '320px',
+                overflowY: 'auto',
+                paddingRight: '2px',
+              }}
+            >
               {deployments.slice(0, 5).map((deployment) => (
                 <DeploymentCard
                   key={deployment.id}
@@ -269,6 +312,7 @@ export default function Deploy() {
               borderRadius: '14px',
               overflow: 'hidden',
               border: '1px solid rgba(255,255,255,0.07)',
+              animation: 'slideUp 0.3s ease-out',
             }}
           >
             <LogStreamErrorBoundary>
