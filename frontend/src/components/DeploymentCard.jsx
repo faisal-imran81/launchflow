@@ -42,21 +42,34 @@ export default function DeploymentCard({ deployment }) {
   return (
     <div
       style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
+        background: status === 'failed'
+          ? 'rgba(229,62,62,0.05)'
+          : 'rgba(255,255,255,0.03)',
+        border: status === 'failed'
+          ? '1px solid rgba(229,62,62,0.15)'
+          : '1px solid rgba(255,255,255,0.07)',
         borderRadius: '12px',
         padding: '18px',
         transition: 'all 0.2s ease',
         animation: 'fadeIn 0.25s ease-out',
+        cursor: 'default',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+        e.currentTarget.style.background = status === 'failed'
+          ? 'rgba(229,62,62,0.08)'
+          : 'rgba(255,255,255,0.05)';
+        e.currentTarget.style.borderColor = status === 'failed'
+          ? 'rgba(229,62,62,0.25)'
+          : 'rgba(255,255,255,0.1)';
         e.currentTarget.style.transform = 'translateY(-1px)';
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)';
+        e.currentTarget.style.background = status === 'failed'
+          ? 'rgba(229,62,62,0.05)'
+          : 'rgba(255,255,255,0.03)';
+        e.currentTarget.style.borderColor = status === 'failed'
+          ? 'rgba(229,62,62,0.15)'
+          : 'rgba(255,255,255,0.07)';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
@@ -70,12 +83,13 @@ export default function DeploymentCard({ deployment }) {
             </svg>
             <p
               style={{
-                color: '#f2f2f2',
+                color: status === 'failed' ? '#fc8181' : '#f2f2f2',
                 fontSize: '13px',
                 fontWeight: 600,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
+                transition: 'color 0.15s ease',
               }}
             >
               {repoName}
@@ -142,19 +156,22 @@ export default function DeploymentCard({ deployment }) {
       {image_tag && (
         <div
           style={{
-            borderTop: '1px solid rgba(255,255,255,0.05)',
+            borderTop: status === 'failed'
+              ? '1px solid rgba(229,62,62,0.1)'
+              : '1px solid rgba(255,255,255,0.05)',
             paddingTop: '10px',
             marginTop: '4px',
           }}
         >
           <p
             style={{
-              color: '#5a5a62',
+              color: status === 'failed' ? 'rgba(229,62,62,0.5)' : '#5a5a62',
               fontSize: '11px',
               fontFamily: 'JetBrains Mono, monospace',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
+              transition: 'color 0.15s ease',
             }}
           >
             {image_tag}
