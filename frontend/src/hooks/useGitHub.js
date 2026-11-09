@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { fetchUserRepos, fetchRepoDetails } from '../services/githubService.js'
 
 export const useGitHub = () => {
@@ -7,6 +7,12 @@ export const useGitHub = () => {
   const [error, setError] = useState(null)
 
   const fetchRepos = async (username) => {
+    if (!navigator.onLine) {
+      setError('No internet connection. Please check your network and try again.');
+      setLoading(false);
+      return;
+    }
+
     if (!username || username.trim() === '') {
       setError('Username is required')
       return
@@ -40,6 +46,12 @@ export const useGitHub = () => {
   }
 
   const fetchFiles = async (owner, repo) => {
+    if (!navigator.onLine) {
+      setError('No internet connection. Please check your network and try again.');
+      setLoading(false);
+      return;
+    }
+
     if (!owner || owner.trim() === '') {
       setError('Repository owner is required')
       return
@@ -81,6 +93,21 @@ export const useGitHub = () => {
     setRepos([])
     setError(null)
   }
+
+  useEffect(() => {
+    const handleOffline = () => {
+      setError('You are offline. Please check your network connection.');
+    };
+    const handleOnline = () => {
+      setError(null);
+    };
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
   return {
     repos,
