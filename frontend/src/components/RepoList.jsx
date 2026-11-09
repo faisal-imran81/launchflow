@@ -8,11 +8,42 @@ export default function RepoList({ repos, onSelect, selectedRepo, searched }) {
 
   if (repos.length === 0) {
     return (
-      <EmptyState
-        icon="🔍"
-        title="No repositories found"
-        description="Check the username and try again"
-      />
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '32px 16px',
+          gap: '10px',
+          textAlign: 'center',
+        }}
+      >
+        <div
+          style={{
+            width: '40px',
+            height: '40px',
+            borderRadius: '10px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="8" cy="8" r="6" stroke="#5a5a62" strokeWidth="1.5"/>
+            <path d="M13 13 L17 17" stroke="#5a5a62" strokeWidth="1.5" strokeLinecap="round"/>
+            <path d="M6 8 L10 8M8 6 L8 10" stroke="#5a5a62" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </div>
+        <p style={{ color: '#5a5a62', fontSize: '13px', fontWeight: 500 }}>
+          No repositories found
+        </p>
+        <p style={{ color: '#3a3a42', fontSize: '12px', lineHeight: '1.5' }}>
+          Check the username and try again
+        </p>
+      </div>
     )
   }
 
@@ -36,12 +67,11 @@ export default function RepoList({ repos, onSelect, selectedRepo, searched }) {
         </label>
         <span
           style={{
-            color: '#5a5a62',
+            color: '#3a3a42',
             fontSize: '11px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            padding: '1px 8px',
-            borderRadius: '999px',
+            textAlign: 'right',
+            paddingTop: '6px',
+            fontVariantNumeric: 'tabular-nums',
           }}
         >
           {repos.length} repos found
@@ -75,8 +105,18 @@ export default function RepoList({ repos, onSelect, selectedRepo, searched }) {
       />
 
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <p style={{ color: '#5a5a62', fontSize: '13px' }}>No repos match "{filter}"</p>
+        <div
+          style={{
+            padding: '20px 16px',
+            textAlign: 'center',
+          }}
+        >
+          <p style={{ color: '#5a5a62', fontSize: '13px' }}>
+            No repositories match{' '}
+            <span style={{ color: '#a0a0a8', fontStyle: 'italic' }}>
+              "{searched}"
+            </span>
+          </p>
         </div>
       ) : (
         <div
