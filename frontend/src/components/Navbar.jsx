@@ -1,6 +1,27 @@
+import { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 export default function Navbar() {
+  const [backendOnline, setBackendOnline] = useState(true);
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api/health`,
+          { signal: AbortSignal.timeout(3000) }
+        );
+        setBackendOnline(res.ok);
+      } catch {
+        setBackendOnline(false);
+      }
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <header
       style={{
@@ -77,14 +98,45 @@ export default function Navbar() {
       {/* Right side — status dot */}
       <div className="ml-auto flex items-center gap-2">
         <div
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '5px 12px',
+            borderRadius: '8px',
+            background: backendOnline
+              ? 'rgba(82,183,136,0.06)'
+              : 'rgba(229,62,62,0.06)',
+            border: backendOnline
+              ? '1px solid rgba(82,183,136,0.12)'
+              : '1px solid rgba(229,62,62,0.15)',
+            transition: 'all 0.3s ease',
+          }}
         >
           <span
-            style={{ background: '#52b788', boxShadow: '0 0 6px rgba(82,183,136,0.6)' }}
-            className="w-1.5 h-1.5 rounded-full"
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              background: backendOnline ? '#52b788' : '#e53e3e',
+              boxShadow: backendOnline
+                ? '0 0 6px rgba(82,183,136,0.6)'
+                : '0 0 6px rgba(229,62,62,0.6)',
+              display: 'inline-block',
+              transition: 'all 0.3s ease',
+              flexShrink: 0,
+            }}
           />
-          <span className="text-xs text-[#a0a0a8] font-medium">Live</span>
+          <span
+            style={{
+              fontSize: '11px',
+              fontWeight: 600,
+              color: backendOnline ? '#52b788' : '#fc8181',
+              transition: 'color 0.3s ease',
+            }}
+          >
+            {backendOnline ? 'Live' : 'Offline'}
+          </span>
         </div>
       </div>
     </header>
