@@ -28,16 +28,24 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
   const id = rawDeployment?.id;
   const stack = rawDeployment?.stack;
   const image_tag = rawDeployment?.image_tag;
-  const status = rawDeployment?.status ?? rawDeployment?.state ?? 'pending';
+  const status = rawDeployment?.status ?? rawDeployment?.state ?? 'queued';
   const created_at = rawDeployment?.created_at ?? rawDeployment?.createdAt ?? null;
 
-  const repoName =
-    rawDeployment?.repoUrl?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
-    rawDeployment?.repo_url?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
-    rawDeployment?.url?.replace('https://github.com/', '')?.replace('http://github.com/', '') ??
-    rawDeployment?.fullName ??
-    rawDeployment?.name ??
-    'Unknown repository';
+  const repoName = (
+    rawDeployment?.repoUrl ??
+    rawDeployment?.repo_url ??
+    rawDeployment?.url ??
+    rawDeployment?.cloneUrl ??
+    rawDeployment?.clone_url ??
+    ''
+  )
+    ?.replace('https://github.com/', '')
+    ?.replace('http://github.com/', '')
+    ?.replace('.git', '')
+    || rawDeployment?.fullName
+    || rawDeployment?.full_name
+    || rawDeployment?.name
+    || 'Unknown repository';
 
   const c = statusColors[status] ?? statusColors.pending;
 
