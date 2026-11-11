@@ -8,8 +8,11 @@ const statCardStyle = {
   background: 'rgba(255,255,255,0.03)',
   border: '1px solid rgba(255,255,255,0.07)',
   borderRadius: '10px',
-  padding: '16px',
+  padding: '14px 16px',
   transition: 'all 0.2s ease',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '4px',
 }
 
 export default function Dashboard() {
@@ -29,6 +32,7 @@ export default function Dashboard() {
     {
       label: 'Total Deployments',
       value: stats.total,
+      accent: '#52b788',
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <path d="M8 2 L8 10" stroke="#52b788" strokeWidth="1.5" strokeLinecap="round"/>
@@ -40,6 +44,7 @@ export default function Dashboard() {
     {
       label: 'Successful',
       value: stats.success,
+      accent: '#52b788',
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="8" r="6.5" stroke="#52b788" strokeWidth="1.5"/>
@@ -50,6 +55,7 @@ export default function Dashboard() {
     {
       label: 'Failed',
       value: stats.failed,
+      accent: '#e53e3e',
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="8" r="6.5" stroke="#e53e3e" strokeWidth="1.5"/>
@@ -60,6 +66,7 @@ export default function Dashboard() {
     {
       label: 'Running',
       value: stats.running,
+      accent: '#52b788',
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
           <circle cx="8" cy="8" r="6.5" stroke="#52b788" strokeWidth="1.5"/>
@@ -127,9 +134,9 @@ export default function Dashboard() {
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '10px',
-              marginBottom: '24px',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '8px',
+              marginBottom: '20px',
             }}
           >
             {statCards.map((stat) => (
@@ -147,19 +154,18 @@ export default function Dashboard() {
                   e.currentTarget.style.transform = 'translateY(0)'
                 }}
               >
-                <span className="text-2xl" style={{ display: 'inline-flex' }}>{stat.icon}</span>
+                <span style={{ color: stat.accent, opacity: 0.9, marginBottom: '4px', display: 'inline-flex' }}>{stat.icon}</span>
                 <p
                   style={{
                     color: '#f2f2f2',
-                    fontSize: '24px',
+                    fontSize: '22px',
                     fontWeight: 700,
                     lineHeight: 1,
-                    margin: '8px 0 4px',
                   }}
                 >
                   {stat.value}
                 </p>
-                <p style={{ color: '#5a5a62', fontSize: '12px', fontWeight: 500 }}>
+                <p style={{ color: '#5a5a62', fontSize: '11px', fontWeight: 500 }}>
                   {stat.label}
                 </p>
               </div>
@@ -185,7 +191,7 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {recentDeployments.map((deployment) => (
                   <DeploymentCard
                     key={deployment.id}
