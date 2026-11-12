@@ -192,6 +192,7 @@ export default function History() {
               key={deployment.id}
               deployment={deployment}
               onDelete={handleDelete}
+              compact
             />
           ))}
         </div>
