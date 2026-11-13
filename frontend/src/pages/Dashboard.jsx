@@ -23,7 +23,7 @@ export default function Dashboard() {
     total: deployments.length,
     success: deployments.filter((d) => d.status === 'success').length,
     failed: deployments.filter((d) => d.status === 'failed').length,
-    running: deployments.filter((d) => d.status === 'running').length,
+    queued: deployments.filter((d) => d.status === 'queued').length,
   }
 
   const recentDeployments = deployments.slice(0, 5)
@@ -64,13 +64,13 @@ export default function Dashboard() {
       ),
     },
     {
-      label: 'Running',
-      value: stats.running,
-      accent: '#52b788',
+      label: 'Queued',
+      value: stats.queued,
+      accent: '#f59e0b',
       icon: (
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <circle cx="8" cy="8" r="6.5" stroke="#52b788" strokeWidth="1.5"/>
-          <path d="M6 5.5 L11 8 L6 10.5 Z" fill="#52b788"/>
+          <circle cx="8" cy="8" r="6.5" stroke="#f59e0b" strokeWidth="1.5"/>
+          <path d="M8 5 L8 8.5 L10.5 10" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       ),
     },
