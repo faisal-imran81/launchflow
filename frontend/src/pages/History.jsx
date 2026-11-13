@@ -11,6 +11,11 @@ export default function History() {
   usePageTitle('History')
   const { deployments, fetchDeployments, removeDeployment, isLoading, error } = useHistory()
   const [toastMessage, setToastMessage] = useState('')
+  const [filter, setFilter] = useState('all')
+
+  const filteredDeployments = filter === 'all'
+    ? deployments
+    : deployments.filter((d) => d.status === filter)
 
   const handleDelete = async (id) => {
     await removeDeployment(id)
@@ -35,6 +40,27 @@ export default function History() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            style={{
+              fontSize: '12px',
+              color: '#a0a0a8',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              padding: '3px 12px',
+              borderRadius: '999px',
+              outline: 'none',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <option value="all">All</option>
+            <option value="queued">Queued</option>
+            <option value="running">Running</option>
+            <option value="success">Success</option>
+            <option value="failed">Failed</option>
+          </select>
           <span
             style={{
               fontSize: '12px',
@@ -48,7 +74,7 @@ export default function History() {
           >
             {isLoading
               ? '...'
-              : `${deployments.length} ${deployments.length === 1 ? 'deployment' : 'deployments'}`}
+              : `${filteredDeployments.length} ${filteredDeployments.length === 1 ? 'deployment' : 'deployments'}`}
           </span>
           <button
             onClick={fetchDeployments}
@@ -229,7 +255,7 @@ export default function History() {
             overflow: 'hidden',
           }}
         >
-          {deployments.map((deployment) => (
+          {filteredDeployments.map((deployment) => (
             <DeploymentCard
               key={deployment.id}
               deployment={deployment}
