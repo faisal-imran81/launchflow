@@ -332,17 +332,37 @@ export default function Deploy() {
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Deployment status badge + stream indicator */}
           <div className="lg:col-span-1 flex flex-col gap-4">
-            <div style={cardStyle}>
+            <div
+              style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '12px',
+                padding: '16px',
+                animation: 'slideUp 0.25s ease-out',
+              }}
+            >
               <div className="flex items-center justify-between mb-3">
-                <h2 style={{ color: '#f2f2f2', fontSize: '14px', fontWeight: 600 }}>
+                <h2
+                  style={{
+                    color: '#5a5a62',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    marginBottom: '12px',
+                  }}
+                >
                   Status
                 </h2>
                 <span
                   style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '3px 10px',
+                    borderRadius: '999px',
                     fontSize: '11px',
                     fontWeight: 600,
-                    padding: '2px 9px',
-                    borderRadius: '999px',
                     color: streamStatus === 'live'
                       ? '#74c69d'
                       : streamStatus === 'reconnecting'

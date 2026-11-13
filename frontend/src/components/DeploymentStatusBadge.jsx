@@ -6,12 +6,13 @@
  */
 const STATUS_CONFIG = {
   queued:    { label: 'Queued',     dot: '#f59e0b', bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.2)',   text: '#fbbf24' },
-  building:  { label: 'Building…',  dot: '#a78bfa', bg: 'rgba(139,92,246,0.1)',   border: 'rgba(139,92,246,0.2)',   text: '#a78bfa' },
-  pushing:   { label: 'Pushing…',   dot: '#22d3ee', bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.2)',    text: '#22d3ee' },
-  deploying: { label: 'Deploying…', dot: '#fb923c', bg: 'rgba(249,115,22,0.1)',   border: 'rgba(249,115,22,0.2)',   text: '#fb923c' },
+  cloning:   { label: 'Cloning',    dot: '#3b82f6', bg: 'rgba(59,130,246,0.1)',   border: 'rgba(59,130,246,0.2)',   text: '#60a5fa' },
+  building:  { label: 'Building',   dot: '#8b5cf6', bg: 'rgba(139,92,246,0.1)',   border: 'rgba(139,92,246,0.2)',   text: '#a78bfa' },
+  pushing:   { label: 'Pushing',    dot: '#06b6d4', bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.2)',    text: '#22d3ee' },
+  deploying: { label: 'Deploying',  dot: '#f97316', bg: 'rgba(249,115,22,0.1)',   border: 'rgba(249,115,22,0.2)',   text: '#fb923c' },
   running:   { label: 'Running',    dot: '#52b788', bg: 'rgba(82,183,136,0.1)',   border: 'rgba(82,183,136,0.2)',   text: '#52b788' },
   failed:    { label: 'Failed',     dot: '#e53e3e', bg: 'rgba(229,62,62,0.1)',    border: 'rgba(229,62,62,0.2)',    text: '#e53e3e' },
-  stopped:   { label: 'Stopped',    dot: '#a0a0a8', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.08)', text: '#a0a0a8' },
+  stopped:   { label: 'Stopped',    dot: '#5a5a62', bg: 'rgba(90,90,98,0.1)',     border: 'rgba(90,90,98,0.2)',     text: '#a0a0a8' },
 };
 
 /** Fallback config for unknown or null status values. */
@@ -43,7 +44,7 @@ export default function DeploymentStatusBadge({
   size = 'md',
   className = '',
 }) {
-  const config = STATUS_CONFIG[status] ?? FALLBACK_CONFIG;
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.queued;
   const sizing = SIZE_STYLES[size] ?? SIZE_STYLES.md;
 
   return (
