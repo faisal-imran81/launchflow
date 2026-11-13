@@ -71,6 +71,7 @@ export default function ManualGenerateForm({
   loading,
   busyKind,
 }) {
+  const [showNginx, setShowNginx] = useState(false)
   const [repoInfo, setRepoInfo] = useState({
     repoName: '',
     language: '',
@@ -226,76 +227,112 @@ export default function ManualGenerateForm({
         )}
       </div>
 
-      <div
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          paddingTop: '12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px',
-        }}
-      >
-        <h4 style={{ color: '#5a5a62', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-          Nginx Config (optional)
-        </h4>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
-          <LimitedInput
-            field="domain"
-            value={nginxInfo.domain}
-            onChange={updateNginxField}
-            placeholder="Domain (e.g. example.com)"
-          />
-          <input
-            type="number"
-            min="1"
-            max="65535"
-            placeholder="Port (e.g. 3000)"
-            value={nginxInfo.port}
-            onChange={(e) => updateNginxField('port', e.target.value)}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-          <select
-            value={nginxInfo.type}
-            onChange={(e) => updateNginxField('type', e.target.value)}
-            style={{ ...inputStyle, width: '100%' }}
-          >
-            <option value="backend">Backend</option>
-            <option value="frontend">Frontend (static)</option>
-            <option value="fullstack">Fullstack</option>
-          </select>
-        </div>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
         <button
-          onClick={handleNginxSubmit}
-          disabled={!canGenerateNginx}
+          onClick={() => setShowNginx(prev => !prev)}
           style={{
-            ...primaryButton,
-            alignSelf: 'flex-start',
-            cursor: !canGenerateNginx ? 'not-allowed' : 'pointer',
-            opacity: !canGenerateNginx ? 0.5 : 1,
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             gap: '6px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '0',
+            color: '#5a5a62',
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            transition: 'color 0.15s ease',
           }}
-          onMouseEnter={e => {
-            if (canGenerateNginx) {
-              e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
-              e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
-            }
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
-            e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
-          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#a0a0a8'}
+          onMouseLeave={e => e.currentTarget.style.color = '#5a5a62'}
         >
-          {busyKind === 'nginx' ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Generating...
-            </span>
-          ) : (
-            'Generate Nginx'
-          )}
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            style={{
+              transform: showNginx ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
+            }}
+          >
+            <path d="M1 3 L5 7 L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Nginx Config (optional)
         </button>
+
+        {showNginx && (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+              marginTop: '12px',
+              animation: 'fadeIn 0.15s ease-out',
+            }}
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+              <LimitedInput
+                field="domain"
+                value={nginxInfo.domain}
+                onChange={updateNginxField}
+                placeholder="Domain (e.g. example.com)"
+              />
+              <input
+                type="number"
+                min="1"
+                max="65535"
+                placeholder="Port (e.g. 3000)"
+                value={nginxInfo.port}
+                onChange={(e) => updateNginxField('port', e.target.value)}
+                style={{ ...inputStyle, width: '100%' }}
+              />
+              <select
+                value={nginxInfo.type}
+                onChange={(e) => updateNginxField('type', e.target.value)}
+                style={{ ...inputStyle, width: '100%' }}
+              >
+                <option value="backend">Backend</option>
+                <option value="frontend">Frontend (static)</option>
+                <option value="fullstack">Fullstack</option>
+              </select>
+            </div>
+            <button
+              onClick={handleNginxSubmit}
+              disabled={!canGenerateNginx}
+              style={{
+                ...primaryButton,
+                alignSelf: 'flex-start',
+                cursor: !canGenerateNginx ? 'not-allowed' : 'pointer',
+                opacity: !canGenerateNginx ? 0.5 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={e => {
+                if (canGenerateNginx) {
+                  e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
+                  e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
+                e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
+              }}
+            >
+              {busyKind === 'nginx' ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </span>
+              ) : (
+                'Generate Nginx'
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
