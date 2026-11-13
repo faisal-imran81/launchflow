@@ -209,3 +209,41 @@ npm run dev
 > ⚠️ Never commit `.env` files to version control. Both are listed in `.gitignore`.
 
 ---
+## 📖 Usage
+
+### Deploying a Repository
+
+1. **Open the Deploy page** from the sidebar navigation
+2. **Search for a GitHub repository** by entering a GitHub username — LaunchFlow fetches all public repositories
+3. **Select a repository** from the list — LaunchFlow analyzes the codebase and auto-detects the stack
+4. **Review AI-generated files** — the AI Engine tab shows the generated `Dockerfile` and GitHub Actions workflow
+5. **Trigger deployment** — click Deploy to start the full pipeline:
+   - Docker image is built locally
+   - Image is tagged and pushed to AWS ECR
+   - EC2 instance pulls and runs the container
+   - Nginx reverse proxy is configured automatically
+6. **Monitor real-time logs** — the Log Stream panel streams live deployment output via SSE
+7. **Check deployment status** — status badge updates in real time (Pending → Building → Deploying → Live / Failed)
+
+### Viewing Deployment History
+
+- Navigate to the **History page** to see all past deployments
+- Each entry shows repository name, stack, status, timestamps, and deployment ID
+- Failed deployments include error details for debugging
+
+### Managing Projects
+
+- Navigate to the **Dashboard** to see all tracked projects
+- Each project card shows the latest deployment status and quick-access actions
+
+### Running Tests
+
+```bash
+# From the backend directory
+cd backend
+npm test
+```
+
+> 691 tests across unit, integration, and end-to-end suites — all passing.
+
+---
