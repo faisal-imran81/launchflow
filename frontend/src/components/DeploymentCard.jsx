@@ -213,7 +213,10 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
             >
               {repoName}
             </p>
-            <span style={{ color: '#5a5a62', fontSize: '11px', marginTop: '2px' }}>
+            <span
+              style={{ color: '#5a5a62', fontSize: '11px', marginTop: '2px' }}
+              title={created_at ? new Date(created_at).toLocaleString() : ''}
+            >
               {timeAgo(created_at)}
             </span>
             {Boolean(stackLabel || environment) && (
@@ -478,7 +481,10 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
                 {stack}
               </span>
             )}
-            <span style={{ color: '#5a5a62', fontSize: '11px', marginTop: '1px' }}>
+            <span
+              style={{ color: '#5a5a62', fontSize: '11px', marginTop: '1px' }}
+              title={created_at ? new Date(created_at).toLocaleString() : ''}
+            >
               {timeAgo(created_at)}
             </span>
           </div>
