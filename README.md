@@ -314,3 +314,93 @@ npm test
 | `GET` | `/api/history/:id` | Get details of a specific deployment record |
 
 ---
+## 📁 Project Structure
+
+```
+launchflow/
+├── README.md                      # Project documentation (this file)
+├── CONTRIBUTING.md                # Contribution guidelines
+│
+├── backend/                       # Express 5 API server
+│   ├── .env.example               # Environment variables template
+│   ├── package.json
+│   ├── src/
+│   │   ├── index.js               # Server entry point
+│   │   ├── config/                # Service configuration
+│   │   │   ├── docker.js          # Docker client config
+│   │   │   ├── ec2.js             # AWS EC2 client config
+│   │   │   ├── ecr.js             # AWS ECR client config
+│   │   │   ├── groq.js            # Groq API client config
+│   │   │   └── supabase.js        # Supabase client config
+│   │   ├── controllers/           # Route handler logic (12 controllers)
+│   │   ├── routes/                # Express route definitions (12 route files)
+│   │   ├── services/              # Business logic layer (10 services)
+│   │   │   ├── aiService.js               # Groq LLM integration
+│   │   │   ├── dockerService.js           # Docker build + management
+│   │   │   ├── ec2Service.js              # EC2 deploy + SSH
+│   │   │   ├── ecrService.js              # ECR push + registry
+│   │   │   ├── githubService.js           # GitHub API integration
+│   │   │   ├── logStreamService.js        # SSE log streaming
+│   │   │   ├── nginxService.js            # Nginx config generation
+│   │   │   ├── repoAnalysisService.js     # Stack detection + repo analysis
+│   │   │   ├── repoFilesService.js        # Repository file fetching
+│   │   │   └── deploymentStatusService.js # Deployment status tracking
+│   │   ├── middleware/            # Express middleware
+│   │   │   ├── errorHandler.js    # Global error handler
+│   │   │   ├── notFound.js        # 404 handler
+│   │   │   ├── requestLogger.js   # HTTP request logging
+│   │   │   └── validateJson.js    # JSON body validation
+│   │   ├── db/                    # Database layer
+│   │   │   ├── projectsService.js     # Projects CRUD
+│   │   │   ├── deploymentsService.js  # Deployments CRUD
+│   │   │   ├── schema.sql             # Database schema
+│   │   │   └── policies.sql           # Row-level security policies
+│   │   └── utils/                 # Shared utilities (17 files)
+│   │       ├── detectStack.js         # Stack auto-detection logic
+│   │       ├── validateDockerfile.js
+│   │       ├── validateWorkflow.js
+│   │       ├── validateNginxConfig.js
+│   │       ├── cleanAiOutput.js       # Sanitize LLM responses
+│   │       ├── sseHelper.js           # SSE stream helpers
+│   │       ├── generateDockerignore.js
+│   │       ├── asyncHandler.js        # Async error wrapper
+│   │       ├── parseOwnerRepo.js      # GitHub URL parser
+│   │       ├── rateLimit.js           # API rate limiting
+│   │       └── sanitizeInput.js       # Input sanitization
+│   ├── tests/                     # 691 passing tests
+│   │   ├── unit/                  # ~45 unit test files
+│   │   ├── integration/           # 9 integration suites
+│   │   └── fixtures/              # Test data + stack fixtures
+│   └── eval-outputs/              # AI evaluation outputs (10 stacks)
+│
+└── frontend/                      # React 19 + Vite client
+    ├── .env.example               # Environment variables template
+    ├── package.json
+    ├── vite.config.js
+    ├── tailwind.config.js
+    ├── index.html
+    └── src/
+        ├── main.jsx               # App entry point
+        ├── App.jsx                # Root component + routing
+        ├── config/
+        │   └── supabase.js        # Supabase client config
+        ├── pages/                 # Top-level route pages
+        │   ├── Dashboard.jsx      # Projects overview
+        │   ├── Deploy.jsx         # Deployment workflow
+        │   ├── History.jsx        # Deployment history
+        │   └── NotFound.jsx       # 404 page
+        ├── components/            # Reusable UI components (17 components)
+        ├── hooks/                 # Custom React hooks (8 hooks)
+        │   ├── useAI.js               # AI generation state
+        │   ├── useDeploy.js           # Deployment trigger + state
+        │   ├── useDeploymentStatus.js # Real-time status polling
+        │   ├── useGitHub.js           # GitHub repo fetching
+        │   ├── useHistory.js          # Deployment history
+        │   ├── useLogStream.js        # SSE log streaming
+        │   ├── usePageTitle.js        # Dynamic page titles
+        │   └── useProjects.js         # Projects management
+        ├── services/              # API call layer (7 files)
+        └── utils/                 # Frontend utilities
+```
+
+---
