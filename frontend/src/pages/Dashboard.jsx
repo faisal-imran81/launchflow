@@ -175,9 +175,31 @@ export default function Dashboard() {
           </div>
 
           <div className="space-y-4">
-            <h2 style={{ color: '#f2f2f2', fontSize: '16px', fontWeight: 600 }}>
-              Recent Deployments
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <h2 style={{ color: '#f2f2f2', fontSize: '16px', fontWeight: 600 }}>
+                Recent Deployments
+              </h2>
+              <a
+                href="/history"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#5a5a62',
+                  textDecoration: 'none',
+                  transition: 'color 0.15s ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#52b788'}
+                onMouseLeave={e => e.currentTarget.style.color = '#5a5a62'}
+              >
+                View all
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </a>
+            </div>
             {recentDeployments.length === 0 ? (
               <div
                 style={{
