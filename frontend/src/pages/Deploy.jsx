@@ -269,24 +269,61 @@ export default function Deploy() {
               description="Fill the form and hit Deploy Now to get started"
             />
           ) : (
-            <div
-              className="space-y-3"
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '8px',
-                marginTop: '12px',
-                maxHeight: '320px',
-                overflowY: 'auto',
-                paddingRight: '2px',
-              }}
-            >
-              {deployments.slice(0, 5).map((deployment) => (
-                <DeploymentCard
-                  key={deployment.id}
-                  deployment={deployment}
-                />
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  marginTop: '12px',
+                  maxHeight: '320px',
+                  overflowY: 'auto',
+                  paddingRight: '2px',
+                }}
+              >
+                {deployments.slice(0, 5).map((deployment) => (
+                  <DeploymentCard
+                    key={deployment.id}
+                    deployment={deployment}
+                  />
+                ))}
+              </div>
+              {deployments.length >= 3 && (
+                <a
+                  href="/history"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '5px',
+                    marginTop: '8px',
+                    padding: '8px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#5a5a62',
+                    textDecoration: 'none',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    background: 'rgba(255,255,255,0.02)',
+                    transition: 'all 0.15s ease',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = '#52b788'
+                    e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
+                    e.currentTarget.style.background = 'rgba(82,183,136,0.04)'
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = '#5a5a62'
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.02)'
+                  }}
+                >
+                  View all deployments
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6 L10 6 M7 3 L10 6 L7 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </a>
+              )}
             </div>
           )}
         </div>
