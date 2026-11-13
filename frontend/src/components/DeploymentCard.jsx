@@ -22,7 +22,7 @@ function timeAgo(dateStr) {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function DeploymentCard({ deployment: rawDeployment, onDelete }) {
+export default function DeploymentCard({ deployment: rawDeployment, onDelete, compact = false }) {
   if (!rawDeployment) return null;
 
   const id = rawDeployment?.id;
@@ -30,8 +30,11 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
   const image_tag = rawDeployment?.image_tag;
   const status = rawDeployment?.status ?? rawDeployment?.state ?? 'queued';
   const created_at = rawDeployment?.created_at ?? rawDeployment?.createdAt ?? null;
+  const environment = rawDeployment?.projects?.environment ?? rawDeployment?.environment ?? rawDeployment?.env;
+  const stackLabel = stack ?? rawDeployment?.language;
 
   const repoName = (
+    rawDeployment?.projects?.repo_url ??
     rawDeployment?.repoUrl ??
     rawDeployment?.repo_url ??
     rawDeployment?.url ??
@@ -42,6 +45,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
     ?.replace('https://github.com/', '')
     ?.replace('http://github.com/', '')
     ?.replace('.git', '')
+    || rawDeployment?.projects?.name
     || rawDeployment?.fullName
     || rawDeployment?.full_name
     || rawDeployment?.name
@@ -50,6 +54,153 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
   const c = statusColors[status] ?? statusColors.pending;
 
   const deployment = rawDeployment;
+
+  if (compact) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          padding: '10px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          transition: 'background 0.15s ease',
+          cursor: 'default',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
+          <p
+            style={{
+              color: '#f2f2f2',
+              fontSize: '13px',
+              fontWeight: 500,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {repoName}
+          </p>
+          <span style={{ color: '#5a5a62', fontSize: '11px', marginTop: '2px' }}>
+            {timeAgo(created_at)}
+          </span>
+          {Boolean(stackLabel || environment) && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+              {stackLabel && (
+                <span
+                  style={{
+                    color: '#5a5a62',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    padding: '1px 7px',
+                    borderRadius: '999px',
+                  }}
+                >
+                  {stackLabel}
+                </span>
+              )}
+              {environment && (
+                <span
+                  style={{
+                    color: '#52b788',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    background: 'rgba(82,183,136,0.06)',
+                    border: '1px solid rgba(82,183,136,0.12)',
+                    padding: '1px 7px',
+                    borderRadius: '999px',
+                  }}
+                >
+                  {environment}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <span
+            style={{
+              background: c.bg,
+              border: `1px solid ${c.border}`,
+              color: c.text,
+              fontSize: '11px',
+              fontWeight: 600,
+              padding: '3px 10px',
+              borderRadius: '999px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              flexShrink: 0,
+              textTransform: 'capitalize',
+            }}
+          >
+            <span
+              style={{
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                background: c.dot,
+                boxShadow: status === 'running'
+                  ? `0 0 6px ${c.dot}`
+                  : 'none',
+                flexShrink: 0,
+              }}
+            />
+            {status}
+          </span>
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(deployment.id);
+              }}
+              title="Delete deployment"
+              style={{
+                padding: '4px 8px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: 600,
+                border: '1px solid rgba(229,62,62,0.15)',
+                background: 'transparent',
+                color: '#5a5a62',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
+                e.currentTarget.style.borderColor = 'rgba(229,62,62,0.25)';
+                e.currentTarget.style.color = '#fc8181';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(229,62,62,0.15)';
+                e.currentTarget.style.color = '#5a5a62';
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path
+                  d="M2 3 L10 3 M4 3 L4 2 L8 2 L8 3 M5 5.5 L5 9 M7 5.5 L7 9 M3 3 L3.5 10 L8.5 10 L9 3"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -60,9 +211,9 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
         border: status === 'failed'
           ? '1px solid rgba(229,62,62,0.15)'
           : '1px solid rgba(255,255,255,0.07)',
-        borderRadius: '12px',
-        padding: '18px',
-        transition: 'all 0.2s ease',
+        borderRadius: '8px',
+        padding: '10px 14px',
+        transition: 'all 0.15s ease',
         animation: 'fadeIn 0.25s ease-out',
         cursor: 'default',
       }}
@@ -97,7 +248,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
               style={{
                 color: status === 'failed' ? '#fc8181' : '#f2f2f2',
                 fontSize: '13px',
-                fontWeight: 600,
+                fontWeight: 500,
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
                 whiteSpace: 'nowrap',
@@ -125,7 +276,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete }) 
                 {stack}
               </span>
             )}
-            <span style={{ color: '#5a5a62', fontSize: '12px' }}>
+            <span style={{ color: '#5a5a62', fontSize: '11px', marginTop: '1px' }}>
               {timeAgo(created_at)}
             </span>
           </div>
