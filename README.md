@@ -83,3 +83,39 @@
 ```
 
 ---
+## 🛠️ Tech Stack
+
+### Backend
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| Node.js | 20.x | Runtime |
+| Express | 5.x | HTTP framework |
+| Supabase | Latest | PostgreSQL database + auth |
+| Groq API | Latest | LLM for AI generation |
+| Docker SDK | Latest | Image build + container management |
+| AWS SDK v3 | Latest | ECR + EC2 integration |
+| ESM Modules | Native | Modern JS module system |
+
+### Frontend
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| React | 19 | UI framework |
+| Vite | 6.x | Build tool + dev server |
+| Tailwind CSS | 3.x | Utility-first styling |
+| Supabase JS | Latest | Auth + realtime client |
+
+### Infrastructure
+| Service | Purpose |
+|---------|---------|
+| AWS EC2 | Deployment target server |
+| AWS ECR | Docker image registry |
+| Nginx | Reverse proxy |
+| GitHub API | Repository data fetching |
+
+### Testing
+| Tool | Purpose |
+|------|---------|
+| Node.js built-in test runner | Unit + integration tests |
+| 691 total tests | Full coverage across backend + frontend |
+
+---
