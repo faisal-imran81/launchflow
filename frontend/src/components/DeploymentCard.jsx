@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const statusColors = {
   pending:   { dot: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  text: '#fbbf24' },
@@ -13,6 +13,112 @@ const statusColors = {
   live:      { dot: '#52b788', bg: 'rgba(82,183,136,0.1)',  border: 'rgba(82,183,136,0.2)',  text: '#52b788' },
   failed:    { dot: '#e53e3e', bg: 'rgba(229,62,62,0.1)',   border: 'rgba(229,62,62,0.2)',   text: '#e53e3e' },
 };
+
+function DeleteButton({ onDelete }) {
+  const [confirming, setConfirming] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const handleFirstClick = (e) => {
+    e.stopPropagation();
+    setConfirming(true);
+    timeoutRef.current = setTimeout(() => setConfirming(false), 3000);
+  };
+
+  const handleConfirm = (e) => {
+    e.stopPropagation();
+    clearTimeout(timeoutRef.current);
+    setConfirming(false);
+    onDelete();
+  };
+
+  const handleCancel = (e) => {
+    e.stopPropagation();
+    clearTimeout(timeoutRef.current);
+    setConfirming(false);
+  };
+
+  if (confirming) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+        <button
+          onClick={handleConfirm}
+          style={{
+            padding: '3px 8px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 600,
+            border: '1px solid rgba(229,62,62,0.3)',
+            background: 'rgba(229,62,62,0.12)',
+            color: '#fc8181',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Delete?
+        </button>
+        <button
+          onClick={handleCancel}
+          style={{
+            padding: '3px 8px',
+            borderRadius: '6px',
+            fontSize: '11px',
+            fontWeight: 600,
+            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'rgba(255,255,255,0.04)',
+            color: '#5a5a62',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleFirstClick}
+      title="Delete deployment"
+      style={{
+        padding: '4px 8px',
+        borderRadius: '6px',
+        fontSize: '11px',
+        fontWeight: 600,
+        border: '1px solid rgba(229,62,62,0.15)',
+        background: 'transparent',
+        color: '#5a5a62',
+        cursor: 'pointer',
+        transition: 'all 0.15s ease',
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      onMouseEnter={e => {
+        e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
+        e.currentTarget.style.borderColor = 'rgba(229,62,62,0.25)';
+        e.currentTarget.style.color = '#fc8181';
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.background = 'transparent';
+        e.currentTarget.style.borderColor = 'rgba(229,62,62,0.15)';
+        e.currentTarget.style.color = '#5a5a62';
+      }}
+    >
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path
+          d="M2 3 L10 3 M4 3 L4 2 L8 2 L8 3 M5 5.5 L5 9 M7 5.5 L7 9 M3 3 L3.5 10 L8.5 10 L9 3"
+          stroke="currentColor"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
 
 function timeAgo(dateStr) {
   if (!dateStr) return '—';
@@ -71,6 +177,14 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
         {/* Main row — clickable to expand */}
         <div
           onClick={() => setExpanded(prev => !prev)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setExpanded(prev => !prev);
+            }
+          }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -79,9 +193,12 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
             padding: '10px 16px',
             cursor: 'pointer',
             transition: 'background 0.15s ease',
+            outline: 'none',
           }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
           onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+          onFocus={e => e.currentTarget.style.background = 'rgba(82,183,136,0.04)'}
+          onBlur={e => e.currentTarget.style.background = 'transparent'}
         >
           <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0, flex: 1 }}>
             <p
@@ -179,48 +296,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
               <path d="M2 4 L6 8 L10 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {onDelete && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete(deployment.id);
-                }}
-                title="Delete deployment"
-                style={{
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  border: '1px solid rgba(229,62,62,0.15)',
-                  background: 'transparent',
-                  color: '#5a5a62',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                  flexShrink: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
-                  e.currentTarget.style.borderColor = 'rgba(229,62,62,0.25)';
-                  e.currentTarget.style.color = '#fc8181';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.borderColor = 'rgba(229,62,62,0.15)';
-                  e.currentTarget.style.color = '#5a5a62';
-                }}
-              >
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                  <path
-                    d="M2 3 L10 3 M4 3 L4 2 L8 2 L8 3 M5 5.5 L5 9 M7 5.5 L7 9 M3 3 L3.5 10 L8.5 10 L9 3"
-                    stroke="currentColor"
-                    strokeWidth="1.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+              <DeleteButton onDelete={() => onDelete(deployment.id)} />
             )}
           </div>
         </div>
@@ -440,48 +516,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
           {status}
         </span>
         {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(deployment.id);
-            }}
-            title="Delete deployment"
-            style={{
-              padding: '4px 8px',
-              borderRadius: '6px',
-              fontSize: '11px',
-              fontWeight: 600,
-              border: '1px solid rgba(229,62,62,0.15)',
-              background: 'transparent',
-              color: '#5a5a62',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-              flexShrink: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(229,62,62,0.08)';
-              e.currentTarget.style.borderColor = 'rgba(229,62,62,0.25)';
-              e.currentTarget.style.color = '#fc8181';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(229,62,62,0.15)';
-              e.currentTarget.style.color = '#5a5a62';
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path
-                d="M2 3 L10 3 M4 3 L4 2 L8 2 L8 3 M5 5.5 L5 9 M7 5.5 L7 9 M3 3 L3.5 10 L8.5 10 L9 3"
-                stroke="currentColor"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          <DeleteButton onDelete={() => onDelete(deployment.id)} />
         )}
       </div>
 
