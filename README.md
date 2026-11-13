@@ -119,3 +119,62 @@
 | 691 total tests | Full coverage across backend + frontend |
 
 ---
+## 📦 Installation
+
+### Prerequisites
+
+Before you begin, make sure you have the following installed and configured:
+
+- **Node.js** v20.x or higher
+- **npm** v10.x or higher
+- **Docker** (running locally)
+- **Git**
+- A **Supabase** project (PostgreSQL database)
+- A **Groq API** key — [get one free at console.groq.com](https://console.groq.com)
+- **AWS Account** with EC2 and ECR access
+- A **GitHub Personal Access Token** (for repo fetching)
+
+---
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/faisal-imran81/launchflow.git
+cd launchflow
+```
+
+### 2. Backend Setup
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Fill in your credentials in .env
+```
+
+### 3. Frontend Setup
+
+```bash
+cd ../frontend
+npm install
+cp .env.example .env
+# Fill in your credentials in .env
+```
+
+### 4. Run the Development Servers
+
+**Backend** (runs on `http://localhost:3000`):
+```bash
+cd backend
+npm run dev
+```
+
+**Frontend** (runs on `http://localhost:5173`):
+```bash
+cd frontend
+npm run dev
+```
+
+> Both servers must be running simultaneously for the app to function correctly.
+
+---
