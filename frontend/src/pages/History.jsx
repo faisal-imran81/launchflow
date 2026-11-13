@@ -35,7 +35,17 @@ export default function History() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 bg-gray-800 px-3 py-1 rounded-full whitespace-nowrap">
+          <span
+            style={{
+              fontSize: '12px',
+              color: '#5a5a62',
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              padding: '3px 12px',
+              borderRadius: '999px',
+              whiteSpace: 'nowrap',
+            }}
+          >
             {isLoading
               ? '...'
               : `${deployments.length} ${deployments.length === 1 ? 'deployment' : 'deployments'}`}
@@ -43,9 +53,41 @@ export default function History() {
           <button
             onClick={fetchDeployments}
             disabled={isLoading}
-            className="text-xs text-blue-400 hover:text-blue-300 disabled:text-blue-800 bg-gray-800 px-3 py-1 rounded-full transition-colors whitespace-nowrap"
+            style={{
+              fontSize: '12px',
+              fontWeight: 600,
+              color: isLoading ? 'rgba(82,183,136,0.3)' : '#52b788',
+              background: 'rgba(82,183,136,0.06)',
+              border: '1px solid rgba(82,183,136,0.15)',
+              padding: '3px 12px',
+              borderRadius: '999px',
+              whiteSpace: 'nowrap',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.15s ease',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '5px',
+            }}
+            onMouseEnter={e => {
+              if (!isLoading) {
+                e.currentTarget.style.background = 'rgba(82,183,136,0.12)'
+                e.currentTarget.style.borderColor = 'rgba(82,183,136,0.25)'
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(82,183,136,0.06)'
+              e.currentTarget.style.borderColor = 'rgba(82,183,136,0.15)'
+            }}
           >
-            ↻ Refresh
+            <span
+              style={{
+                display: 'inline-block',
+                animation: isLoading ? 'spin 0.7s linear infinite' : 'none',
+              }}
+            >
+              ↻
+            </span>
+            Refresh
           </button>
         </div>
       </div>
