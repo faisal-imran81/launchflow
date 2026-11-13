@@ -6,55 +6,111 @@ import DeploymentStatusBadge from './DeploymentStatusBadge.jsx';
  * Ordered pipeline steps shown in the timeline.
  * Each step maps to a DEPLOYMENT_STATUS value.
  */
-const PIPELINE_STEPS = [
-  { status: 'queued',    label: 'Queued',    description: 'Deployment added to queue' },
-  { status: 'building',  label: 'Build',     description: 'Building Docker image' },
-  { status: 'pushing',   label: 'Push',      description: 'Pushing image to ECR' },
-  { status: 'deploying', label: 'Deploy',    description: 'Deploying container to EC2' },
-  { status: 'running',   label: 'Running',   description: 'Container is live and healthy' },
+const steps = [
+  {
+    key: 'queued',
+    label: 'Queued',
+    desc: 'Deployment added to queue',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M7 4 L7 7.5 L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'cloning',
+    label: 'Cloning',
+    desc: 'Fetching repository from GitHub',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M2 2.5C2 1.67 2.67 1 3.5 1h7C11.33 1 12 1.67 12 2.5v9a.5.5 0 01-.777.416L7 8.6l-4.223 3.316A.5.5 0 012 11.5v-9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'building',
+    label: 'Building',
+    desc: 'Building Docker image',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+        <rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+        <rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+        <rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'pushing',
+    label: 'Pushing',
+    desc: 'Uploading image to ECR',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 9 L7 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M4.5 4.5 L7 2 L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M2 10 C2 11.1 2.9 12 4 12 L10 12 C11.1 12 12 11.1 12 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'deploying',
+    label: 'Deploying',
+    desc: 'Launching container on EC2',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M7 1 C4 1 1 4 1 7 C1 10 4 13 7 13 C10 13 13 10 13 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        <path d="M9 1 L13 1 L13 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        <path d="M13 1 L7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'running',
+    label: 'Live',
+    desc: 'Deployment is running',
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5"/>
+        <path d="M5 4.5 L10 7 L5 9.5 Z" fill="currentColor"/>
+      </svg>
+    ),
+  },
 ];
 
 /**
  * Returns the visual state of a pipeline step relative to the current status.
  *
- * @param {string} stepStatus    - The status this step represents
+ * @param {string} stepKey       - The status this step represents
  * @param {string|null} current  - The current deployment status
- * @returns {'completed'|'active'|'failed'|'pending'}
+ * @returns {'done'|'active'|'failed'|'pending'}
  */
-function getStepState(stepStatus, current) {
-  if (!current) return 'pending';
-
-  const order = PIPELINE_STEPS.map((s) => s.status);
-  const currentIdx = order.indexOf(current);
-  const stepIdx = order.indexOf(stepStatus);
-
-  // Failed — mark current step as failed, prior steps completed
-  if (current === 'failed') {
-    if (stepIdx < currentIdx) return 'completed';
-    if (stepIdx === currentIdx) return 'failed';
-    return 'pending';
+function getStepState(stepKey, currentStatus) {
+  if (currentStatus === 'failed') {
+    const stepIndex    = steps.findIndex(s => s.key === stepKey);
+    const currentIndex = steps.findIndex(s => s.key === 'deploying');
+    if (stepIndex < currentIndex) return 'done';
+    return 'failed';
   }
 
-  // Stopped — all steps up to and including running are completed
-  // since stopped only happens after a successful running state
-  if (current === 'stopped') {
-    return 'completed';
-  }
+  const stepIndex    = steps.findIndex(s => s.key === stepKey);
+  const currentIndex = steps.findIndex(s => s.key === currentStatus);
 
-  if (stepIdx < currentIdx) return 'completed';
-  if (stepIdx === currentIdx) return 'active';
+  if (currentIndex === -1)      return 'pending';
+  if (stepIndex < currentIndex)  return 'done';
+  if (stepIndex === currentIndex) return 'active';
   return 'pending';
 }
 
 /**
  * Returns the color set for the step indicator circle based on its state.
  *
- * @param {'completed'|'active'|'failed'|'pending'} state
+ * @param {'done'|'active'|'failed'|'pending'} state
  * @returns {{ icon: string, iconBg: string, border: string, label: string, desc: string }}
  */
 function getCircleColors(state) {
   const map = {
-    completed: {
+    done: {
       icon: '#52b788',
       iconBg: 'rgba(82,183,136,0.12)',
       border: 'rgba(82,183,136,0.25)',
@@ -89,12 +145,12 @@ function getCircleColors(state) {
 /**
  * Returns the icon character shown inside the step circle.
  *
- * @param {'completed'|'active'|'failed'|'pending'} state
+ * @param {'done'|'active'|'failed'|'pending'} state
  * @param {number} index - Step index (shown for pending steps)
  * @returns {string}
  */
 function getCircleIcon(state, index) {
-  if (state === 'completed') return '✓';
+  if (state === 'done') return '✓';
   if (state === 'failed')    return '✕';
   if (state === 'active')    return '●';
   return String(index + 1);
@@ -134,19 +190,19 @@ export default function DeploymentTimeline({
 
       {/* ── Pipeline steps ── */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-        {PIPELINE_STEPS.map((step, idx) => {
-          const state = getStepState(step.status, status);
-          const isLast = idx === PIPELINE_STEPS.length - 1;
+        {steps.map((step, idx) => {
+          const state = getStepState(step.key, status);
+          const isLast = idx === steps.length - 1;
           const c = getCircleColors(state);
           const isFailed = state === 'failed';
 
           // Find timestamp for this step from history
           const historyEntry = history
-            .filter((h) => h.status === step.status)
+            .filter((h) => h.status === step.key)
             .at(-1);
 
           return (
-            <div key={step.status} style={{ display: 'flex', gap: '16px' }}>
+            <div key={step.key} style={{ display: 'flex', gap: '16px' }}>
 
               {/* ── Left column: circle + connector line ── */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -184,7 +240,7 @@ export default function DeploymentTimeline({
                       width: '1px',
                       flex: 1,
                       minHeight: '20px',
-                      background: state === 'completed'
+                      background: state === 'done'
                         ? 'linear-gradient(to bottom, #52b788, rgba(82,183,136,0.15))'
                         : isFailed
                         ? 'linear-gradient(to bottom, rgba(229,62,62,0.3), rgba(229,62,62,0.05))'
@@ -210,7 +266,7 @@ export default function DeploymentTimeline({
                   {step.label}
                 </p>
                 <p style={{ color: c.desc, fontSize: '12px', marginTop: '2px' }}>
-                  {step.description}
+                  {step.desc}
                 </p>
 
                 {(isFailed || (status === 'failed' && state === 'active')) && (
