@@ -1,5 +1,25 @@
 import { getUserRepos, getRepoDetails, getRateLimit } from '../services/githubService.js'
 
+/**
+ * @async
+ * @function fetchUserRepos
+ * @description Fetches all public repositories for a given GitHub username using the
+ * GitHub REST API. Returns repository name, description, language, stars, and URL.
+ *
+ * @route GET /api/github/repos/:username
+ *
+ * @param {import('express').Request} req - Express request object
+ * @param {object} req.params - Route parameters
+ * @param {string} req.params.username - GitHub username to fetch repositories for
+ *
+ * @param {import('express').Response} res - Express response object
+ *
+ * @returns {Promise<void>} JSON response containing an array of repository objects
+ *
+ * @example
+ * // GET /api/github/repos/faisal-imran81
+ * // Response: { repos: [{ name: "launchflow", language: "JavaScript", stars: 12, ... }] }
+ */
 export const fetchUserRepos = async (req, res) => {
   try {
     const { username } = req.params
@@ -26,6 +46,30 @@ export const fetchUserRepos = async (req, res) => {
   }
 }
 
+/**
+ * @async
+ * @function fetchRepoDetails
+ * @description Fetches detailed metadata and the full file tree for a specific GitHub
+ * repository. Used by the AI engine to analyze the codebase and detect the stack.
+ *
+ * @route GET /api/github/repo/:owner/:repo
+ *
+ * @param {import('express').Request} req - Express request object
+ * @param {object} req.params - Route parameters
+ * @param {string} req.params.owner - GitHub repository owner (username or organization)
+ * @param {string} req.params.repo - GitHub repository name
+ *
+ * @param {import('express').Response} res - Express response object
+ *
+ * @returns {Promise<void>} JSON response containing repository metadata and file tree array
+ *
+ * @example
+ * // GET /api/github/repo/faisal-imran81/launchflow
+ * // Response: {
+ * //   repo: { name: "launchflow", description: "...", language: "JavaScript" },
+ * //   files: ["package.json", "src/index.js", "Dockerfile", ...]
+ * // }
+ */
 export const fetchRepoDetails = async (req, res) => {
   try {
     const { owner, repo } = req.params
