@@ -46,7 +46,10 @@ export default function Sidebar() {
         borderRight: '1px solid rgba(255,255,255,0.07)',
         width: '200px',
         padding: '12px 10px',
-        minHeight: 'calc(100vh - 56px)',
+        minHeight: 'calc(100vh - 48px)',
+        position: 'sticky',
+        top: '48px',
+        alignSelf: 'flex-start',
       }}
       className="flex flex-col shrink-0"
     >
@@ -74,6 +77,7 @@ export default function Sidebar() {
                 : '1px solid transparent',
               transition: 'all 0.15s ease',
               textDecoration: 'none',
+              outline: 'none',
             })}
             onMouseEnter={e => {
               if (!e.currentTarget.style.background.includes('82,183')) {
@@ -87,6 +91,18 @@ export default function Sidebar() {
                 e.currentTarget.style.color = '#a0a0a8';
               }
             }}
+          onFocus={e => {
+            if (!e.currentTarget.style.background.includes('82,183')) {
+              e.currentTarget.style.borderColor = 'rgba(82,183,136,0.4)'
+              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(82,183,136,0.08)'
+            }
+          }}
+          onBlur={e => {
+            if (!e.currentTarget.style.background.includes('82,183')) {
+              e.currentTarget.style.borderColor = '1px solid transparent'
+              e.currentTarget.style.boxShadow = 'none'
+            }
+          }}
           >
             <span style={{ opacity: 0.9 }}>{icon}</span>
             {label}
