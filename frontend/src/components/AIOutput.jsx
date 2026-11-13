@@ -318,7 +318,6 @@ function EmptyHint() {
         Enter an owner/repo above to get a Dockerfile, .dockerignore and GitHub Actions
         workflow in one click, or fill in the details manually.
       </p>
-      <p style={{ color: "#3a3a42", fontSize: "11px" }}>Node.js repos with a package.json in the root only, for now.</p>
     </div>
   );
 }
