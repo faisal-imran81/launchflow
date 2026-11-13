@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useHistory } from '../hooks/useHistory'
 import SkeletonCard from '../components/SkeletonCard'
@@ -17,6 +18,7 @@ const statCardStyle = {
 
 export default function Dashboard() {
   usePageTitle('Dashboard')
+  const navigate = useNavigate()
   const { deployments, isLoading, error } = useHistory()
 
   const stats = {
@@ -247,10 +249,15 @@ export default function Dashboard() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {recentDeployments.map((deployment) => (
-                  <DeploymentCard
+                  <div
                     key={deployment.id}
-                    deployment={deployment}
-                  />
+                    onClick={() => navigate('/history')}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <DeploymentCard
+                      deployment={deployment}
+                    />
+                  </div>
                 ))}
               </div>
             )}
