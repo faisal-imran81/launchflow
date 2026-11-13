@@ -20,3 +20,18 @@
 > Paste a GitHub repo URL. LaunchFlow's AI engine analyzes your codebase, generates a production-ready `Dockerfile` and GitHub Actions workflow, builds a Docker image, pushes it to AWS ECR, deploys it to AWS EC2, and streams real-time logs — all from a single click.
 
 ---
+
+## ✨ Features
+
+- **AI-Powered Generation** — Groq LLM analyzes your repository and auto-generates a production-ready `Dockerfile` and GitHub Actions CI/CD workflow
+- **Stack Auto-Detection** — Automatically detects Node.js, Python, Go, Java, Ruby, PHP, Rust, and more from your repo's file structure
+- **Docker Integration** — Builds, tags, and manages Docker images locally before pushing to the registry
+- **AWS ECR Support** — Pushes built images directly to your Amazon Elastic Container Registry
+- **AWS EC2 Deployment** — Deploys containers to your EC2 instance with zero manual SSH required
+- **Nginx Configuration** — Auto-generates and applies reverse proxy config for your deployed app
+- **Real-Time Log Streaming** — Server-Sent Events (SSE) stream live Docker and deployment logs to the browser
+- **Deployment History** — Full audit trail of every deployment with status, timestamps, and logs
+- **Project Management** — Organize and track multiple projects and their deployment lifecycles
+- **691 Tests** — Comprehensive unit, integration, and E2E test coverage
+
+---
