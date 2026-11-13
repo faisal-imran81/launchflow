@@ -178,3 +178,34 @@ npm run dev
 > Both servers must be running simultaneously for the app to function correctly.
 
 ---
+## 🔐 Environment Variables
+
+### Backend (`backend/.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PORT` | Yes | Port the Express server runs on (default: `3000`) |
+| `SUPABASE_URL` | Yes | Your Supabase project URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (server-side) |
+| `GROQ_API_KEY` | Yes | Groq API key for LLM-powered generation |
+| `GITHUB_TOKEN` | Yes | GitHub Personal Access Token for repo fetching |
+| `AWS_ACCESS_KEY_ID` | Yes | AWS IAM user access key |
+| `AWS_SECRET_ACCESS_KEY` | Yes | AWS IAM user secret key |
+| `AWS_REGION` | Yes | AWS region (e.g. `us-east-1`) |
+| `AWS_ACCOUNT_ID` | Yes | Your 12-digit AWS account ID |
+| `ECR_REGISTRY` | Yes | Full ECR registry URL (e.g. `123456789.dkr.ecr.us-east-1.amazonaws.com`) |
+| `EC2_HOST` | Yes | Public IP or DNS of your EC2 instance |
+| `EC2_USERNAME` | Yes | SSH username for EC2 (e.g. `ubuntu`) |
+| `EC2_SSH_KEY_PATH` | Yes | Absolute path to your EC2 `.pem` key file |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_SUPABASE_URL` | Yes | Your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Yes | Supabase anon/public key (client-side) |
+| `VITE_API_URL` | Yes | Backend API base URL (e.g. `http://localhost:3000`) |
+
+> ⚠️ Never commit `.env` files to version control. Both are listed in `.gitignore`.
+
+---
