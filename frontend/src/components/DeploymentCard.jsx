@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 const statusColors = {
   pending:   { dot: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  text: '#fbbf24' },
@@ -166,6 +166,39 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
 
   const [expanded, setExpanded] = useState(false);
 
+  const transitionalStatuses = ['queued', 'cloning', 'building', 'pushing', 'deploying']
+  const [liveStatus, setLiveStatus] = useState(status)
+  const [liveStatusColor, setLiveStatusColor] = useState(c)
+
+  useEffect(() => {
+    setLiveStatus(status)
+    setLiveStatusColor(statusColors[status] ?? statusColors.pending)
+  }, [status])
+
+  useEffect(() => {
+    if (!expanded || !id || !transitionalStatuses.includes(liveStatus)) return
+
+    const baseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`${baseUrl}/api/status/${id}`)
+        if (!res.ok) return
+        const data = await res.json()
+        const newStatus = data?.status ?? data?.data?.status
+        if (newStatus && newStatus !== liveStatus) {
+          setLiveStatus(newStatus)
+          setLiveStatusColor(statusColors[newStatus] ?? statusColors.pending)
+        }
+      } catch {
+        // silent fail — polling is best effort
+      }
+    }
+
+    const interval = setInterval(poll, 5000)
+    return () => clearInterval(interval)
+  }, [expanded, id, liveStatus])
+
   if (compact) {
     return (
       <div
@@ -257,9 +290,9 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <span
               style={{
-                background: c.bg,
-                border: `1px solid ${c.border}`,
-                color: c.text,
+                background: liveStatusColor.bg,
+                border: `1px solid ${liveStatusColor.border}`,
+                color: liveStatusColor.text,
                 fontSize: '11px',
                 fontWeight: 600,
                 padding: '3px 10px',
@@ -269,6 +302,7 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
                 gap: '5px',
                 flexShrink: 0,
                 textTransform: 'capitalize',
+                transition: 'all 0.3s ease',
               }}
             >
               <span
@@ -276,12 +310,12 @@ export default function DeploymentCard({ deployment: rawDeployment, onDelete, co
                   width: '5px',
                   height: '5px',
                   borderRadius: '50%',
-                  background: c.dot,
-                  boxShadow: status === 'running' ? `0 0 6px ${c.dot}` : 'none',
+                  background: liveStatusColor.dot,
+                  boxShadow: liveStatus === 'running' ? `0 0 6px ${liveStatusColor.dot}` : 'none',
                   flexShrink: 0,
                 }}
               />
-              {status}
+              {liveStatus}
             </span>
             {/* Expand chevron */}
             <svg
