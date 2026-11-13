@@ -81,15 +81,6 @@ export default function AIEngine() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div>
-        <h2 style={{ color: '#f2f2f2', fontSize: '14px', fontWeight: 600 }}>
-          AI Engine
-        </h2>
-        <p style={{ color: '#5a5a62', fontSize: '12px', marginTop: '4px' }}>
-          Generate Dockerfile, .dockerignore and GitHub Actions workflow for your repo
-        </p>
-      </div>
-
       <AutoDetectForm
         onSubmit={handleAutoSubmit}
         loading={loading}
