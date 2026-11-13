@@ -404,3 +404,93 @@ launchflow/
 ```
 
 ---
+---
+
+## API Routes
+
+| Method | Route | Controller | Description |
+|--------|-------|------------|-------------|
+| `GET` | `/api/health` | — | Server health check |
+| `POST` | `/api/ai/dockerfile` | aiController | Generate Dockerfile via Groq |
+| `POST` | `/api/ai/github-actions` | aiController | Generate GitHub Actions YAML via Groq |
+| `POST` | `/api/deploy/trigger` | deployController | Trigger full deployment pipeline |
+| `GET` | `/api/status/:deploymentId` | deploymentStatusController | Get deployment status |
+| `GET` | `/api/status/:deploymentId/stream` | deploymentStatusController | Stream status via SSE |
+| `POST` | `/api/docker/build` | dockerController | Build Docker image locally |
+| `GET` | `/api/docker/images` | dockerController | List local Docker images |
+| `DELETE` | `/api/docker/images/:imageId` | dockerController | Remove a Docker image |
+| `GET` | `/api/logs/:containerId/stream` | logStreamController | Stream container logs via SSE |
+| `GET` | `/api/github/repos/:username` | githubController | List public repos for a user |
+| `GET` | `/api/github/repo/:owner/:repo` | githubController | Fetch repo metadata + file tree |
+| `POST` | `/api/ecr/create-repository` | ecrController | Create ECR repository |
+| `POST` | `/api/ecr/push` | ecrController | Push image to ECR |
+| `GET` | `/api/ecr/repositories` | ecrController | List ECR repositories |
+| `POST` | `/api/ec2/deploy` | ec2Controller | Deploy container to EC2 |
+| `GET` | `/api/ec2/status` | ec2Controller | Check EC2 connectivity |
+| `POST` | `/api/nginx/configure` | nginxController | Apply Nginx reverse proxy config |
+| `GET` | `/api/nginx/status` | nginxController | Check Nginx service status |
+| `GET` | `/api/projects` | projectsController | List all projects |
+| `POST` | `/api/projects` | projectsController | Create a project |
+| `DELETE` | `/api/projects/:id` | projectsController | Delete a project |
+| `GET` | `/api/history` | historyController | List all deployment records |
+| `GET` | `/api/history/:id` | historyController | Get a specific deployment record |
+
+---
+
+## Running Tests
+
+```bash
+npm test
+```
+
+691 tests passing across unit, integration, and end-to-end suites using the Node.js built-in test runner.
+
+---
+
+## Environment Variables
+
+See `.env.example` for the full list of required variables with descriptions.
+## 🧪 Testing
+
+LaunchFlow has 691 passing tests across unit, integration, and end-to-end suites using the Node.js built-in test runner.
+
+```bash
+cd backend
+npm test
+```
+
+### Test Coverage
+
+| Suite | Location | Description |
+|-------|----------|-------------|
+| Unit | `backend/tests/unit/` | ~45 files covering all services, utils, and controllers |
+| Integration | `backend/tests/integration/` | 9 suites covering all API routes end-to-end |
+| Fixtures | `backend/tests/fixtures/` | 12 stack JSON fixtures for consistent test data |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for commit guidelines, code style rules, and the pull request process.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👤 Author
+
+**Faisal Imran**
+- GitHub: [@faisal-imran81](https://github.com/faisal-imran81)
+- LinkedIn: [faisal-imran-623284373](https://linkedin.com/in/faisal-imran-623284373)
+
+---
+
+<div align="center">
+
+Built with ❤️ using React 19, Express 5, Groq AI, and AWS.
+
+</div>
