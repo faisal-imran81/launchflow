@@ -179,16 +179,70 @@ export default function Dashboard() {
             {recentDeployments.length === 0 ? (
               <div
                 style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '48px 24px',
+                  gap: '12px',
+                  textAlign: 'center',
                   background: 'rgba(255,255,255,0.02)',
                   border: '1px solid rgba(255,255,255,0.06)',
                   borderRadius: '12px',
-                  padding: '48px 24px',
-                  textAlign: 'center',
+                  animation: 'fadeIn 0.3s ease-out',
                 }}
               >
-                <p style={{ color: '#5a5a62', fontSize: '14px' }}>
-                  No deployments yet — go deploy something! 🚀
+                <div
+                  style={{
+                    width: '44px',
+                    height: '44px',
+                    borderRadius: '12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 2 L8 10" stroke="#5a5a62" strokeWidth="1.5" strokeLinecap="round"/>
+                    <path d="M5 5 L8 2 L11 5" stroke="#5a5a62" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M3 12 C3 13.1 3.9 14 5 14 L11 14 C12.1 14 13 13.1 13 12" stroke="#5a5a62" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <p style={{ color: '#f2f2f2', fontSize: '14px', fontWeight: 600 }}>
+                  No deployments yet
                 </p>
+                <p style={{ color: '#5a5a62', fontSize: '13px', lineHeight: '1.6', maxWidth: '260px' }}>
+                  Your recent deployments will appear here once you deploy your first project.
+                </p>
+                <a
+                  href="/deploy"
+                  style={{
+                    marginTop: '8px',
+                    padding: '8px 20px',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    border: '1px solid rgba(82,183,136,0.2)',
+                    background: 'rgba(82,183,136,0.08)',
+                    color: '#52b788',
+                    textDecoration: 'none',
+                    transition: 'all 0.15s ease',
+                    display: 'inline-block',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'rgba(82,183,136,0.14)';
+                    e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'rgba(82,183,136,0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)';
+                  }}
+                >
+                  Deploy your first project →
+                </a>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
