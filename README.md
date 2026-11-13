@@ -247,3 +247,70 @@ npm test
 > 691 tests across unit, integration, and end-to-end suites — all passing.
 
 ---
+## 🔌 API Endpoints
+
+### Health
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Server health check |
+
+### AI Engine
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/ai/dockerfile` | Generate a Dockerfile for a given repository |
+| `POST` | `/api/ai/github-actions` | Generate a GitHub Actions workflow YAML |
+
+### Deployment
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/deploy/trigger` | Trigger a full deployment pipeline |
+| `GET` | `/api/status/:deploymentId` | Get current status of a deployment |
+| `GET` | `/api/status/:deploymentId/stream` | Stream real-time deployment status via SSE |
+
+### Docker
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/docker/build` | Build a Docker image locally |
+| `GET` | `/api/docker/images` | List all local Docker images |
+| `DELETE` | `/api/docker/images/:imageId` | Remove a local Docker image |
+| `GET` | `/api/logs/:containerId/stream` | Stream live container logs via SSE |
+
+### GitHub
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/github/repos/:username` | Fetch all public repositories for a GitHub user |
+| `GET` | `/api/github/repo/:owner/:repo` | Fetch metadata and file tree for a specific repo |
+
+### AWS ECR
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/ecr/create-repository` | Create a new ECR repository |
+| `POST` | `/api/ecr/push` | Tag and push a Docker image to ECR |
+| `GET` | `/api/ecr/repositories` | List all ECR repositories |
+
+### AWS EC2
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/ec2/deploy` | Pull and run a container on the EC2 instance |
+| `GET` | `/api/ec2/status` | Check EC2 instance connectivity |
+
+### Nginx
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/nginx/configure` | Generate and apply Nginx reverse proxy config |
+| `GET` | `/api/nginx/status` | Check Nginx service status on EC2 |
+
+### Projects
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/projects` | List all projects |
+| `POST` | `/api/projects` | Create a new project |
+| `DELETE` | `/api/projects/:id` | Delete a project |
+
+### History
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/history` | List all deployment history records |
+| `GET` | `/api/history/:id` | Get details of a specific deployment record |
+
+---
