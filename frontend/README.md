@@ -1,97 +1,145 @@
 # LaunchFlow — Frontend
 
-React + Vite + Tailwind CSS powered frontend for the LaunchFlow deployment platform.
+React 19 client application for the LaunchFlow deployment platform. Built with Vite, Tailwind CSS 3, and Supabase Auth. Provides a full deployment workflow UI — from GitHub repo search to real-time log streaming.
 
-## Tech Stack
+---
 
-- React 18
-- Vite
-- Tailwind CSS
-- Supabase JS Client
-- Axios
-- React Router DOM
+## Stack
 
-## Setup
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| React | 19 | UI framework |
+| Vite | 6.x | Build tool + dev server |
+| Tailwind CSS | 3.x | Utility-first styling |
+| Supabase JS | Latest | Auth + database client |
 
-1. Install dependencies:
+---
+
+## Getting Started
+
+### Install Dependencies
+
 ```bash
+cd frontend
 npm install
 ```
 
-2. Copy env example and fill in your values:
+### Configure Environment
+
 ```bash
 cp .env.example .env
 ```
 
-3. Start dev server:
+Fill in all required values in `.env`. See `.env.example` for descriptions of each variable.
+
+### Start Development Server
+
 ```bash
 npm run dev
 ```
 
+App runs on `http://localhost:5173` by default.
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+---
+
 ## Project Structure
 
-src/
-├── components/ # Reusable UI components
-│ ├── DeployForm.jsx
-│ ├── DeploymentCard.jsx
-│ ├── EmptyState.jsx
-│ ├── ErrorAlert.jsx
-│ ├── RepoList.jsx
-│ ├── RepoSearchBar.jsx
-│ ├── SkeletonCard.jsx
-│ ├── Spinner.jsx
-│ ├── StatusBadge.jsx
-│ └── SuccessToast.jsx
+```
+frontend/src/
+├── main.jsx                       # App entry point
+├── App.jsx                        # Root component + route definitions
+├── index.css                      # Global styles + Tailwind directives
 ├── config/
-│ └── supabase.js # Supabase client
-├── hooks/ # Custom React hooks
-│ ├── useDeploy.js
-│ ├── useGitHub.js
-│ ├── useHistory.js
-│ ├── usePageTitle.js
-│ └── useProjects.js
-├── pages/ # Route pages
-│ ├── Dashboard.jsx
-│ ├── Deploy.jsx
-│ ├── History.jsx
-│ └── NotFound.jsx
-└── services/ # API service layer
-├── api.js
-├── deployService.js
-├── deploymentsService.js
-├── githubService.js
-├── historyService.js
-└── projectsService.js
+│   └── supabase.js                # Supabase client initialization
+├── pages/                         # Top-level route pages
+│   ├── Dashboard.jsx              # Projects overview page
+│   ├── Deploy.jsx                 # Full deployment workflow page
+│   ├── History.jsx                # Deployment history page
+│   └── NotFound.jsx               # 404 page
+├── components/                    # Reusable UI components (17 total)
+│   ├── AIEngine.jsx               # AI generation panel
+│   ├── AIOutput.jsx               # Generated Dockerfile + workflow display
+│   ├── AutoDetectForm.jsx         # Stack auto-detection form
+│   ├── DeployForm.jsx             # Deployment trigger form
+│   ├── DeploymentCard.jsx         # Single deployment summary card
+│   ├── DeploymentStatusBadge.jsx  # Status indicator badge
+│   ├── DeploymentTimeline.jsx     # Step-by-step deployment progress
+│   ├── EmptyState.jsx             # Empty state placeholder UI
+│   ├── ErrorAlert.jsx             # Error message display
+│   ├── LogStreamErrorBoundary.jsx # Error boundary for log stream
+│   ├── LogStreamPanel.jsx         # Real-time SSE log display panel
+│   ├── ManualGenerateForm.jsx     # Manual Dockerfile + workflow generator
+│   ├── Navbar.jsx                 # Top navigation bar
+│   ├── OutputTabs.jsx             # Tabbed output switcher
+│   ├── RepoList.jsx               # GitHub repository list
+│   ├── RepoSearchBar.jsx          # GitHub username search input
+│   ├── Sidebar.jsx                # Side navigation
+│   ├── SkeletonCard.jsx           # Loading skeleton placeholder
+│   ├── Spinner.jsx                # Loading spinner
+│   ├── StatusBadge.jsx            # Deployment status badge
+│   └── SuccessToast.jsx           # Success notification toast
+├── hooks/                         # Custom React hooks (8 total)
+│   ├── useAI.js                   # AI generation state + handlers
+│   ├── useDeploy.js               # Deployment trigger + pipeline state
+│   ├── useDeploymentStatus.js     # Real-time deployment status via SSE
+│   ├── useGitHub.js               # GitHub repo search + fetch
+│   ├── useHistory.js              # Deployment history fetch + state
+│   ├── useLogStream.js            # Live container log streaming via SSE
+│   ├── usePageTitle.js            # Dynamic browser tab title
+│   └── useProjects.js             # Projects fetch + management
+├── services/                      # API call layer (7 files)
+│   ├── api.js                     # Base Axios/fetch instance + interceptors
+│   ├── aiService.js               # AI generation API calls
+│   ├── deployService.js           # Deployment trigger API calls
+│   ├── deploymentsService.js      # Deployment status API calls
+│   ├── githubService.js           # GitHub API calls
+│   ├── historyService.js          # History API calls
+│   └── projectsService.js         # Projects API calls
+└── utils/
+    ├── aiErrorMessages.js         # Human-readable AI error messages
+    └── parseRepoInput.js          # Parse GitHub repo URL input
+```
 
+---
+
+## Pages
+
+### Dashboard
+- Displays all tracked projects as cards
+- Shows latest deployment status per project
+- Quick-access actions for each project
+
+### Deploy
+- GitHub username search to fetch public repositories
+- Repository selection with stack auto-detection
+- AI Engine tab: view generated Dockerfile and GitHub Actions workflow
+- One-click deployment trigger
+- Real-time log streaming panel via SSE
+- Live deployment status timeline
+
+### History
+- Full list of all past deployments
+- Each record shows repository, stack, status, and timestamps
+- Failed deployments include error details
+
+---
+
+## Design System
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| Charcoal | `#0c0c0c` | Primary background |
+| Forest Green | `#52b788` | Primary accent, success states |
+| Crimson | `#e53e3e` | Error states, destructive actions |
+
+---
 
 ## Environment Variables
 
-See `.env.example` for all required variables.
-
-## AI error handling
-
-The AI Engine never shows raw provider errors. The backend attaches a machine-readable `code` to every AI failure, and the frontend turns that code into a message a user can act on.
-
-| Backend code | Status | Message shown |
-|---|---|---|
-| `ai/rate-limited` | 429 | Too many requests, wait a moment and try again |
-| `ai/service-unavailable` | 503 | The AI service is temporarily unavailable |
-| `ai/bad-gateway` | 502 | The AI provider returned an error |
-| `ai/auth-failed` | 500 | The AI service is not available right now |
-| `ai/model-unavailable` | 500 | The AI model is currently unavailable |
-| `bad-request/invalid-json` | 400 | Invalid request data, check your input |
-
-If the request never reaches the server, the message is "Cannot reach the server. Check your connection and try again."
-
-### How it fits together
-
-- `src/utils/aiErrorMessages.js` holds `getAiErrorMessage` (code, then status, then fallback) and `resolveAiError`, which keeps the server's own message for validation errors such as a repo without a package.json.
-- `src/hooks/useAI.js` uses `resolveAiError` in every generate handler and exposes `clearError`, which dismisses the error without wiping results that are already on screen.
-- `src/components/ErrorAlert.jsx` shows the message with an optional "Try again" button and a dismiss button.
-- `src/components/AIEngine.jsx` remembers the last action (auto-detect, manual Dockerfile or manual workflow), so "Try again" repeats exactly what failed.
-
-### Tests
-
-Run from the repo root:
-
-    node --test frontend/tests/*.test.js
+See `.env.example` for the full list of required variables with descriptions.
