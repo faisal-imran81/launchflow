@@ -43,7 +43,7 @@ export default function SuccessToast({ message, onDismiss, duration = 3000 }) {
           flexShrink: 0,
         }}
       >
-        ✅
+        ✓
       </span>
       <p
         className="text-sm font-medium"

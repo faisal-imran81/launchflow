@@ -173,7 +173,7 @@ export default function LogStreamPanel({
               e.currentTarget.style.color = '#a0a0a8'
             }}
           >
-            {isPaused ? '▶ Resume' : '⏸ Pause'}
+            {isPaused ? 'Resume' : 'Pause'}
           </button>
 
           {/* Clear buffer */}
@@ -348,37 +348,37 @@ export default function LogStreamPanel({
           >
             {status === 'idle' && (
               <>
-                <span style={{ fontSize: '20px' }}>📋</span>
+                <span style={{ fontSize: '20px' }}>—</span>
                 <p style={{ fontSize: '12px' }}>No container selected.</p>
               </>
             )}
             {status === 'connecting' && (
               <>
-                <span className="animate-pulse" style={{ fontSize: '20px' }}>🔌</span>
+                <span className="animate-pulse" style={{ fontSize: '20px' }}>↻</span>
                 <p style={{ fontSize: '12px' }}>Connecting to log stream…</p>
               </>
             )}
             {status === 'live' && (
               <>
-                <span className="animate-pulse" style={{ fontSize: '20px' }}>📡</span>
+                <span className="animate-pulse" style={{ fontSize: '20px' }}>↻</span>
                 <p style={{ fontSize: '12px' }}>Connected — waiting for first log line…</p>
               </>
             )}
             {status === 'reconnecting' && (
               <>
-                <span className="animate-pulse" style={{ fontSize: '20px' }}>🔄</span>
+                <span className="animate-pulse" style={{ fontSize: '20px' }}>↻</span>
                 <p style={{ fontSize: '12px' }}>Reconnecting to log stream…</p>
               </>
             )}
             {status === 'done' && (
               <>
-                <span style={{ fontSize: '20px' }}>✅</span>
+                <span style={{ fontSize: '20px' }}>✓</span>
                 <p style={{ fontSize: '12px' }}>Stream ended — no logs were captured.</p>
               </>
             )}
             {status === 'error' && (
               <>
-                <span style={{ fontSize: '20px' }}>⚠️</span>
+                <span style={{ fontSize: '20px' }}>!</span>
                 <p style={{ color: '#fc8181', fontSize: '12px' }}>
                   Stream error — check container status and reconnect.
                 </p>
@@ -445,7 +445,7 @@ export default function LogStreamPanel({
             flexShrink: 0,
           }}
         >
-          <span>⏸</span>
+          <span>❚❚</span>
           <span>Stream paused — new lines are buffered. Click Resume to continue.</span>
         </div>
       )}
@@ -463,7 +463,7 @@ export default function LogStreamPanel({
             flexShrink: 0,
           }}
         >
-          <span>⚠️</span>
+          <span>!</span>
           <span>Stream disconnected — click Reconnect to retry.</span>
         </div>
       )}

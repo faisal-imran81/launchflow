@@ -221,7 +221,7 @@ export default function RepoList({ repos, onSelect, selectedRepo, searched }) {
                       {repo.language}
                     </span>
                   )}
-                  <span style={{ color: '#5a5a62', fontSize: '11px' }}>⭐ {repo.stars}</span>
+                  <span style={{ color: '#5a5a62', fontSize: '11px' }}>★ {repo.stars}</span>
                   {isSelected && (
                     <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                       <circle cx="7" cy="7" r="6" fill="rgba(82,183,136,0.2)" stroke="#52b788" strokeWidth="1.2"/>

@@ -88,7 +88,7 @@ export default function Deploy() {
   const handleSuccess = async (result) => {
     const newProject = result?.data?.project
     if (newProject) {
-      setToastMessage(`🚀 ${newProject.name} deployed successfully!`)
+      setToastMessage(`${newProject.name} deployed successfully!`)
       await fetchDeployments()
     }
   }
@@ -264,7 +264,6 @@ export default function Deploy() {
             </div>
           ) : deployments.length === 0 ? (
             <EmptyState
-              icon="🚀"
               title="No deployments yet"
               description="Fill the form and hit Deploy Now to get started"
             />

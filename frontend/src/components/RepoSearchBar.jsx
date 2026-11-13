@@ -131,7 +131,7 @@ export default function RepoSearchBar({ onSearch, onClear, isLoading }) {
             e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
           }}
         >
-          {isLoading ? <Spinner size="sm" color="green" /> : '🔍 Search'}
+          {isLoading ? <Spinner size="sm" color="green" /> : 'Search'}
         </button>
       </div>
     </form>

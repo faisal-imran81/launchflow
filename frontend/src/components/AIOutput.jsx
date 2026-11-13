@@ -51,7 +51,7 @@ function CopyButton({ text }) {
         }
       }}
     >
-      {isCopied ? "✅ Copied!" : status === "failed" ? "❌ Copy failed" : "Copy"}
+      {isCopied ? "Copied!" : status === "failed" ? "Copy failed" : "Copy"}
     </button>
   );
 }
@@ -269,16 +269,16 @@ function buildAutoTabs(autoResult, autoWorkflow) {
   if (autoResult) {
     tabs.push({
       id: "dockerfile",
-      label: "🐳 Dockerfile",
-      title: "🐳 Dockerfile (auto-detected)",
+      label: "Dockerfile",
+      title: "Dockerfile (auto-detected)",
       text: autoResult.dockerfile,
       colorClass: "text-green-400",
       filename: "Dockerfile",
     });
     tabs.push({
       id: "dockerignore",
-      label: "🚫 .dockerignore",
-      title: "🚫 .dockerignore",
+      label: ".dockerignore",
+      title: ".dockerignore",
       text: autoResult.dockerignore,
       colorClass: "text-yellow-400",
       filename: ".dockerignore",
@@ -288,8 +288,8 @@ function buildAutoTabs(autoResult, autoWorkflow) {
   if (autoWorkflow) {
     tabs.push({
       id: "workflow",
-      label: "⚙️ Workflow",
-      title: "⚙️ GitHub Actions workflow (auto-detected)",
+      label: "Workflow",
+      title: "GitHub Actions workflow (auto-detected)",
       text: autoWorkflow.yaml,
       colorClass: "text-blue-400",
       filename: "ci.yml",
@@ -429,7 +429,7 @@ export default function AIOutput({
                     transition: "all 0.15s ease",
                   }}
                 >
-                  🔄 Regenerate
+                  Regenerate
                 </button>
               )}
             </div>
@@ -456,7 +456,7 @@ export default function AIOutput({
 
         {dockerfile && (
           <OutputPanel
-            title="🐳 Dockerfile"
+            title="Dockerfile"
             text={dockerfile}
             colorClass="text-green-400"
             filename="Dockerfile"
@@ -465,7 +465,7 @@ export default function AIOutput({
 
         {githubActionsYaml && (
           <OutputPanel
-            title="⚙️ GitHub Actions YAML"
+            title="GitHub Actions YAML"
             text={githubActionsYaml}
             colorClass="text-blue-400"
             filename="ci.yml"
@@ -474,7 +474,7 @@ export default function AIOutput({
 
         {nginxConfig && (
           <OutputPanel
-            title="🌐 Nginx Config"
+            title="Nginx Config"
             text={nginxConfig}
             colorClass="text-teal-400"
             filename="nginx.conf"

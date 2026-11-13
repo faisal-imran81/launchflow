@@ -19,7 +19,7 @@ export default function History() {
 
   const handleDelete = async (id) => {
     await removeDeployment(id)
-    setToastMessage('🗑 Deployment deleted successfully')
+    setToastMessage('Deployment deleted')
   }
 
   return (

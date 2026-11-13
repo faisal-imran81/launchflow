@@ -19,7 +19,6 @@ export default function NotFound() {
         animation: 'fadeIn 0.3s ease-out',
       }}
     >
-      <span className="text-7xl mb-6">🚀</span>
       <h1
         className="text-6xl font-bold text-white mb-2"
         style={{

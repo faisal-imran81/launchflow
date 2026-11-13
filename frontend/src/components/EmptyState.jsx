@@ -1,4 +1,4 @@
-export default function EmptyState({ icon = '📭', title, description, action }) {
+export default function EmptyState({ icon = '', title, description, action }) {
   return (
     <div
       className="flex flex-col items-center justify-center py-16 text-center"
@@ -12,16 +12,18 @@ export default function EmptyState({ icon = '📭', title, description, action }
         animation: 'fadeIn 0.3s ease-out',
       }}
     >
-      <span
-        className="text-5xl mb-4"
-        style={{
-          fontSize: '32px',
-          marginBottom: '16px',
-          opacity: 0.6,
-        }}
-      >
-        {icon}
-      </span>
+      {icon && (
+        <span
+          className="text-5xl mb-4"
+          style={{
+            fontSize: '32px',
+            marginBottom: '16px',
+            opacity: 0.6,
+          }}
+        >
+          {icon}
+        </span>
+      )}
       <h3
         className="text-white font-semibold text-lg"
         style={{

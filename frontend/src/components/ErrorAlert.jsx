@@ -45,7 +45,7 @@ export default function ErrorAlert({ message, onDismiss, onRetry }) {
           className="text-red-400 text-sm mt-0.5 shrink-0"
           style={{ color: '#e53e3e', flexShrink: 0, marginTop: '1px' }}
         >
-          ⚠️
+          !
         </span>
         <p
           className="text-red-400 text-sm break-words"
