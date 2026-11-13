@@ -47,9 +47,7 @@ export default function Sidebar() {
         width: '200px',
         padding: '12px 10px',
         minHeight: 'calc(100vh - 48px)',
-        position: 'sticky',
-        top: '48px',
-        alignSelf: 'flex-start',
+        alignSelf: 'stretch',
       }}
       className="flex flex-col shrink-0"
     >
