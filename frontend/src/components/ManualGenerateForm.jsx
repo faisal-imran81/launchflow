@@ -72,6 +72,7 @@ export default function ManualGenerateForm({
   busyKind,
 }) {
   const [showNginx, setShowNginx] = useState(false)
+  const [showManual, setShowManual] = useState(false)
   const [repoInfo, setRepoInfo] = useState({
     repoName: '',
     language: '',
@@ -118,114 +119,162 @@ export default function ManualGenerateForm({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
-        <LimitedInput
-          field="repoName"
-          value={repoInfo.repoName}
-          onChange={updateField}
-          placeholder="Repo name *"
-        />
-        <LimitedInput
-          field="language"
-          value={repoInfo.language}
-          onChange={updateField}
-          placeholder="Language (e.g. JavaScript)"
-        />
-        <LimitedInput
-          field="framework"
-          value={repoInfo.framework}
-          onChange={updateField}
-          placeholder="Framework (e.g. React)"
-        />
-      </div>
-
-      <LimitedInput
-        field="description"
-        value={repoInfo.description}
-        onChange={updateField}
-        placeholder="Description (optional — helps the AI generate a better Dockerfile)"
-      />
-
-      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
         <button
-          onClick={() => onGenerateDockerfile(repoInfo)}
-          disabled={!canGenerate}
+          onClick={() => setShowManual(prev => !prev)}
           style={{
-            ...primaryButton,
-            cursor: !canGenerate ? 'not-allowed' : 'pointer',
-            opacity: !canGenerate ? 0.5 : 1,
-            display: 'inline-flex',
+            display: 'flex',
             alignItems: 'center',
             gap: '6px',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '0',
+            color: '#5a5a62',
+            fontSize: '11px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            transition: 'color 0.15s ease',
           }}
-          onMouseEnter={e => {
-            if (canGenerate) {
-              e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
-              e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
-            }
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
-            e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
-          }}
+          onMouseEnter={e => e.currentTarget.style.color = '#a0a0a8'}
+          onMouseLeave={e => e.currentTarget.style.color = '#5a5a62'}
         >
-          {busyKind === 'dockerfile' ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Generating...
-            </span>
-          ) : (
-            'Generate Dockerfile'
-          )}
-        </button>
-        <button
-          onClick={() => onGenerateActions(repoInfo)}
-          disabled={!canGenerate}
-          style={{
-            ...primaryButton,
-            cursor: !canGenerate ? 'not-allowed' : 'pointer',
-            opacity: !canGenerate ? 0.5 : 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-          onMouseEnter={e => {
-            if (canGenerate) {
-              e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
-              e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
-            }
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
-            e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
-          }}
-        >
-          {busyKind === 'actions' ? (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-              <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Generating...
-            </span>
-          ) : (
-            'Generate Actions'
-          )}
-        </button>
-        {showReset && (
-          <button
-            onClick={onReset}
-            style={{ ...secondaryButton, cursor: 'pointer' }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
-              e.currentTarget.style.color = '#f2f2f2'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-              e.currentTarget.style.color = '#a0a0a8'
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            style={{
+              transform: showManual ? 'rotate(180deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease',
             }}
           >
-            Reset
-          </button>
-        )}
+            <path d="M1 3 L5 7 L9 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Advanced: generate manually
+        </button>
       </div>
+
+      {showManual && (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '10px',
+            animation: 'fadeIn 0.15s ease-out',
+          }}
+        >
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '8px' }}>
+            <LimitedInput
+              field="repoName"
+              value={repoInfo.repoName}
+              onChange={updateField}
+              placeholder="Repo name *"
+            />
+            <LimitedInput
+              field="language"
+              value={repoInfo.language}
+              onChange={updateField}
+              placeholder="Language (e.g. JavaScript)"
+            />
+            <LimitedInput
+              field="framework"
+              value={repoInfo.framework}
+              onChange={updateField}
+              placeholder="Framework (e.g. React)"
+            />
+          </div>
+
+          <LimitedInput
+            field="description"
+            value={repoInfo.description}
+            onChange={updateField}
+            placeholder="Description (optional — helps the AI generate a better Dockerfile)"
+          />
+
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => onGenerateDockerfile(repoInfo)}
+              disabled={!canGenerate}
+              style={{
+                ...primaryButton,
+                cursor: !canGenerate ? 'not-allowed' : 'pointer',
+                opacity: !canGenerate ? 0.5 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={e => {
+                if (canGenerate) {
+                  e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
+                  e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
+                e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
+              }}
+            >
+              {busyKind === 'dockerfile' ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </span>
+              ) : (
+                'Generate Dockerfile'
+              )}
+            </button>
+            <button
+              onClick={() => onGenerateActions(repoInfo)}
+              disabled={!canGenerate}
+              style={{
+                ...primaryButton,
+                cursor: !canGenerate ? 'not-allowed' : 'pointer',
+                opacity: !canGenerate ? 0.5 : 1,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+              onMouseEnter={e => {
+                if (canGenerate) {
+                  e.currentTarget.style.background = 'rgba(82,183,136,0.14)'
+                  e.currentTarget.style.borderColor = 'rgba(82,183,136,0.3)'
+                }
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(82,183,136,0.08)'
+                e.currentTarget.style.borderColor = 'rgba(82,183,136,0.2)'
+              }}
+            >
+              {busyKind === 'actions' ? (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Generating...
+                </span>
+              ) : (
+                'Generate Actions'
+              )}
+            </button>
+            {showReset && (
+              <button
+                onClick={onReset}
+                style={{ ...secondaryButton, cursor: 'pointer' }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+                  e.currentTarget.style.color = '#f2f2f2'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                  e.currentTarget.style.color = '#a0a0a8'
+                }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
         <button
